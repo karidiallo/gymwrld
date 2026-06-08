@@ -18,6 +18,7 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
+import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TreningRoute = TreningRouteImport.update({
@@ -65,6 +66,11 @@ const CwiczeniaRoute = CwiczeniaRouteImport.update({
   path: '/cwiczenia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BiegiRoute = BiegiRouteImport.update({
+  id: '/biegi',
+  path: '/biegi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -73,6 +79,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/biegi'
     | '/cwiczenia'
     | '/dieta'
     | '/onboarding'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/biegi'
     | '/cwiczenia'
     | '/dieta'
     | '/onboarding'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/biegi'
     | '/cwiczenia'
     | '/dieta'
     | '/onboarding'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BiegiRoute: typeof BiegiRoute
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CwiczeniaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/biegi': {
+      id: '/biegi'
+      path: '/biegi'
+      fullPath: '/biegi'
+      preLoaderRoute: typeof BiegiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -237,6 +257,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BiegiRoute: BiegiRoute,
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
   OnboardingRoute: OnboardingRoute,

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import { Moon, Brain, Wind, Heart, Plus, Sparkles, X, BookOpen, Sun, Music, Leaf } from "lucide-react";
+import { Moon, Brain, Wind, Plus, X, BookOpen, Sun, Footprints, Bath, Play } from "lucide-react";
 
 export const Route = createFileRoute("/regeneracja")({
   head: () => ({ meta: [{ title: "Regeneracja — GymWrld" }, { name: "description", content: "Sen, medytacja i mind health." }] }),
@@ -10,25 +10,20 @@ export const Route = createFileRoute("/regeneracja")({
 });
 
 type SleepEntry = { date: string; hours: number; quality: number };
-type MindEntry = { id: string; type: "medytacja" | "oddech" | "journal" | "wdziecznosc" | "natura" | "muzyka"; minutes: number; note?: string };
+type MindType = "medytacja" | "oddech" | "journal" | "afirmacja" | "spacer" | "kapiel";
+type MindEntry = { id: string; type: MindType; minutes: number; note?: string };
 
 function Regeneracja() {
-  const [sleep, setSleep] = useState<SleepEntry[]>([
-    { date: "Dziś", hours: 7.4, quality: 82 },
-    { date: "Wczoraj", hours: 6.8, quality: 70 },
-    { date: "2 dni temu", hours: 8.1, quality: 90 },
-  ]);
-  const [mind, setMind] = useState<MindEntry[]>([
-    { id: "1", type: "medytacja", minutes: 10, note: "Poranek, focus" },
-  ]);
+  const [sleep, setSleep] = useState<SleepEntry[]>([]);
+  const [mind, setMind] = useState<MindEntry[]>([]);
   const [openSleep, setOpenSleep] = useState(false);
   const [openMind, setOpenMind] = useState(false);
-  const [moods, setMoods] = useState<number[]>([3, 4, 2, 4, 5]); // 1-5 scale, last 5 entries
-  const todayMood = moods[moods.length - 1];
+  const [moods, setMoods] = useState<number[]>([]);
+  const todayMood = moods[moods.length - 1] ?? 0;
   const avgMood = moods.length ? moods.reduce((s, m) => s + m, 0) / moods.length : 0;
   const happiness = Math.round((avgMood / 5) * 100);
 
-  const todaySleep = sleep[0];
+  const todaySleep = sleep[0] ?? { date: "Dziś", hours: 0, quality: 0 };
   const sleepGoal = 8;
 
   return (
@@ -52,7 +47,7 @@ function Regeneracja() {
           <div className="flex-1 space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Jakość</span><span className="font-medium">{todaySleep.quality}%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Cel</span><span className="font-medium">{sleepGoal}h</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Średnia tyg.</span><span className="font-medium">7.4h</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Średnia tyg.</span><span className="font-medium">{sleep.length ? (sleep.reduce((s, x) => s + x.hours, 0) / sleep.length).toFixed(1) + "h" : "—"}</span></div>
           </div>
         </div>
       </section>
@@ -77,6 +72,9 @@ function Regeneracja() {
 
       {/* Sleep history */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Historia snu</h3>
+      {sleep.length === 0 ? (
+        <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">Brak danych · zaloguj sen</div>
+      ) : (
       <div className="space-y-2.5">
         {sleep.map((s, i) => (
           <div key={i} className="flex items-center gap-3 rounded-2xl glass p-3.5">
@@ -94,18 +92,17 @@ function Regeneracja() {
           </div>
         ))}
       </div>
+      )}
 
       {/* Mind sessions */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Mind health</h3>
-      <div className="grid grid-cols-3 gap-2">
-        <SessionPill icon={<Brain className="h-4 w-4" />} label="Medytacja" min={10} onClick={() => addQuick(setMind, "medytacja", 10)} />
-        <SessionPill icon={<Wind className="h-4 w-4" />} label="Oddech 4-7-8" min={5} onClick={() => addQuick(setMind, "oddech", 5)} />
-        <SessionPill icon={<BookOpen className="h-4 w-4" />} label="Journal" min={5} onClick={() => addQuick(setMind, "journal", 5)} />
-      </div>
-      <div className="mt-2 grid grid-cols-3 gap-2">
-        <SessionPill icon={<Sun className="h-4 w-4" />} label="Wdzięczność" min={3} onClick={() => addQuick(setMind, "wdziecznosc", 3)} />
-        <SessionPill icon={<Leaf className="h-4 w-4" />} label="Spacer w naturze" min={15} onClick={() => addQuick(setMind, "natura", 15)} />
-        <SessionPill icon={<Music className="h-4 w-4" />} label="Muzykoterapia" min={10} onClick={() => addQuick(setMind, "muzyka", 10)} />
+      <div className="grid grid-cols-2 gap-3">
+        <SessionTile icon={<Brain className="h-5 w-5" />} label="Medytacja" desc="10 min · focus + spokój" min={10} onClick={() => addQuick(setMind, "medytacja", 10)} startable />
+        <SessionTile icon={<Wind className="h-5 w-5" />} label="Oddech 4-7-8" desc="5 min · układ nerwowy" min={5} onClick={() => addQuick(setMind, "oddech", 5)} startable />
+        <SessionTile icon={<BookOpen className="h-5 w-5" />} label="Journal" desc="5 min · zapis myśli" min={5} onClick={() => addQuick(setMind, "journal", 5)} />
+        <SessionTile icon={<Sun className="h-5 w-5" />} label="Afirmacja" desc="3 min · pozytywny start" min={3} onClick={() => addQuick(setMind, "afirmacja", 3)} startable />
+        <SessionTile icon={<Footprints className="h-5 w-5" />} label="Spacer" desc="15 min · ruch + powietrze" min={15} onClick={() => addQuick(setMind, "spacer", 15)} startable />
+        <SessionTile icon={<Bath className="h-5 w-5" />} label="Kąpiel relaksacyjna" desc="20 min · pełen reset" min={20} onClick={() => addQuick(setMind, "kapiel", 20)} />
       </div>
 
       <div className="mt-4 space-y-2.5">
@@ -115,9 +112,9 @@ function Regeneracja() {
               {m.type === "medytacja" ? <Brain className="h-4 w-4" />
                 : m.type === "oddech" ? <Wind className="h-4 w-4" />
                 : m.type === "journal" ? <BookOpen className="h-4 w-4" />
-                : m.type === "wdziecznosc" ? <Sun className="h-4 w-4" />
-                : m.type === "natura" ? <Leaf className="h-4 w-4" />
-                : <Music className="h-4 w-4" />}
+                : m.type === "afirmacja" ? <Sun className="h-4 w-4" />
+                : m.type === "spacer" ? <Footprints className="h-4 w-4" />
+                : <Bath className="h-4 w-4" />}
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium capitalize">{m.type}</p>
@@ -137,7 +134,7 @@ function Regeneracja() {
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Pasek zadowolenia</p>
             <p className="font-display text-3xl">{happiness}%</p>
           </div>
-          <span className="text-3xl">{["😞","😕","😐","🙂","😄"][Math.max(0, Math.round(avgMood) - 1)]}</span>
+          <span className="text-3xl">{avgMood ? ["😞","😕","😐","🙂","😄"][Math.max(0, Math.round(avgMood) - 1)] : "—"}</span>
         </div>
         <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/8">
           <div
@@ -146,7 +143,7 @@ function Regeneracja() {
           />
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Średnia z ostatnich {moods.length} wpisów · dziś {["😞","😕","😐","🙂","😄"][todayMood - 1]}
+          {moods.length === 0 ? "Brak wpisów — kliknij emoji" : `Średnia z ostatnich ${moods.length} wpisów · dziś ${["😞","😕","😐","🙂","😄"][todayMood - 1]}`}
         </p>
         <div className="mt-3 flex justify-between">
           {["😞","😕","😐","🙂","😄"].map((e, i) => (
@@ -164,17 +161,18 @@ function Regeneracja() {
             </button>
           ))}
         </div>
-        <div className="mt-4 flex items-end gap-1 border-t border-white/5 pt-3">
-          {moods.slice(-10).map((m, i) => (
-            <div key={i} className="flex-1">
-              <div
-                className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--lime)]"
-                style={{ height: `${(m / 5) * 36 + 4}px` }}
-              />
+        {moods.length > 0 && (
+          <>
+            <div className="mt-4 flex items-end gap-1 border-t border-white/5 pt-3">
+              {moods.slice(-10).map((m, i) => (
+                <div key={i} className="flex-1">
+                  <div className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--lime)]" style={{ height: `${(m / 5) * 36 + 4}px` }} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="mt-1 text-center text-[10px] text-muted-foreground">Trend nastroju</p>
+            <p className="mt-1 text-center text-[10px] text-muted-foreground">Trend nastroju</p>
+          </>
+        )}
       </div>
       <div className="h-24" />
 
@@ -192,18 +190,32 @@ function Regeneracja() {
   );
 }
 
-function addQuick(setMind: React.Dispatch<React.SetStateAction<MindEntry[]>>, type: MindEntry["type"], min: number) {
+function addQuick(setMind: React.Dispatch<React.SetStateAction<MindEntry[]>>, type: MindType, min: number) {
   setMind((prev) => [{ id: String(Date.now()), type, minutes: min, note: "Szybka sesja" }, ...prev]);
   toast.success(`+${min} min ${type} · +20 XP`);
 }
 
-function SessionPill({ icon, label, min, onClick }: { icon: React.ReactNode; label: string; min: number; onClick: () => void }) {
+function SessionTile({ icon, label, desc, min, onClick, startable }: { icon: React.ReactNode; label: string; desc: string; min: number; onClick: () => void; startable?: boolean }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1 rounded-2xl glass p-3 text-center">
-      <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/5">{icon}</div>
-      <p className="text-[11px] font-medium">{label}</p>
-      <p className="text-[10px] text-muted-foreground">{min} min</p>
-    </button>
+    <div className="rounded-2xl glass p-4">
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--violet)]/30 to-[var(--magenta)]/15 text-white">{icon}</div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold">{label}</p>
+          <p className="text-[10px] text-muted-foreground">{desc}</p>
+        </div>
+      </div>
+      <div className="mt-3 flex gap-2">
+        <button onClick={onClick} className="flex-1 rounded-xl bg-white/5 px-3 py-2 text-[11px] font-medium">
+          + {min} min
+        </button>
+        {startable && (
+          <button onClick={onClick} className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-[var(--lime)] to-[var(--orange)] px-3 py-2 text-[11px] font-semibold text-background">
+            <Play className="h-3 w-3" /> Start
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -247,7 +259,7 @@ function MindSheet({ onClose, onSave }: { onClose: () => void; onSave: (t: MindE
           <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {(["medytacja","oddech","journal","wdziecznosc","natura","muzyka"] as const).map((t) => (
+          {(["medytacja","oddech","journal","afirmacja","spacer","kapiel"] as const).map((t) => (
             <button key={t} onClick={() => setType(t)} className={`rounded-2xl p-3 text-xs font-medium capitalize ${type === t ? "bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] text-white" : "bg-white/5 text-muted-foreground"}`}>
               {t}
             </button>
