@@ -26,13 +26,23 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
   return (
     <div className="fixed inset-0 z-[60] bg-background">
       <div className="absolute inset-0" style={{ background: room.bg }} />
-      {/* window light */}
-      <div aria-hidden className="absolute left-6 top-16 h-48 w-32 rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-transparent blur-[1px]" />
-      <div aria-hidden className="absolute right-8 top-24 h-32 w-24 rounded-xl border border-white/10 bg-white/[0.04]" />
-      {/* horizon */}
-      <div className="absolute inset-x-0 bottom-40 h-px bg-white/10" />
-      {/* floor */}
+      {/* large window */}
+      <div aria-hidden className="absolute left-[8%] right-[8%] top-[10%] bottom-[44%] rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent">
+        <div className="absolute inset-y-0 left-1/2 w-px bg-white/10" />
+        <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
+      </div>
+      {/* skyline silhouette */}
+      <div aria-hidden className="absolute inset-x-[10%] top-[36%] h-10 opacity-30" style={{
+        background: "linear-gradient(180deg, transparent, #000), repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 8px, transparent 8px 22px)",
+      }} />
+      {/* horizon line */}
+      <div className="absolute inset-x-0 bottom-40 h-px bg-white/15" />
+      {/* floor with perspective */}
       <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: `linear-gradient(180deg, transparent, ${room.floor})` }} />
+      <div className="absolute inset-x-0 bottom-0 h-40 opacity-40" style={{
+        backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
+        backgroundSize: "40px 100%",
+      }} />
       {/* room glow */}
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/3 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[var(--magenta)]/10 blur-3xl" />
 
