@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { X, Check, ChevronRight } from "lucide-react";
+import { X, Check, ChevronRight, Sparkles, Lock } from "lucide-react";
 import {
-  AvatarSvg,
   DEFAULT_AVATAR,
-  SKIN_TONES,
-  HAIR_COLORS,
-  OUTFIT_COLORS,
-  hairOptionsFor,
+  BODY_LABELS,
+  GENDER_LABELS,
+  OUTFIT_TINTS,
+  getAvatarImage,
   type AvatarConfig,
+  type BodyType,
+  type Gender,
 } from "./AvatarSvg";
 
-const HAIR_LABEL: Record<AvatarConfig["hairStyle"], string> = {
-  short: "Krótkie", buzz: "Na jeżyka", medium: "Średnie", long: "Długie", curly: "Kręcone", bun: "Kok",
+const BODY_BY_GENDER: Record<Gender, BodyType[]> = {
+  m: ["slim", "athletic", "medium", "muscular", "curvy"],
+  k: ["slim", "athletic", "medium", "muscular", "curvy"],
+  nb: ["slim", "athletic", "medium", "muscular", "curvy"],
 };
-const BODY_LABEL: Record<AvatarConfig["body"], string> = { slim: "Smukła", athletic: "Atletyczna", muscular: "Umięśniona" };
-const OUTFIT_LABEL: Record<AvatarConfig["outfit"], string> = { tank: "Tank top", tshirt: "T-shirt", hoodie: "Bluza", crop: "Crop top" };
-const AGE_LABEL: Record<AvatarConfig["age"], string> = { young: "Młody", adult: "Dorosły", mature: "Dojrzały" };
 
 export function AvatarCustomizer({
   initial, onClose, onSave, embedded = false,
@@ -27,75 +27,95 @@ export function AvatarCustomizer({
 }) {
   const [cfg, setCfg] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, ...(initial ?? {}) });
   const set = <K extends keyof AvatarConfig>(k: K, v: AvatarConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
+  const img = getAvatarImage(cfg.gender, cfg.body);
 
   const content = (
     <>
       {!embedded && (
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-xl">Dostosuj postać</h3>
-          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Studio postaci</p>
+            <h3 className="font-display text-2xl">Dostosuj postać</h3>
+          </div>
+          <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full bg-white/5">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
-      <div className="mt-3 grid place-items-center rounded-3xl bg-gradient-to-b from-[var(--magenta)]/15 via-transparent to-[var(--lime)]/10 py-4">
-        <AvatarSvg cfg={cfg} size={180} />
+      {/* Realistic preview */}
+      <div
+        className="relative mt-4 overflow-hidden rounded-3xl border border-white/10"
+        style={{
+          background: `radial-gradient(120% 80% at 50% 0%, ${cfg.outfitTint}33 0%, transparent 60%), linear-gradient(180deg,#0f1726 0%,#070a13 100%)`,
+        }}
+      >
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="relative grid h-[340px] place-items-end">
+          <img
+            src={img}
+            alt="Podgląd postaci"
+            className="h-full w-auto object-contain"
+            style={{ filter: `drop-shadow(0 24px 28px ${cfg.outfitTint}55)` }}
+          />
+        </div>
+        <div className="absolute left-3 top-3 rounded-full glass px-2.5 py-1 text-[10px] uppercase tracking-wider">
+          {GENDER_LABELS[cfg.gender]} · {BODY_LABELS[cfg.body]}
+        </div>
       </div>
 
-      <div className="mt-4 space-y-4">
-        <Row label="Płeć">
-          {(["m","k","nb"] as const).map((g) => (
-            <Chip key={g} active={cfg.gender === g} onClick={() => set("gender", g)}>
-              {g === "m" ? "♂ Mężczyzna" : g === "k" ? "♀ Kobieta" : "⚧ Both"}
-            </Chip>
-          ))}
-        </Row>
+      <div className="mt-5 space-y-5">
+        <Section title="Płeć">
+          <div className="grid grid-cols-3 gap-2">
+            {(["m","k","nb"] as const).map((g) => (
+              <BigChip key={g} active={cfg.gender === g} onClick={() => set("gender", g)}>
+                <span className="text-base">{g === "m" ? "♂" : g === "k" ? "♀" : "⚧"}</span>
+                <span>{g === "m" ? "Mężczyzna" : g === "k" ? "Kobieta" : "Both / NB"}</span>
+              </BigChip>
+            ))}
+          </div>
+        </Section>
 
-        <Row label="Wiek">
-          {(["young","adult","mature"] as const).map((a) => (
-            <Chip key={a} active={cfg.age === a} onClick={() => set("age", a)}>{AGE_LABEL[a]}</Chip>
-          ))}
-        </Row>
+        <Section title="Typ sylwetki">
+          <div className="grid grid-cols-5 gap-1.5">
+            {BODY_BY_GENDER[cfg.gender].map((b) => (
+              <BodyTile key={b} body={b} gender={cfg.gender} active={cfg.body === b} onClick={() => set("body", b)} />
+            ))}
+          </div>
+        </Section>
 
-        <Row label="Skóra">
-          {SKIN_TONES.map((s) => (
-            <Swatch key={s} color={s} active={cfg.skin === s} onClick={() => set("skin", s)} />
-          ))}
-        </Row>
+        <Section title="Akcent stroju">
+          <div className="flex flex-wrap gap-2">
+            {OUTFIT_TINTS.map((c) => (
+              <button
+                key={c}
+                onClick={() => set("outfitTint", c)}
+                style={{ background: c, boxShadow: cfg.outfitTint === c ? `0 0 0 2px #fff, 0 0 16px ${c}` : undefined }}
+                className={`h-9 w-9 rounded-full transition ${cfg.outfitTint === c ? "scale-110" : "ring-1 ring-white/10"}`}
+                aria-label={c}
+              />
+            ))}
+          </div>
+        </Section>
 
-        <Row label="Fryzura">
-          {hairOptionsFor(cfg.gender).map((h) => (
-            <Chip key={h} active={cfg.hairStyle === h} onClick={() => set("hairStyle", h)}>{HAIR_LABEL[h]}</Chip>
-          ))}
-        </Row>
-
-        <Row label="Kolor włosów">
-          {HAIR_COLORS.map((c) => (
-            <Swatch key={c} color={c} active={cfg.hair === c} onClick={() => set("hair", c)} />
-          ))}
-        </Row>
-
-        <Row label="Sylwetka">
-          {(["slim","athletic","muscular"] as const).map((b) => (
-            <Chip key={b} active={cfg.body === b} onClick={() => set("body", b)}>{BODY_LABEL[b]}</Chip>
-          ))}
-        </Row>
-
-        <Row label="Ubiór">
-          {(["tank","tshirt","hoodie","crop"] as const).map((o) => (
-            <Chip key={o} active={cfg.outfit === o} onClick={() => set("outfit", o)}>{OUTFIT_LABEL[o]}</Chip>
-          ))}
-        </Row>
-
-        <Row label="Kolor stroju">
-          {OUTFIT_COLORS.map((c) => (
-            <Swatch key={c} color={c} active={cfg.outfitColor === c} onClick={() => set("outfitColor", c)} />
-          ))}
-        </Row>
+        <Section title="Skiny premium" right={<span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"><Lock className="h-3 w-3"/> Wymaga Premium</span>}>
+          <div className="grid grid-cols-3 gap-2">
+            {["Cyber Suit","Neon Hoodie","Champion Gold"].map((s) => (
+              <div key={s} className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3 opacity-70">
+                <div className="grid h-16 place-items-center rounded-xl bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--lime)]/20">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <p className="mt-2 text-[11px] font-medium">{s}</p>
+                <Lock className="absolute right-2 top-2 h-3 w-3 text-muted-foreground" />
+              </div>
+            ))}
+          </div>
+        </Section>
       </div>
 
       <button
         onClick={() => onSave(cfg)}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-secondary to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"
       >
         {embedded ? (<>Dalej <ChevronRight className="h-4 w-4" /></>) : (<><Check className="h-4 w-4" /> Zapisz wygląd</>)}
       </button>
@@ -105,8 +125,8 @@ export function AvatarCustomizer({
   if (embedded) return <div>{content}</div>;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[94vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4">{content}</div>
       </div>
@@ -114,32 +134,46 @@ export function AvatarCustomizer({
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Section({ title, right, children }: { title: string; right?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{title}</p>
+        {right}
+      </div>
+      {children}
     </div>
   );
 }
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+
+function BigChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-        active ? "bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] text-white" : "bg-white/5 text-muted-foreground hover:bg-white/10"
+      className={`flex flex-col items-center gap-0.5 rounded-2xl px-3 py-3 text-xs font-medium transition ${
+        active
+          ? "bg-gradient-to-br from-primary to-secondary text-primary-foreground glow-primary"
+          : "bg-white/5 text-muted-foreground hover:bg-white/10"
       }`}
     >
       {children}
     </button>
   );
 }
-function Swatch({ color, active, onClick }: { color: string; active: boolean; onClick: () => void }) {
+
+function BodyTile({ body, gender, active, onClick }: { body: BodyType; gender: Gender; active: boolean; onClick: () => void }) {
+  const src = getAvatarImage(gender, body);
   return (
     <button
       onClick={onClick}
-      style={{ background: color }}
-      className={`h-8 w-8 rounded-full ring-2 transition ${active ? "ring-[var(--lime)] scale-110" : "ring-white/10"}`}
-    />
+      className={`relative overflow-hidden rounded-2xl border transition ${
+        active ? "border-primary bg-primary/10 glow-primary" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+      }`}
+    >
+      <div className="grid h-20 place-items-end bg-gradient-to-b from-transparent to-black/40">
+        <img src={src} alt={BODY_LABELS[body]} className="h-full w-auto object-contain" loading="lazy" />
+      </div>
+      <p className="px-1 py-1 text-center text-[9px] font-medium leading-tight">{BODY_LABELS[body]}</p>
+    </button>
   );
 }
