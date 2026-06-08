@@ -45,6 +45,25 @@ function Onboarding() {
   const total = 6;
   const progress = ((step + 1) / total) * 100;
 
+  // First screen: pure black, huge logo only.
+  if (step === 0) {
+    return (
+      <main className="relative flex min-h-screen flex-col items-center justify-between bg-black px-5 pt-10 pb-10 text-white">
+        <div className="flex-1" />
+        <img
+          src={logoAsset.url}
+          alt="GymWrld"
+          className="w-[88%] max-w-[560px] drop-shadow-[0_8px_40px_rgba(255,255,255,0.18)]"
+          style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 40px rgba(255,255,255,0.18))" }}
+        />
+        <div className="flex-1" />
+        <div className="w-full max-w-[480px]">
+          <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden px-5 pt-10 pb-10">
       {/* ambient glow */}
@@ -55,7 +74,7 @@ function Onboarding() {
         <img
           src={logoAsset.url}
           alt="GymWrld"
-          className="h-24 w-auto"
+          className="h-20 w-auto"
           style={{ filter: "brightness(0) invert(1) drop-shadow(0 4px 28px rgba(255,255,255,0.15))" }}
         />
         <span className="mt-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{step + 1} / {total}</span>
@@ -69,9 +88,6 @@ function Onboarding() {
       </div>
 
       <section className="relative mt-8">
-        {step === 0 && (
-          <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
-        )}
         {step === 1 && (
           <StepPersonal
             age={age} setAge={setAge}

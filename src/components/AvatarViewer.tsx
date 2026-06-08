@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { X, Lock } from "lucide-react";
-import { getAvatarImageFor, skinFilter, type AvatarConfig } from "./AvatarSvg";
+import { type AvatarConfig } from "./AvatarSvg";
+import { FullBodyAvatar } from "./FullBodyAvatar";
 
 const ROOMS = [
   { id: "starter", name: "Pokój startowy", bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
@@ -25,8 +26,13 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
   return (
     <div className="fixed inset-0 z-[60] bg-background">
       <div className="absolute inset-0" style={{ background: room.bg }} />
+      {/* window light */}
+      <div aria-hidden className="absolute left-6 top-16 h-48 w-32 rounded-2xl border border-white/10 bg-gradient-to-br from-white/15 to-transparent blur-[1px]" />
+      <div aria-hidden className="absolute right-8 top-24 h-32 w-24 rounded-xl border border-white/10 bg-white/[0.04]" />
+      {/* horizon */}
+      <div className="absolute inset-x-0 bottom-40 h-px bg-white/10" />
       {/* floor */}
-      <div className="absolute inset-x-0 bottom-0 h-32" style={{ background: `linear-gradient(180deg, transparent, ${room.floor})` }} />
+      <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: `linear-gradient(180deg, transparent, ${room.floor})` }} />
       {/* room glow */}
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/3 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[var(--magenta)]/10 blur-3xl" />
 
@@ -40,7 +46,7 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
 
       {/* avatar stage */}
       <div
-        className="absolute inset-x-0 top-16 bottom-40 grid place-items-end touch-none select-none"
+        className="absolute inset-x-0 top-24 bottom-44 grid place-items-end touch-none select-none"
         onMouseDown={(e) => startDrag(e.clientX)}
         onMouseMove={(e) => move(e.clientX)}
         onMouseUp={end}
@@ -50,19 +56,14 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
         onTouchEnd={end}
       >
         <div
-          className="h-full"
+          className="h-[70%]"
           style={{
             filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)`,
             transform: `scaleX(${rot > 90 && rot < 270 ? -1 : 1}) translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
             transition: "transform 80ms linear",
           }}
         >
-          <img
-            src={getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m")}
-            alt="Avatar"
-            className="h-full w-auto object-contain"
-            style={{ filter: skinFilter(cfg.skinTone) }}
-          />
+          <FullBodyAvatar cfg={cfg} height={520} />
         </div>
       </div>
 
