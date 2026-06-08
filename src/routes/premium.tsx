@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Sparkles, Crown, Zap, ChevronLeft, Lock } from "lucide-react";
+import { Check, Zap, ChevronLeft, Lock } from "lucide-react";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({ meta: [{ title: "Premium — GymWrld" }, { name: "description", content: "Odblokuj pełen potencjał GymWrld." }] }),
@@ -78,14 +79,17 @@ function Premium() {
       </header>
 
       <section className="relative mt-6 text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground glow-primary">
-          <Crown className="h-6 w-6" />
-        </div>
-        <h1 className="mt-4 font-display text-4xl leading-tight">
-          Odblokuj <span className="text-gradient">pełnię życia</span>
+        <img
+          src={logoAsset.url}
+          alt="GymWrld"
+          className="mx-auto h-16 w-auto"
+          style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 30px rgba(255,255,255,0.2))" }}
+        />
+        <h1 className="mt-5 font-display text-4xl leading-tight">
+          Wejdź na <span className="text-gradient">wyższy poziom</span>
         </h1>
         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-          AI Coach, ekskluzywne skiny, plany premium i wszystkie pomieszczenia.
+          AI Coach, ekskluzywne skiny, plany premium i pełne pomieszczenia.
         </p>
       </section>
 
