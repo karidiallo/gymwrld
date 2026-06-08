@@ -35,7 +35,7 @@ function Premium() {
       price: { monthly: 9.99, yearly: 79.99 },
       perks: [
         "Wszystko z Free",
-        "AI Coach 24/7",
+        "Skanowanie produktów",
         "Plany treningowe premium",
         "Zaawansowane statystyki & rekordy",
         "3 dodatkowe pokoje",
@@ -52,11 +52,11 @@ function Premium() {
       price: { monthly: 24.99, yearly: 199.99 },
       perks: [
         "Wszystko z Pro",
-        "Ekskluzywne skiny postaci",
+        "AI Coach 24/7",
         "Premium Deals (zniżki marek)",
         "Wszystkie pomieszczenia + dekoracje",
         "Indywidualny plan żywieniowy AI",
-        "Wsparcie priorytetowe",
+        "Support 24/7",
       ],
       cta: "Odblokuj Premium",
       badge: "VIP",

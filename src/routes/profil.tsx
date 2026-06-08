@@ -58,21 +58,18 @@ function Profil() {
         <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-primary/25 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-secondary/20 blur-3xl" />
         <div className="relative flex items-center gap-4">
-          <button onClick={() => setCustomOpen(true)} className="relative h-36 w-28 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
+          <div className="relative h-36 w-28 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
             <img src={getAvatarImage(avatarCfg.gender, avatarCfg.body)} alt="Avatar" className="h-full w-full object-contain" loading="lazy" style={{ filter: `drop-shadow(0 8px 16px ${avatarCfg.outfitTint}66)` }} />
-          </button>
+          </div>
           <div className="flex-1">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
               {identity.name || "Bez imienia"}{identity.nickname ? ` · @${identity.nickname}` : ""}
             </p>
-            <h2 className="mt-1 text-xl font-semibold">Poziom 14 — Eksplorator</h2>
+            <h2 className="mt-1 text-xl font-semibold">Poziom 1 — Początkujący</h2>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
-              <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-primary to-secondary" />
+              <div className="h-full w-[0%] rounded-full bg-gradient-to-r from-primary to-secondary" />
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">1 240 / 2 000 XP do Lvl 15</p>
-            <button onClick={() => setCustomOpen(true)} className="mt-3 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground glow-primary">
-              Dostosuj postać
-            </button>
+            <p className="mt-1 text-[11px] text-muted-foreground">0 / 2 000 XP do Lvl 2</p>
           </div>
         </div>
       </section>
