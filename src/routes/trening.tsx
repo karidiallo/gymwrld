@@ -738,21 +738,42 @@ function NumField({ label, value, onChange, step, min }: { label: string; value:
 function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: { title: string; exercises: Exercise[] }) => void }) {
   const [title, setTitle] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [name, setName] = useState("");
-  const [sets, setSets] = useState<number | "">(4);
-  const [reps, setReps] = useState<number | "">(8);
-  const [weight, setWeight] = useState<number | "">("");
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<EquipCat | "all">("all");
 
-  const add = () => {
-    if (!name) return;
+  const list = EXERCISES.filter((e) => {
+    if (cat !== "all" && e.cat !== cat) return false;
+    if (q && !(e.name.toLowerCase().includes(q.toLowerCase()) || e.muscles.join(" ").toLowerCase().includes(q.toLowerCase()))) return false;
+    return true;
+  });
+
+  const addFromLib = (lib: ExerciseInfo) => {
+    const b = lib.base ?? { sets: 3, reps: 10, weight: 0 };
     setExercises((prev) => [
       ...prev,
-      { id: `e${Date.now()}`, name, sets: Number(sets) || 3, reps: Number(reps) || 10, weight: weight ? Number(weight) : undefined },
+      {
+        id: `e${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        libId: lib.id,
+        name: lib.name,
+        sets: b.sets,
+        reps: b.reps,
+        weight: b.weight || undefined,
+        restSec: lib.rest,
+        kind: "normal",
+      },
     ]);
-    setName(""); setWeight("");
+    toast.success(`${lib.name} dodane`);
   };
 
-  const SUGGEST = ["Wyciskanie sztangi","Przysiad","Martwy ciąg","Wiosłowanie","Podciąganie","Pompki","Wykroki","Plank","Pajacyki","Hip thrust"];
+  const CATS: { id: EquipCat | "all"; label: string }[] = [
+    { id: "all", label: "Wszystkie" },
+    { id: "sztanga", label: "Sztanga" },
+    { id: "hantle", label: "Hantle" },
+    { id: "maszyny", label: "Maszyny" },
+    { id: "kettle", label: "Kettle" },
+    { id: "bodyweight", label: "Masa ciała" },
+    { id: "guma", label: "Gumy" },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
@@ -770,14 +791,16 @@ function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: 
           className="mt-4 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground"
         />
 
-        {/* Exercise list */}
+        {/* Selected list */}
         <div className="mt-4 space-y-2">
           {exercises.map((ex, i) => (
-            <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--magenta)]/15 text-[var(--magenta)] text-xs font-semibold">{i + 1}</div>
+            <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.04] p-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 text-xl">
+                {EXERCISES.find((e) => e.id === ex.libId)?.emoji ?? "💪"}
+              </span>
               <div className="flex-1">
                 <p className="text-sm font-medium">{ex.name}</p>
-                <p className="text-[11px] text-muted-foreground">{ex.sets} × {ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ""}</p>
+                <p className="text-[11px] text-muted-foreground">{ex.sets} × {ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ""} · ⏱️ {ex.restSec}s</p>
               </div>
               <button
                 onClick={() => setExercises((prev) => prev.filter((_, idx) => idx !== i))}
@@ -788,34 +811,50 @@ function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: 
             </div>
           ))}
           {exercises.length === 0 && (
-            <p className="rounded-2xl bg-white/[0.02] p-4 text-center text-xs text-muted-foreground">Dodaj pierwsze ćwiczenie poniżej</p>
+            <p className="rounded-2xl bg-white/[0.02] p-4 text-center text-xs text-muted-foreground">Wybierz ćwiczenia z biblioteki poniżej</p>
           )}
         </div>
 
-        {/* Add form */}
-        <div className="mt-4 space-y-2 rounded-2xl bg-white/[0.03] p-3">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Dodaj ćwiczenie</p>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nazwa ćwiczenia"
-            className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <div className="flex flex-wrap gap-1.5">
-            {SUGGEST.map((s) => (
-              <button key={s} onClick={() => setName(s)} className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] text-muted-foreground hover:bg-white/10">
-                {s}
+        {/* Library picker */}
+        <div className="mt-5 rounded-2xl bg-white/[0.03] p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground"><Library className="mr-1 inline h-3 w-3" /> Biblioteka ćwiczeń</p>
+            <span className="text-[10px] text-muted-foreground">{list.length} pozycji</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj ćwiczenia lub mięśnia..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+          </div>
+          <div className="mt-2 -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            {CATS.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setCat(c.id)}
+                className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-medium transition ${
+                  cat === c.id ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground"
+                }`}
+              >
+                {c.label}
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <input type="number" value={sets} onChange={(e) => setSets(e.target.value ? parseInt(e.target.value) : "")} placeholder="Serie" className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
-            <input type="number" value={reps} onChange={(e) => setReps(e.target.value ? parseInt(e.target.value) : "")} placeholder="Powt." className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
-            <input type="number" value={weight} onChange={(e) => setWeight(e.target.value ? parseInt(e.target.value) : "")} placeholder="kg" className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+          <div className="mt-2 max-h-[260px] space-y-1.5 overflow-y-auto pr-1">
+            {list.map((e) => (
+              <button
+                key={e.id}
+                onClick={() => addFromLib(e)}
+                className="flex w-full items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left transition hover:bg-white/[0.08]"
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-lg">{e.emoji}</span>
+                <div className="flex-1">
+                  <p className="text-xs font-medium">{e.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{e.muscles.join(" · ")} · {EQUIP_LABEL[e.cat]}</p>
+                </div>
+                <Plus className="h-4 w-4 text-[var(--lime)]" />
+              </button>
+            ))}
+            {list.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">Brak wyników.</p>}
           </div>
-          <button onClick={add} disabled={!name} className="w-full rounded-xl bg-white/10 py-2 text-xs font-medium disabled:opacity-40">
-            <Plus className="inline h-3.5 w-3.5" /> Dodaj
-          </button>
         </div>
 
         <button
