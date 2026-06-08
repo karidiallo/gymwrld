@@ -116,15 +116,24 @@ function Trening() {
   const hero = heroTitles[cat];
 
   const basePushDay = [
-    { name: "Wyciskanie sztangi (klatka)", sets: 4, reps: 8, weight: 70 },
-    { name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40 },
-    { name: "Rozpiętki hantle", sets: 3, reps: 12, weight: 14 },
-    { name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10 },
-    { name: "Triceps wyciąg", sets: 3, reps: 12, weight: 30 },
+    { libId: "bp", name: "Wyciskanie sztangi leżąc", sets: 4, reps: 8, weight: 70, restSec: 150 },
+    { libId: "ohp", name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40, restSec: 120 },
+    { libId: "dbp", name: "Wyciskanie hantli", sets: 3, reps: 12, weight: 24, restSec: 90 },
+    { libId: "lat", name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10, restSec: 60 },
+    { libId: "bic", name: "Uginanie hantli (biceps)", sets: 3, reps: 12, weight: 14, restSec: 60 },
   ];
   const defaultPushDay: Exercise[] = basePushDay.map((b, i) => {
     const r = recommendForUser(b.weight, b.sets, b.reps, profile);
-    return { id: `e${i + 1}`, name: b.name, sets: r.sets, reps: r.reps, weight: r.weight };
+    return {
+      id: `e${i + 1}`,
+      libId: b.libId,
+      name: b.name,
+      sets: r.sets,
+      reps: r.reps,
+      weight: r.weight,
+      kind: "normal",
+      restSec: recommendRest(b.restSec, profile.level),
+    };
   });
 
   const startMain = () => {
