@@ -244,6 +244,22 @@ function Trening() {
       {/* Treadmill / Bieżnia quick log */}
       <TreadmillLog />
 
+      {/* Marathon / runners banner */}
+      <Link
+        to="/biegi"
+        className="mt-4 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[#3b0a0a] via-[#5a0f0f] to-[#7a1a1a] p-4 transition-transform active:scale-[0.99]"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-black/40 text-[var(--orange)]">
+          <Mountain className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Dla biegaczy</p>
+          <p className="font-display text-lg leading-tight text-white">Maraton & biegi</p>
+          <p className="text-[11px] text-white/70">Trasy na mapie · dystans · pace · nadchodzące zawody</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-white/70" />
+      </Link>
+
       {/* Calendar */}
       <div className="mb-3 mt-7 flex items-end justify-between">
         <h3 className="text-lg font-semibold">Kalendarz</h3>
@@ -359,8 +375,8 @@ function TreadmillLog() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
             <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
             <div className="mt-4 flex items-center justify-between">
               <div>
