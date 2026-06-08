@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Target, Scale, Ruler, Pencil, TrendingDown, X } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -16,7 +16,12 @@ function Profil() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [body, setBody] = useState({
-    weight: 78.4, height: 182, chest: 102, waist: 84, hips: 98, biceps: 38, thigh: 58,
+    weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
+  });
+  const [weightLog, setWeightLog] = useState<{ ts: number; weight: number }[]>([]);
+  const [weightOpen, setWeightOpen] = useState(false);
+  const [stats, setStats] = useState<{ sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number; streak: number }>({
+    sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0, streak: 0,
   });
 
   useEffect(() => {
@@ -32,10 +37,43 @@ function Profil() {
       if (rp) {
         const p = JSON.parse(rp);
         setIdentity({ name: p.name, nickname: p.nickname });
+        if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
+        if (typeof p.streak === "number") setStats((s) => ({ ...s, streak: p.streak }));
       }
     } catch {}
+    try {
+      const rw = localStorage.getItem("gw_weight_log");
+      if (rw) setWeightLog(JSON.parse(rw));
+    } catch {}
+    const onUpd = () => {
+      try {
+        const rp = localStorage.getItem("gw_profile");
+        if (rp) {
+          const p = JSON.parse(rp);
+          if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
+        }
+      } catch {}
+    };
+    window.addEventListener("gw_profile_update", onUpd);
+    return () => window.removeEventListener("gw_profile_update", onUpd);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const addWeight = (w: number) => {
+    const next = [{ ts: Date.now(), weight: w }, ...weightLog].slice(0, 50);
+    setWeightLog(next);
+    setBody({ ...body, weight: w });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gw_weight_log", JSON.stringify(next));
+      localStorage.setItem("gw_body", JSON.stringify({ ...body, weight: w }));
+    }
+    toast.success(`Waga zapisana · ${w} kg`);
+    setWeightOpen(false);
+  };
+
+  const lastWeightTs = weightLog[0]?.ts ?? 0;
+  const daysSinceWeight = lastWeightTs ? Math.floor((Date.now() - lastWeightTs) / (1000 * 60 * 60 * 24)) : null;
+  const reminderActive = daysSinceWeight === null || daysSinceWeight >= 7;
 
   const saveBody = (next: typeof body) => {
     setBody(next);
@@ -90,7 +128,7 @@ function Profil() {
 
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Ciało & pomiary</h3>
+        <h3 className="text-lg font-semibold">Wymiary</h3>
         <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
           <Pencil className="h-3 w-3" /> Edytuj
         </button>
@@ -102,65 +140,79 @@ function Profil() {
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-display text-3xl leading-none">{body.weight.toFixed(1)} <span className="text-sm text-muted-foreground">kg</span></p>
-              <p className="mt-1 text-[11px] text-muted-foreground">Waga · zaktualizowano dziś</p>
+              <p className="font-display text-3xl leading-none">{body.weight ? body.weight.toFixed(1) : "—"} <span className="text-sm text-muted-foreground">kg</span></p>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {daysSinceWeight === null ? "Waga · brak wpisów" : daysSinceWeight === 0 ? "Waga · dziś" : `Waga · ${daysSinceWeight} dni temu`}
+              </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2.5 py-1 text-[10px] font-semibold text-[var(--lime)]">
-            <TrendingDown className="h-3 w-3" /> -1.2 kg / 30 dni
-          </span>
+          <button onClick={() => setWeightOpen(true)} className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-3 py-1.5 text-[11px] font-semibold text-white">
+            <Plus className="h-3 w-3" /> Zaloguj wagę
+          </button>
         </div>
+        {reminderActive && (
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-[var(--orange)]/10 px-3 py-2 text-[11px] text-[var(--orange)]">
+            <Bell className="h-3.5 w-3.5" /> Czas zalogować nową wagę {daysSinceWeight !== null ? `(${daysSinceWeight} dni temu)` : "— zacznij dziś"}
+          </div>
+        )}
+        {weightLog.length > 1 && (
+          <div className="mt-3 flex items-end gap-1 border-t border-white/5 pt-3">
+            {weightLog.slice(0, 10).reverse().map((w, i) => {
+              const max = Math.max(...weightLog.map((x) => x.weight));
+              const min = Math.min(...weightLog.map((x) => x.weight));
+              const range = Math.max(1, max - min);
+              return (
+                <div key={i} className="flex-1">
+                  <div className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--orange)]" style={{ height: `${((w.weight - min) / range) * 30 + 4}px` }} />
+                </div>
+              );
+            })}
+          </div>
+        )}
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <BodyStat label="Wzrost" value={`${body.height} cm`} />
-          <BodyStat label="Klatka" value={`${body.chest} cm`} />
-          <BodyStat label="Talia" value={`${body.waist} cm`} />
-          <BodyStat label="Biodra" value={`${body.hips} cm`} />
-          <BodyStat label="Biceps" value={`${body.biceps} cm`} />
-          <BodyStat label="Udo" value={`${body.thigh} cm`} />
+          <BodyStat label="Wzrost" value={body.height ? `${body.height} cm` : "—"} />
+          <BodyStat label="Klatka" value={body.chest ? `${body.chest} cm` : "—"} />
+          <BodyStat label="Talia" value={body.waist ? `${body.waist} cm` : "—"} />
+          <BodyStat label="Biodra" value={body.hips ? `${body.hips} cm` : "—"} />
+          <BodyStat label="Biceps" value={body.biceps ? `${body.biceps} cm` : "—"} />
+          <BodyStat label="Udo" value={body.thigh ? `${body.thigh} cm` : "—"} />
         </div>
       </section>
-
-      {/* Quests */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Dzienne questy</h3>
-      <div className="space-y-2.5">
-        <QuestRow icon={<Target className="h-4 w-4" />} title="10 000 kroków" reward="+80 XP" pct={78} />
-        <QuestRow icon={<Sparkles className="h-4 w-4" />} title="Zrealizuj makro białka" reward="+60 XP" pct={70} />
-        <QuestRow icon={<Target className="h-4 w-4" />} title="Wykonaj trening" reward="+120 XP" pct={50} />
-      </div>
 
       {/* Stats */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Statystyki</h3>
       <div className="grid grid-cols-3 gap-3">
-        <StatBox label="Siła" value="68" />
-        <StatBox label="Kondycja" value="55" />
-        <StatBox label="Dieta" value="82" />
-        <StatBox label="Sen" value="74" />
-        <StatBox label="Rozwój" value="40" />
-        <StatBox label="Streak" value="12 dni" />
+        <StatBox label="Siła" value={String(stats.sila)} />
+        <StatBox label="Kondycja" value={String(stats.kondycja)} />
+        <StatBox label="Dieta" value={String(stats.dieta)} />
+        <StatBox label="Sen" value={String(stats.sen)} />
+        <StatBox label="Rozwój" value={String(stats.rozwoj)} />
+        <StatBox label="Streak" value={`${stats.streak} dni`} />
       </div>
 
       {/* Collection */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Kolekcja</h3>
       <div className="grid grid-cols-4 gap-3">
-        <Collect icon={<Shirt className="h-5 w-5" />} label="Ubrania" count={12} />
-        <Collect icon={<Sofa className="h-5 w-5" />} label="Dekoracje" count={7} />
-        <Collect icon={<Trophy className="h-5 w-5" />} label="Trofea" count={4} />
-        <Collect icon={<BadgeCheck className="h-5 w-5" />} label="Odznaki" count={9} />
+        <Collect icon={<Shirt className="h-5 w-5" />} label="Ubrania" count={0} />
+        <Collect icon={<Sofa className="h-5 w-5" />} label="Dekoracje" count={0} />
+        <Collect icon={<Trophy className="h-5 w-5" />} label="Trofea" count={0} />
+        <Collect icon={<BadgeCheck className="h-5 w-5" />} label="Odznaki" count={0} />
       </div>
 
       <h3 className="mb-3 mt-7 text-lg font-semibold">Osiągnięcia</h3>
       <div className="grid grid-cols-3 gap-3">
         {["Pierwszy trening","7 dni streak","Lvl 10","100 km","2 L wody × 30","Push 80 kg"].map((a, i) => (
           <div key={a} className="rounded-2xl glass p-3 text-center">
-            <div className={`mx-auto grid h-12 w-12 place-items-center rounded-full ${i < 4 ? "bg-gradient-to-br from-primary to-secondary text-primary-foreground" : "bg-white/5 text-muted-foreground"}`}>
-              <Trophy className="h-5 w-5" />
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/5 text-muted-foreground">
+              <Lock className="h-4 w-4" />
             </div>
-            <p className="mt-2 text-[11px] leading-tight">{a}</p>
+            <p className="mt-2 text-[11px] leading-tight text-muted-foreground">{a}</p>
           </div>
         ))}
       </div>
 
       {open && <BodySheet body={body} onSave={saveBody} onClose={() => setOpen(false)} />}
+      {weightOpen && <WeightSheet current={body.weight} onClose={() => setWeightOpen(false)} onSave={addWeight} />}
       {customOpen && (
         <AvatarCustomizer
           initial={avatarCfg}
