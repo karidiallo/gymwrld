@@ -195,6 +195,9 @@ function Trening() {
         <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </Link>
 
+      {/* Treadmill / Bieżnia quick log — directly under Library */}
+      <TreadmillLog />
+
       {/* Body-part banners */}
       {cat === "silownia" && (
         <>
@@ -268,9 +271,6 @@ function Trening() {
           </div>
         </button>
       </div>
-
-      {/* Treadmill / Bieżnia quick log */}
-      <TreadmillLog />
 
       {/* Marathon / runners banner */}
       <Link
