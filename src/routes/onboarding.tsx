@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -11,11 +11,14 @@ export const Route = createFileRoute("/onboarding")({
 
 type Goal = "masa" | "redukcja" | "kondycja" | "zdrowie";
 type Level = "poczatkujacy" | "sredni" | "zaawansowany";
+type Gender = "m" | "k" | "nb";
 
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [age, setAge] = useState<number | "">("");
+  const [gender, setGender] = useState<Gender | null>(null);
   const [goal, setGoal] = useState<Goal | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
@@ -29,24 +32,24 @@ function Onboarding() {
   const finish = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      localStorage.setItem("gw_profile", JSON.stringify({ goal, level, freq }));
+      localStorage.setItem("gw_profile", JSON.stringify({ goal, level, freq, age, gender }));
     }
     toast.success("Witaj w GymWrld!", { description: "Twoja postać została stworzona ✨" });
     navigate({ to: "/" });
   };
 
-  const total = 4;
+  const total = 5;
   const progress = ((step + 1) / total) * 100;
 
   return (
     <main className="relative min-h-screen overflow-hidden px-5 pt-10 pb-10">
       {/* ambient glow */}
-      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[var(--magenta)]/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[var(--magenta)]/25 blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-[var(--lime)]/15 blur-3xl" />
 
-      <header className="relative flex items-center justify-between">
-        <img src={logo} alt="GymWrld" className="h-7 w-auto invert" />
-        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{step + 1} / {total}</span>
+      <header className="relative flex flex-col items-center">
+        <img src={logoAsset.url} alt="GymWrld" className="h-24 w-auto invert drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]" />
+        <span className="mt-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{step + 1} / {total}</span>
       </header>
 
       <div className="relative mt-4 h-1 overflow-hidden rounded-full bg-white/8">
@@ -61,6 +64,13 @@ function Onboarding() {
           <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
         )}
         {step === 1 && (
+          <StepPersonal
+            age={age} setAge={setAge}
+            gender={gender} setGender={setGender}
+            onNext={() => setStep(2)}
+          />
+        )}
+        {step === 2 && (
           <StepChoice
             title="Jaki masz cel?"
             subtitle="Dopasujemy plan pod Ciebie."
@@ -72,11 +82,11 @@ function Onboarding() {
             ]}
             value={goal}
             onChange={(v) => setGoal(v as Goal)}
-            onNext={() => setStep(2)}
+            onNext={() => setStep(3)}
             canNext={!!goal}
           />
         )}
-        {step === 2 && (
+        {step === 3 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -87,15 +97,83 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(3)}
+            onNext={() => setStep(4)}
             canNext={!!level}
           />
         )}
-        {step === 3 && (
+        {step === 4 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
     </main>
+  );
+}
+
+function StepPersonal({
+  age, setAge, gender, setGender, onNext,
+}: {
+  age: number | ""; setAge: (v: number | "") => void;
+  gender: Gender | null; setGender: (g: Gender) => void;
+  onNext: () => void;
+}) {
+  const genders: { id: Gender; label: string; emoji: string }[] = [
+    { id: "m", label: "Mężczyzna", emoji: "♂" },
+    { id: "k", label: "Kobieta", emoji: "♀" },
+    { id: "nb", label: "Non-binary", emoji: "⚧" },
+  ];
+  const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender;
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl leading-tight">Trochę o <span className="text-gradient">Tobie</span></h1>
+        <p className="mt-2 text-sm text-muted-foreground">Dzięki temu lepiej dopasujemy plan i kalorie.</p>
+      </div>
+
+      <div>
+        <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Wiek</p>
+        <input
+          type="number"
+          min={13}
+          max={99}
+          inputMode="numeric"
+          value={age}
+          onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : "")}
+          placeholder="np. 24"
+          className="w-full rounded-2xl glass px-4 py-3.5 text-center font-display text-2xl outline-none placeholder:text-muted-foreground/40"
+        />
+      </div>
+
+      <div>
+        <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Płeć</p>
+        <div className="grid grid-cols-3 gap-2">
+          {genders.map((g) => {
+            const active = gender === g.id;
+            return (
+              <button
+                key={g.id}
+                onClick={() => setGender(g.id)}
+                className={`flex flex-col items-center gap-1 rounded-2xl p-3.5 transition ${
+                  active
+                    ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60"
+                    : "glass"
+                }`}
+              >
+                <span className="text-2xl">{g.emoji}</span>
+                <span className="text-xs font-medium">{g.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <button
+        onClick={onNext}
+        disabled={!canNext}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
+      >
+        Dalej <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
