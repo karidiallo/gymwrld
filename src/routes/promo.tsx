@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Sparkles, Lock, Tag, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/promo")({
@@ -71,7 +72,10 @@ function Promo() {
             <p className="text-sm font-medium">Odblokuj GymWrld Premium</p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Ekskluzywne kody, AI Coach, premium skiny i więcej.</p>
-          <button className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] py-2.5 text-sm font-semibold text-background glow-primary">
+          <button
+            onClick={() => toast.success("Twój trial Premium startuje!", { description: "7 dni za darmo — bez zobowiązań." })}
+            className="mt-3 w-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] py-2.5 text-sm font-semibold text-background glow-primary"
+          >
             Wypróbuj 7 dni za darmo
           </button>
         </div>
@@ -83,6 +87,18 @@ function Promo() {
 function Deal({ d, locked, premium }: { d: Deal; locked?: boolean; premium?: boolean }) {
   const bg = `linear-gradient(135deg, ${d.from}, ${d.to})`;
   const initials = d.brand.split(" ").map((w) => w[0]).slice(0, 2).join("");
+  const onClick = async () => {
+    if (locked) {
+      toast("Kod Premium zablokowany 🔒", { description: "Odblokuj GymWrld Premium aby go zobaczyć." });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(d.code);
+      toast.success(`Skopiowano ${d.code}`, { description: `${d.brand} · ${d.off}` });
+    } catch {
+      toast("Skopiuj ręcznie", { description: d.code });
+    }
+  };
   return (
     <div className="relative overflow-hidden rounded-2xl glass p-4">
       <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full blur-3xl opacity-50" style={{ background: bg }} />
@@ -105,9 +121,9 @@ function Deal({ d, locked, premium }: { d: Deal; locked?: boolean; premium?: boo
       <div className="relative mt-3 flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 ring-1 ring-white/10">
         <code className={`text-xs ${locked ? "blur-sm select-none" : "font-semibold tracking-wider"}`}>{d.code}</code>
         {locked ? (
-          <span className="inline-flex items-center gap-1 text-xs text-white"><Lock className="h-3 w-3" /> Premium</span>
+          <button onClick={onClick} className="inline-flex items-center gap-1 text-xs text-white"><Lock className="h-3 w-3" /> Premium</button>
         ) : (
-          <button className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold text-background" style={{ background: bg }}><Copy className="h-3 w-3" /> Odbierz</button>
+          <button onClick={onClick} className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold text-background" style={{ background: bg }}><Copy className="h-3 w-3" /> Odbierz</button>
         )}
       </div>
     </div>
