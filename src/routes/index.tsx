@@ -247,15 +247,3 @@ function Quest({ title, reward, progress, done, onToggle }: { title: string; rew
   );
 }
 
-function Activity({ icon, title, meta, to }: { icon: React.ReactNode; title: string; meta: string; to: string }) {
-  return (
-    <Link to={to} className="flex items-center gap-3 rounded-2xl glass p-3.5 transition-transform active:scale-[0.99]">
-      <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary/10 text-secondary">{icon}</div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{meta}</p>
-      </div>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-    </Link>
-  );
-}
