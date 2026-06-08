@@ -150,29 +150,6 @@ function Regeneracja() {
         <SessionTile icon={<Bath className="h-5 w-5" />} label="Kąpiel relaksacyjna" desc="20 min · pełen reset" min={20} onQuick={() => quickAdd("kapiel", 20, mind, persistMind)} />
       </div>
 
-      <div className="mt-4 space-y-2.5">
-        {mind.map((m) => (
-          <div key={m.id} className="flex items-center gap-3 rounded-2xl glass p-3.5">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--lime)]/15 text-[var(--lime)]">
-              {m.type === "medytacja" ? <Brain className="h-4 w-4" />
-                : m.type === "oddech" ? <Wind className="h-4 w-4" />
-                : m.type === "journal" ? <BookOpen className="h-4 w-4" />
-                : m.type === "afirmacja" ? <Sun className="h-4 w-4" />
-                : m.type === "spacer" ? <Footprints className="h-4 w-4" />
-                : <Bath className="h-4 w-4" />}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium capitalize">{m.type}</p>
-              <p className="text-[11px] text-muted-foreground">{m.note ?? "Sesja"}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-semibold">{m.minutes} min</p>
-            </div>
-            <EntryActions onEdit={() => setEditing(m)} onDelete={() => removeMind(m.id)} />
-          </div>
-        ))}
-      </div>
-
       {/* Health Journal */}
       <div className="mb-3 mt-7 flex items-end justify-between">
         <h3 className="text-lg font-semibold">Dziennik zdrowia</h3>
@@ -181,14 +158,13 @@ function Regeneracja() {
         </button>
       </div>
       {(() => {
-        const mindWithNotes = mind.filter((m) => m.note && m.note.trim() && m.note !== "Sesja" && m.note !== "Szybka sesja" && m.note !== "Ukończona sesja");
         const all = [
           ...journal,
-          ...mindWithNotes.map((m) => ({ id: m.id, ts: Date.now(), title: m.type, body: m.note ?? "", _mind: true as const })),
+          ...mind.map((m) => ({ id: m.id, ts: Date.now(), title: m.type, body: `${m.minutes} min · ${m.note ?? "Sesja"}`, _mind: true as const, _mindRef: m })),
         ].sort((a, b) => b.ts - a.ts);
         if (all.length === 0) return (
           <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
-            Brak wpisów · zapisz, jak się dziś czujesz
+            Brak wpisów · zaloguj sesję lub dodaj notatkę
           </div>
         );
         return (
@@ -201,12 +177,19 @@ function Regeneracja() {
                   <p className="mt-0.5 text-[12px] text-muted-foreground whitespace-pre-wrap">{e.body}</p>
                   <p className="mt-1 text-[10px] text-muted-foreground/70">{new Date(e.ts).toLocaleString("pl")}</p>
                 </div>
-                {!e._mind && (
-                  <div className="flex flex-col gap-1">
-                    <button onClick={() => setEditJournal(e)} aria-label="Edytuj" className="grid h-7 w-7 place-items-center rounded-full bg-white/5"><Pencil className="h-3 w-3" /></button>
-                    <button onClick={() => persistJournal(journal.filter((j) => j.id !== e.id))} aria-label="Usuń" className="grid h-7 w-7 place-items-center rounded-full bg-white/5 hover:bg-red-500/30"><Trash2 className="h-3 w-3" /></button>
-                  </div>
-                )}
+                <div className="flex flex-col gap-1">
+                  {e._mind ? (
+                    <>
+                      <button onClick={() => setEditing(e._mindRef)} aria-label="Edytuj" className="grid h-7 w-7 place-items-center rounded-full bg-white/5"><Pencil className="h-3 w-3" /></button>
+                      <button onClick={() => removeMind(e.id)} aria-label="Usuń" className="grid h-7 w-7 place-items-center rounded-full bg-white/5 hover:bg-red-500/30"><Trash2 className="h-3 w-3" /></button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => setEditJournal(e)} aria-label="Edytuj" className="grid h-7 w-7 place-items-center rounded-full bg-white/5"><Pencil className="h-3 w-3" /></button>
+                      <button onClick={() => persistJournal(journal.filter((j) => j.id !== e.id))} aria-label="Usuń" className="grid h-7 w-7 place-items-center rounded-full bg-white/5 hover:bg-red-500/30"><Trash2 className="h-3 w-3" /></button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
