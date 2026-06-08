@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import maleAthletic from "@/assets/avatar.png";
-import maleSlim from "@/assets/avatar-male-slim.png";
-import maleMuscular from "@/assets/avatar-male-muscular.png";
-import maleCurvy from "@/assets/avatar-male-curvy.png";
-import femaleAthletic from "@/assets/avatar-female-athletic.png";
-import femaleCurvy from "@/assets/avatar-female-curvy.png";
-import nbAthletic from "@/assets/avatar-nb-athletic.png";
+import maleAthletic from "@/assets/avatar-male-athletic-crop.png";
+import maleSlim from "@/assets/avatar-male-slim-crop.png";
+import maleMuscular from "@/assets/avatar-male-muscular-crop.png";
+import maleCurvy from "@/assets/avatar-male-curvy-crop.png";
+import femaleSlim from "@/assets/avatar-female-slim-crop.png";
+import femaleAthletic from "@/assets/avatar-female-athletic-crop.png";
+import femaleCurvy from "@/assets/avatar-female-curvy-crop.png";
+import nbAthletic from "@/assets/avatar-nb-athletic-crop.png";
 
 export type Gender = "m" | "k" | "nb";
 export type BodyType = "slim" | "athletic" | "medium" | "muscular" | "curvy";
@@ -74,7 +75,8 @@ export function getAvatarImage(gender: Gender, body: BodyType): string {
 export function getAvatarImageFor(gender: Gender, body: BodyType, nbBase: "m" | "k" = "m"): string {
   const g = gender === "nb" ? nbBase : gender;
   if (g === "k") {
-    if (body === "curvy") return femaleCurvy;
+    if (body === "slim") return femaleSlim;
+    if (body === "curvy" || body === "medium") return femaleCurvy;
     return femaleAthletic;
   }
   // m
