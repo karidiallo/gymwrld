@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkoutsRouteImport } from './routes/workouts'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
@@ -23,6 +24,11 @@ import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkoutsRoute = WorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
   id: '/ustawienia',
   path: '/ustawienia',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/workouts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/workouts'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/workouts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,10 +209,18 @@ export interface RootRouteChildren {
   StreetRoute: typeof StreetRoute
   TreningRoute: typeof TreningRoute
   UstawieniaRoute: typeof UstawieniaRoute
+  WorkoutsRoute: typeof WorkoutsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workouts': {
+      id: '/workouts'
+      path: '/workouts'
+      fullPath: '/workouts'
+      preLoaderRoute: typeof WorkoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ustawienia': {
       id: '/ustawienia'
       path: '/ustawienia'
@@ -309,7 +329,18 @@ const rootRouteChildren: RootRouteChildren = {
   StreetRoute: StreetRoute,
   TreningRoute: TreningRoute,
   UstawieniaRoute: UstawieniaRoute,
+  WorkoutsRoute: WorkoutsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
