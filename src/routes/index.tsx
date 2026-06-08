@@ -95,7 +95,7 @@ function Index() {
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="absolute bottom-0 left-1/2 h-[112%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="absolute -bottom-2 left-1/2 h-[132%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
             <img
               src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
@@ -107,16 +107,19 @@ function Index() {
             />
           </button>
 
-          {/* Bottom overlay: GIANT logo directly above level badge + CTA */}
+          <div className="pointer-events-none absolute left-4 bottom-[104px] z-10">
+            <img
+              src={logoAsset.url}
+              alt="GymWrld"
+              className="h-20 w-auto"
+              style={{ filter: "brightness(0) invert(1) drop-shadow(0 6px 22px rgba(0,0,0,0.9))" }}
+            />
+          </div>
+
+          {/* Bottom overlay: level badge + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2.5">
-              <img
-                src={logoAsset.url}
-                alt="GymWrld"
-                className="mb-2 h-12 w-auto"
-                style={{ filter: "brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0,0,0,0.7))" }}
-              />
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom {profile.level ?? 1}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom średni · Lvl {profile.level ?? 1}</p>
               <p className="text-xs font-medium">{profile.xp ?? 0} / {2000} XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />

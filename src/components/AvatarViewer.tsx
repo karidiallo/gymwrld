@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { X, Lock } from "lucide-react";
 import { type AvatarConfig } from "./AvatarSvg";
-import { FullBodyAvatar } from "./FullBodyAvatar";
+import { AvatarModel } from "./AvatarModel";
 
 const ROOMS = [
   { id: "starter", name: "Pokój startowy", bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
@@ -56,14 +56,14 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
         onTouchEnd={end}
       >
         <div
-          className="h-[70%]"
+          className="h-[86%]"
           style={{
             filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)`,
             transform: `scaleX(${rot > 90 && rot < 270 ? -1 : 1}) translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
             transition: "transform 80ms linear",
           }}
         >
-          <FullBodyAvatar cfg={cfg} height={520} />
+          <AvatarModel cfg={cfg} height="100%" rotation={rot} />
         </div>
       </div>
 
