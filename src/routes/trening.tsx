@@ -6,7 +6,7 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Sparkles, Heart, Activity } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
