@@ -241,6 +241,9 @@ function Trening() {
         </button>
       </div>
 
+      {/* Treadmill / Bieżnia quick log */}
+      <TreadmillLog />
+
       {/* Calendar */}
       <div className="mb-3 mt-7 flex items-end justify-between">
         <h3 className="text-lg font-semibold">Kalendarz</h3>
