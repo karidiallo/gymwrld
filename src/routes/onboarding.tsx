@@ -19,6 +19,8 @@ function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -35,28 +37,28 @@ function Onboarding() {
   const finish = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      localStorage.setItem("gw_profile", JSON.stringify({ goal, level, freq, age, gender }));
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, goal, level, freq, age, gender }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
     }
     toast.success("Witaj w GymWrld!", { description: "Twoja postać została stworzona ✨" });
     navigate({ to: "/" });
   };
 
-  const total = 6;
+  const total = 7;
   const progress = ((step + 1) / total) * 100;
 
   // First screen: pure black, huge logo only.
   if (step === 0) {
     return (
-      <main className="relative flex min-h-screen flex-col items-center justify-between bg-black px-5 pt-10 pb-10 text-white">
-        <div className="flex-1" />
-        <img
-          src={logoAsset.url}
-          alt="GymWrld"
-          className="w-[88%] max-w-[560px] drop-shadow-[0_8px_40px_rgba(255,255,255,0.18)]"
-          style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 40px rgba(255,255,255,0.18))" }}
-        />
-        <div className="flex-1" />
+      <main className="relative flex min-h-screen flex-col items-center bg-black px-5 pt-10 pb-10 text-white">
+        <div className="flex flex-1 items-center justify-center w-full">
+          <img
+            src={logoAsset.url}
+            alt="GymWrld"
+            className="mx-auto block w-[62%] max-w-[360px]"
+            style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 40px rgba(255,255,255,0.18))" }}
+          />
+        </div>
         <div className="w-full max-w-[480px]">
           <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
         </div>
@@ -89,16 +91,19 @@ function Onboarding() {
 
       <section className="relative mt-8">
         {step === 1 && (
+          <StepName name={name} setName={setName} nickname={nickname} setNickname={setNickname} onNext={() => setStep(2)} />
+        )}
+        {step === 2 && (
           <StepPersonal
             age={age} setAge={setAge}
             gender={gender} setGender={setGender}
-            onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(2); }}
+            onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
         )}
-        {step === 2 && (
-          <StepAvatar avatar={avatar} setAvatar={setAvatar} onNext={() => setStep(3)} />
-        )}
         {step === 3 && (
+          <StepAvatar avatar={avatar} setAvatar={setAvatar} onNext={() => setStep(4)} />
+        )}
+        {step === 4 && (
           <StepChoice
             title="Jaki masz cel?"
             subtitle="Dopasujemy plan pod Ciebie."
@@ -110,11 +115,11 @@ function Onboarding() {
             ]}
             value={goal}
             onChange={(v) => setGoal(v as Goal)}
-            onNext={() => setStep(4)}
+            onNext={() => setStep(5)}
             canNext={!!goal}
           />
         )}
-        {step === 4 && (
+        {step === 5 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -125,15 +130,66 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(5)}
+            onNext={() => setStep(6)}
             canNext={!!level}
           />
         )}
-        {step === 5 && (
+        {step === 6 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
     </main>
+  );
+}
+
+function StepName({
+  name, setName, nickname, setNickname, onNext,
+}: {
+  name: string; setName: (v: string) => void;
+  nickname: string; setNickname: (v: string) => void;
+  onNext: () => void;
+}) {
+  const cleanNick = nickname.replace(/[^a-z0-9_\.]/gi, "").toLowerCase();
+  const canNext = name.trim().length >= 2 && cleanNick.length >= 2;
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl leading-tight">Jak mamy <span className="text-gradient">Cię nazwać?</span></h1>
+        <p className="mt-2 text-sm text-muted-foreground">Twoje imię i nick widoczny w profilu.</p>
+      </div>
+      <div>
+        <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Imię</p>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="np. Anna"
+          className="w-full rounded-2xl glass px-4 py-3.5 font-display text-xl outline-none placeholder:text-muted-foreground/40"
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Nick (publiczny)</p>
+        <div className="flex items-center gap-2 rounded-2xl glass px-4 py-3.5">
+          <span className="text-muted-foreground">@</span>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_\.]/g, "").toLowerCase())}
+            placeholder="twoj_nick"
+            className="flex-1 bg-transparent font-display text-xl outline-none placeholder:text-muted-foreground/40"
+            maxLength={20}
+          />
+        </div>
+        <p className="mt-1 text-[10px] text-muted-foreground">2–20 znaków · litery, cyfry, _ i .</p>
+      </div>
+      <button
+        onClick={onNext}
+        disabled={!canNext}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
+      >
+        Dalej <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
