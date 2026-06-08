@@ -527,6 +527,7 @@ function WorkoutSession({
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [restTimer, setRestTimer] = useState<{ exId: string; remaining: number } | null>(null);
 
   useEffect(() => {
     if (!running) return;
@@ -534,10 +535,33 @@ function WorkoutSession({
     return () => clearInterval(id);
   }, [running]);
 
+  useEffect(() => {
+    if (!restTimer) return;
+    if (restTimer.remaining <= 0) {
+      toast.success("Koniec przerwy 💥 Następna seria!");
+      setRestTimer(null);
+      return;
+    }
+    const id = setTimeout(() => setRestTimer((r) => (r ? { ...r, remaining: r.remaining - 1 } : r)), 1000);
+    return () => clearTimeout(id);
+  }, [restTimer]);
+
   const doneCount = items.filter((i) => i.done).length;
   const pct = Math.round((doneCount / items.length) * 100);
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
   const ss = String(seconds % 60).padStart(2, "0");
+
+  const cycleKind = (id: string) => setItems((arr) => arr.map((e) => {
+    if (e.id !== id) return e;
+    const next: SetKind = e.kind === "normal" || !e.kind ? "superset" : e.kind === "superset" ? "dropset" : "normal";
+    return { ...e, kind: next };
+  }));
+
+  const startRest = (ex: Exercise) => {
+    const sec = ex.restSec ?? 90;
+    setRestTimer({ exId: ex.id, remaining: sec });
+    toast(`Przerwa ${sec}s · AI sugeruje dla ${ex.name}`, { icon: "⏱️" });
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
@@ -570,14 +594,31 @@ function WorkoutSession({
       {/* Exercises */}
       <div className="space-y-3 px-5 py-5">
         {items.map((ex, idx) => (
-          <div key={ex.id} className={`rounded-3xl glass p-4 ${ex.done ? "opacity-60" : ""}`}>
+          <div key={ex.id} className={`rounded-3xl glass p-4 ${ex.done ? "opacity-60" : ""} ${ex.kind === "superset" ? "ring-1 ring-[var(--magenta)]/50" : ex.kind === "dropset" ? "ring-1 ring-[var(--orange)]/50" : ""}`}>
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
-                <p className="mt-1 font-display text-lg leading-tight">{ex.name}</p>
-                <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
-                  <Sparkles className="h-3 w-3" /> Sugerowane AI dla Ciebie
-                </p>
+              <div className="flex items-start gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/5 text-3xl animate-pulse-glow">
+                  {EXERCISES.find((e) => e.id === ex.libId)?.emoji ?? "💪"}
+                </span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
+                  <p className="mt-0.5 font-display text-lg leading-tight">{ex.name}</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
+                      <Sparkles className="h-3 w-3" /> AI dla Ciebie
+                    </span>
+                    {ex.kind === "superset" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/20 px-2 py-0.5 text-[10px] text-[var(--magenta)]">
+                        <Layers className="h-3 w-3" /> Superseria
+                      </span>
+                    )}
+                    {ex.kind === "dropset" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--orange)]/20 px-2 py-0.5 text-[10px] text-[var(--orange)]">
+                        <ArrowDown className="h-3 w-3" /> Dropset
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setItems((arr) => arr.map((e, i) => i === idx ? { ...e, done: !e.done } : e))}
@@ -604,15 +645,20 @@ function WorkoutSession({
                 <SetStat label="Ciężar" value={ex.weight ? `${ex.weight} kg` : "—"} />
               </button>
             )}
-            <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px]">
               {editingId === ex.id ? (
-                <button onClick={() => setEditingId(null)} className="rounded-full bg-[var(--lime)]/20 px-3 py-1 text-[var(--lime)]">Gotowe</button>
+                <button onClick={() => setEditingId(null)} className="rounded-full bg-[var(--lime)]/20 px-3 py-1 font-medium text-[var(--lime)]">Gotowe</button>
               ) : (
-                <button onClick={() => setEditingId(ex.id)} className="underline-offset-2 hover:underline">Edytuj serie / powt. / ciężar</button>
+                <button onClick={() => setEditingId(ex.id)} className="rounded-full bg-white/5 px-3 py-1 text-muted-foreground hover:bg-white/10">
+                  <Pencil className="mr-1 inline h-2.5 w-2.5" /> Edytuj
+                </button>
               )}
-              {profile.gender && (
-                <span>Dostosowane do: {profile.gender === "k" ? "♀" : profile.gender === "nb" ? "⚧" : "♂"} {profile.level ?? ""}</span>
-              )}
+              <button onClick={() => cycleKind(ex.id)} className="rounded-full bg-white/5 px-3 py-1 text-muted-foreground hover:bg-white/10">
+                <Layers className="mr-1 inline h-2.5 w-2.5" /> {ex.kind === "superset" ? "Superseria" : ex.kind === "dropset" ? "Dropset" : "Zwykła"}
+              </button>
+              <button onClick={() => startRest(ex)} className="rounded-full bg-[var(--orange)]/15 px-3 py-1 font-medium text-[var(--orange)] hover:bg-[var(--orange)]/25">
+                <Timer className="mr-1 inline h-2.5 w-2.5" /> Przerwa {ex.restSec ?? 90}s
+              </button>
             </div>
             <div className="mt-3 flex gap-1.5">
               {Array.from({ length: ex.sets }).map((_, i) => (
@@ -622,6 +668,25 @@ function WorkoutSession({
           </div>
         ))}
       </div>
+
+      {/* Floating AI rest timer */}
+      {restTimer && (
+        <div className="fixed inset-x-0 bottom-24 z-20 flex justify-center px-4">
+          <div className="flex w-full max-w-md items-center gap-3 rounded-2xl border border-[var(--orange)]/40 bg-background/95 p-3 backdrop-blur-xl glow-primary">
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-[var(--orange)]/15 text-[var(--orange)]">
+              <Timer className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">AI Rest Timer</p>
+              <p className="font-display text-2xl tabular-nums">
+                {String(Math.floor(restTimer.remaining / 60)).padStart(2, "0")}:
+                {String(restTimer.remaining % 60).padStart(2, "0")}
+              </p>
+            </div>
+            <button onClick={() => setRestTimer(null)} className="rounded-full bg-white/5 px-3 py-1.5 text-xs">Pomiń</button>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="sticky bottom-0 border-t border-white/5 bg-background/90 px-5 py-4 backdrop-blur-xl">
