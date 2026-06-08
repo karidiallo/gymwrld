@@ -247,7 +247,7 @@ function MindSheet({ onClose, onSave }: { onClose: () => void; onSave: (t: MindE
           <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {(["medytacja","oddech","journal"] as const).map((t) => (
+          {(["medytacja","oddech","journal","wdziecznosc","natura","muzyka"] as const).map((t) => (
             <button key={t} onClick={() => setType(t)} className={`rounded-2xl p-3 text-xs font-medium capitalize ${type === t ? "bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] text-white" : "bg-white/5 text-muted-foreground"}`}>
               {t}
             </button>
