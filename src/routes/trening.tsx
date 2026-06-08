@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import gymHero from "@/assets/gym-hero.jpg";
 import homeHero from "@/assets/home-hero.jpg";
@@ -7,7 +7,7 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, RotateCcw, Trash2 } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -349,13 +349,11 @@ function WorkoutSession({
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(true);
 
-  useState(() => {
-    // intentional: no-op (we use effect below)
-    return undefined;
-  });
-
-  // simple timer
-  useTimer(running, () => setSeconds((s) => s + 1));
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [running]);
 
   const doneCount = items.filter((i) => i.done).length;
   const pct = Math.round((doneCount / items.length) * 100);
@@ -442,17 +440,6 @@ function SetStat({ label, value }: { label: string; value: React.ReactNode }) {
       <p className="mt-1 text-[10px] text-muted-foreground">{label}</p>
     </div>
   );
-}
-
-function useTimer(running: boolean, tick: () => void) {
-  // React hook in function — using setInterval via effect
-  // imported here to keep WorkoutSession self-contained
-  const { useEffect } = require("react");
-  useEffect(() => {
-    if (!running) return;
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [running]);
 }
 
 /* ============ Workout Builder ============ */
