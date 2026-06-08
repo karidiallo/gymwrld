@@ -549,8 +549,25 @@ function MonthView() {
   const month = today.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
-  const logged = new Set([2, 4, 6, 9, 11, 13, 16, 18, 20, 23, 25, 27]);
   const monthName = today.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
+  const [logs, setLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    const refresh = () => setLogs(readLogs());
+    refresh();
+    if (typeof window !== "undefined") {
+      window.addEventListener("gw_training_log_update", refresh);
+      return () => window.removeEventListener("gw_training_log_update", refresh);
+    }
+  }, []);
+  const byDay = new Map<number, Set<string>>();
+  logs.forEach((l) => {
+    const d = new Date(l.ts);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const set = byDay.get(d.getDate()) ?? new Set();
+      set.add(l.kind);
+      byDay.set(d.getDate(), set);
+    }
+  });
 
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
@@ -565,7 +582,7 @@ function MonthView() {
       <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
           if (d === null) return <span key={`e${i}`} />;
-          const isLogged = logged.has(d);
+          const kinds = byDay.get(d);
           const isToday = d === today.getDate();
           return (
             <div
@@ -575,20 +592,26 @@ function MonthView() {
               }`}
             >
               <span className={isToday ? "font-semibold" : "text-foreground/80"}>{d}</span>
-              {isLogged && (
-                <span className="mt-0.5 h-1 w-1 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--lime)]" />
+              {kinds && (
+                <div className="mt-0.5 flex gap-0.5">
+                  {[...kinds].slice(0, 4).map((k) => (
+                    <span key={k} className="h-1 w-1 rounded-full" style={{ background: KIND_COLOR[k as keyof typeof KIND_COLOR] }} />
+                  ))}
+                </div>
               )}
             </div>
           );
         })}
       </div>
-      <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--lime)]" />
-          Trening zalogowany
-        </span>
-        <span>Streak: 12 dni · {logged.size} sesji</span>
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+        {(["silownia","biezia","bieg","street","mind","sen"] as const).map((k) => (
+          <span key={k} className="inline-flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: KIND_COLOR[k] }} />
+            {k === "silownia" ? "Siłownia" : k === "biezia" ? "Bieżnia" : k === "bieg" ? "Bieg" : k === "street" ? "Street" : k === "mind" ? "Mind" : "Sen"}
+          </span>
+        ))}
       </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">{logs.length} sesji w bazie</p>
     </div>
   );
 }
