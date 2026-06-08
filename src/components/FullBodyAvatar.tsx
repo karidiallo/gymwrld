@@ -42,7 +42,7 @@ export function FullBodyAvatar({ cfg, height = 480 }: { cfg: AvatarConfig; heigh
   if (isFem) {
     d.sh = Math.max(48, d.sh - 8);
     d.hi = d.hi + 6;
-    d.bust = d.body === "slim" ? 6 : d.body === "curvy" ? 14 : 10;
+    d.bust = cfg.body === "slim" ? 6 : cfg.body === "curvy" ? 14 : 10;
     d.chest = Math.max(d.chest - 8, 10);
     d.arm = Math.max(8, d.arm - 4);
   }
