@@ -19,12 +19,12 @@ export function awardXp(amount: number, reason?: string) {
     const raw = localStorage.getItem(PROFILE_KEY);
     const p = raw ? JSON.parse(raw) : {};
     const prevXp = Number(p.xp ?? 0);
-    const prevLvl = Number(p.level ?? 1);
+    const prevLvl = Number(p.lvl ?? 1);
     let xp = prevXp + amount;
     let lvl = prevLvl;
     while (xp >= 2000) { xp -= 2000; lvl += 1; }
     const stats = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
-    const next = { ...p, xp, level: lvl, stats };
+    const next = { ...p, xp, lvl, stats };
     localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
     window.dispatchEvent(new Event("gw_profile_update"));
     if (lvl > prevLvl) window.dispatchEvent(new CustomEvent("gw_levelup", { detail: { lvl } }));

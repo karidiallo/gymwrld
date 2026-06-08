@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { X, Lock } from "lucide-react";
 import { type AvatarConfig } from "./AvatarSvg";
 import { AvatarModel } from "./AvatarModel";
@@ -6,23 +6,15 @@ import sanctuary from "@/assets/sanctuary.jpg";
 
 const ROOMS = [
   { id: "starter", name: "Apartament startowy", bgImg: sanctuary, bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
-  { id: "loft", name: "Loft Premium", bg: "linear-gradient(180deg,#0e1d2a 0%,#0a1320 70%,#000 100%)", floor: "#1d2f44", locked: true, req: "Lvl 20" },
-  { id: "penthouse", name: "Penthouse", bg: "linear-gradient(180deg,#2a0e1d 0%,#1a0814 70%,#000 100%)", floor: "#3d1828", locked: true, req: "Lvl 40" },
-  { id: "skyhouse", name: "Sky House", bg: "linear-gradient(180deg,#0e2a23 0%,#0a1a18 70%,#000 100%)", floor: "#1d3d33", locked: true, req: "Lvl 60" },
+  { id: "loft", name: "Loft · Berlin", bg: "linear-gradient(180deg,#0e1d2a 0%,#0a1320 70%,#000 100%)", floor: "#1d2f44", locked: true, req: "Lvl 5" },
+  { id: "paris", name: "Atelier · Paryż", bg: "linear-gradient(180deg,#1a1428 0%,#100a18 70%,#000 100%)", floor: "#2a1f3d", locked: true, req: "Lvl 10" },
+  { id: "penthouse", name: "Penthouse · Mediolan", bg: "linear-gradient(180deg,#2a0e1d 0%,#1a0814 70%,#000 100%)", floor: "#3d1828", locked: true, req: "Lvl 20 · Premium" },
+  { id: "skyhouse", name: "Sky House · Barcelona", bg: "linear-gradient(180deg,#0e2a23 0%,#0a1a18 70%,#000 100%)", floor: "#1d3d33", locked: true, req: "Lvl 30 · Premium" },
+  { id: "villa", name: "Vila · Lazurowe", bg: "linear-gradient(180deg,#2a1a0e 0%,#1a1108 70%,#000 100%)", floor: "#3d2818", locked: true, req: "Lvl 40 · Premium" },
 ];
 
 export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () => void }) {
-  const [rot, setRot] = useState(0);
   const [room, setRoom] = useState(ROOMS[0]);
-  const dragging = useRef<{ x: number; r: number } | null>(null);
-
-  const startDrag = (x: number) => (dragging.current = { x, r: rot });
-  const move = (x: number) => {
-    if (!dragging.current) return;
-    const dx = x - dragging.current.x;
-    setRot((360 + dragging.current.r + dx * 1.5) % 360);
-  };
-  const end = () => (dragging.current = null);
 
   return (
     <div className="fixed inset-0 z-[60] bg-background">
@@ -44,36 +36,13 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
       </div>
 
       {/* avatar stage */}
-      <div
-        className="absolute inset-x-0 top-24 bottom-44 grid place-items-end touch-none select-none"
-        onMouseDown={(e) => startDrag(e.clientX)}
-        onMouseMove={(e) => move(e.clientX)}
-        onMouseUp={end}
-        onMouseLeave={end}
-        onTouchStart={(e) => startDrag(e.touches[0].clientX)}
-        onTouchMove={(e) => move(e.touches[0].clientX)}
-        onTouchEnd={end}
-      >
+      <div className="absolute inset-x-0 top-20 bottom-40 grid place-items-end">
         <div
-          className="h-[86%]"
-          style={{
-            filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)`,
-            transform: `translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
-            transition: "transform 80ms linear",
-          }}
+          className="h-[88%]"
+          style={{ filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)` }}
         >
-          <AvatarModel cfg={cfg} height="100%" rotation={rot} />
+          <AvatarModel cfg={cfg} height="100%" rotation={0} />
         </div>
-      </div>
-
-      {/* rotation slider */}
-      <div className="absolute inset-x-6 bottom-32 z-10">
-        <p className="mb-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground">Przeciągnij lub obróć · {Math.round(rot)}°</p>
-        <input
-          type="range" min={0} max={360} value={rot}
-          onChange={(e) => setRot(parseInt(e.target.value))}
-          className="w-full accent-[var(--orange)]"
-        />
       </div>
 
       {/* rooms picker */}
