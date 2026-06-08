@@ -7,7 +7,8 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, BookOpen, Library } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
+import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -16,7 +17,19 @@ export const Route = createFileRoute("/trening")({
 
 type Cat = "silownia" | "kobiety" | "redukcja" | "dom" | "kalistenika" | "outdoor";
 
-type Exercise = { id: string; name: string; sets: number; reps: number; weight?: number; done?: boolean };
+type SetKind = "normal" | "superset" | "dropset";
+type Exercise = {
+  id: string;
+  name: string;
+  sets: number;
+  reps: number;
+  weight?: number;
+  done?: boolean;
+  kind?: SetKind;
+  /** Library id for emoji & rest hint. */
+  libId?: string;
+  restSec?: number;
+};
 
 type Profile = { gender?: "m" | "k" | "nb"; weight?: number; level?: "poczatkujacy" | "sredni" | "zaawansowany" };
 
@@ -236,13 +249,7 @@ function Trening() {
       {view === "dzien" && <DayView />}
 
       {/* Records */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Rekordy & PR-y</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <PR title="Wyciskanie sztangi" value="80 kg × 6" />
-        <PR title="Martwy ciąg" value="140 kg × 3" />
-        <PR title="Przysiad" value="120 kg × 5" />
-        <PR title="5 km bieg" value="22:18" />
-      </div>
+      <PRSection />
 
       {session && (
         <WorkoutSession
@@ -373,14 +380,128 @@ function DayView() {
   );
 }
 
-function PR({ title, value }: { title: string; value: string }) {
+/* ============ PR Section (user-pickable & editable) ============ */
+type PRRecord = { id: string; name: string; value: string; emoji?: string };
+const DEFAULT_PRS: PRRecord[] = [
+  { id: "bp", name: "Wyciskanie sztangi", value: "80 kg × 6", emoji: "🏋️" },
+  { id: "dl", name: "Martwy ciąg", value: "140 kg × 3", emoji: "💪" },
+  { id: "sq", name: "Przysiad", value: "120 kg × 5", emoji: "🦵" },
+  { id: "run5", name: "5 km bieg", value: "22:18", emoji: "🏃" },
+];
+
+function PRSection() {
+  const [prs, setPRs] = useState<PRRecord[]>(DEFAULT_PRS);
+  const [editing, setEditing] = useState<number | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_prs");
+      if (raw) setPRs(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const save = (next: PRRecord[]) => {
+    setPRs(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_prs", JSON.stringify(next));
+  };
   return (
-    <div className="rounded-2xl glass p-4">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Trophy className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs">{title}</span>
+    <>
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Rekordy & PR-y</h3>
+        <span className="text-[10px] text-muted-foreground">Kliknij, by edytować</span>
       </div>
-      <p className="mt-2 text-lg font-semibold">{value}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {prs.map((pr, i) => (
+          <button
+            key={i}
+            onClick={() => setEditing(i)}
+            className="rounded-2xl glass p-4 text-left transition active:scale-[0.98] hover:bg-white/[0.04]"
+          >
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-base">{pr.emoji ?? "🏆"}</span>
+              <span className="line-clamp-1 text-xs">{pr.name}</span>
+              <Pencil className="ml-auto h-3 w-3 opacity-60" />
+            </div>
+            <p className="mt-2 text-lg font-semibold">{pr.value || "—"}</p>
+          </button>
+        ))}
+      </div>
+      {editing !== null && (
+        <PREditor
+          pr={prs[editing]}
+          onClose={() => setEditing(null)}
+          onSave={(next) => {
+            const copy = [...prs];
+            copy[editing] = next;
+            save(copy);
+            setEditing(null);
+            toast.success("PR zaktualizowany 🏆");
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function PREditor({ pr, onClose, onSave }: { pr: PRRecord; onClose: () => void; onSave: (pr: PRRecord) => void }) {
+  const [name, setName] = useState(pr.name);
+  const [value, setValue] = useState(pr.value);
+  const [emoji, setEmoji] = useState(pr.emoji ?? "🏆");
+  const [q, setQ] = useState("");
+  const list = EXERCISES.filter((e) => e.name.toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+  const OTHER = [
+    { name: "5 km bieg", emoji: "🏃" }, { name: "10 km bieg", emoji: "🏃" },
+    { name: "Plank", emoji: "🧘" }, { name: "Wytrzymałość", emoji: "⏱️" },
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Edytuj rekord</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Nazwa rekordu</p>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Wartość (np. 100 kg × 5, 22:18)</p>
+            <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="120 kg × 3" className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Wybierz z biblioteki</p>
+            <div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+              <Search className="h-3.5 w-3.5 text-muted-foreground" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj ćwiczenia..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {list.map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => { setName(e.name); setEmoji(e.emoji); }}
+                  className="flex items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left hover:bg-white/[0.08]"
+                >
+                  <span className="text-lg">{e.emoji}</span>
+                  <span className="line-clamp-1 text-[11px]">{e.name}</span>
+                </button>
+              ))}
+              {OTHER.map((o) => (
+                <button key={o.name} onClick={() => { setName(o.name); setEmoji(o.emoji); }} className="flex items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left hover:bg-white/[0.08]">
+                  <span className="text-lg">{o.emoji}</span>
+                  <span className="text-[11px]">{o.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => onSave({ id: pr.id, name, value, emoji })}
+          className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"
+        >
+          Zapisz rekord
+        </button>
+      </div>
     </div>
   );
 }
