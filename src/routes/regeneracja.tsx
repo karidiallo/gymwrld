@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import { Moon, Brain, Wind, Plus, X, BookOpen, Sun, Footprints, Bath, Play, Pause, Square } from "lucide-react";
+import { Moon, Brain, Wind, Plus, X, BookOpen, Sun, Footprints, Bath, Play, Pause, Square, Pencil, Trash2 } from "lucide-react";
 import { addLog, removeLog, updateLog } from "@/lib/training-log";
 import { EntryActions } from "@/components/EntryActions";
 
@@ -23,11 +23,19 @@ function Regeneracja() {
   const [moods, setMoods] = useState<number[]>([]);
   const [active, setActive] = useState<{ type: MindType; targetMin: number; startedAt: number; paused: boolean; pausedAt?: number; elapsedBeforePause: number } | null>(null);
   const [editing, setEditing] = useState<MindEntry | null>(null);
+  const [journal, setJournal] = useState<{ id: string; ts: number; title: string; body: string }[]>([]);
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [editJournal, setEditJournal] = useState<{ id: string; ts: number; title: string; body: string } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
+    try { const raw = localStorage.getItem("gw_journal"); if (raw) setJournal(JSON.parse(raw)); } catch {}
   }, []);
+  const persistJournal = (next: typeof journal) => {
+    setJournal(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_journal", JSON.stringify(next));
+  };
   const persistMind = (next: MindEntry[]) => {
     setMind(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_mind", JSON.stringify(next));
