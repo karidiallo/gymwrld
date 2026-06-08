@@ -3,14 +3,17 @@ import { useState } from "react";
 import gymHero from "@/assets/gym-hero.jpg";
 import homeHero from "@/assets/home-hero.jpg";
 import outdoorHero from "@/assets/outdoor-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock } from "lucide-react";
+import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
+import womenHero from "@/assets/women-hero.jpg";
+import cutHero from "@/assets/cut-hero.jpg";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
   component: Trening,
 });
 
-type Cat = "silownia" | "dom" | "outdoor";
+type Cat = "silownia" | "kobiety" | "redukcja" | "dom" | "kalistenika" | "outdoor";
 
 function Trening() {
   const [cat, setCat] = useState<Cat>("silownia");
@@ -22,10 +25,25 @@ function Trening() {
       { title: "Pull Day · Plecy, biceps", meta: "6 ćwiczeń · 60 min" },
       { title: "Leg Day · Hipertrofia", meta: "5 ćwiczeń · 70 min" },
     ],
+    kobiety: [
+      { title: "Glute Builder · Pośladki & nogi", meta: "6 ćwiczeń · 45 min" },
+      { title: "Hourglass · Talia & brzuch", meta: "8 ćwiczeń · 35 min" },
+      { title: "Total Tone · Spalanie & ujędrnianie", meta: "10 ćwiczeń · 40 min" },
+    ],
+    redukcja: [
+      { title: "HIIT Burn · Intensywne spalanie", meta: "12 rund · 25 min · ~380 kcal" },
+      { title: "Cardio Strength Mix", meta: "9 ćwiczeń · 45 min · ~520 kcal" },
+      { title: "Fat Loss Circuit", meta: "8 stacji · 35 min · ~450 kcal" },
+    ],
     dom: [
       { title: "Kalistenika full body", meta: "8 ćwiczeń · 35 min" },
       { title: "Mobility & rozciąganie", meta: "10 sekwencji · 25 min" },
       { title: "Trening funkcjonalny", meta: "6 ćwiczeń · 40 min" },
+    ],
+    kalistenika: [
+      { title: "Push-Pull · Drążek i poręcze", meta: "7 ćwiczeń · 50 min" },
+      { title: "Skill Work · Muscle-up, planche", meta: "6 progresji · 60 min" },
+      { title: "Core & Lever · Front lever", meta: "8 ćwiczeń · 40 min" },
     ],
     outdoor: [
       { title: "Bieganie · Interwały 5×3 min", meta: "35 min · ~420 kcal" },
@@ -34,7 +52,23 @@ function Trening() {
     ],
   };
 
-  const heroes: Record<Cat, string> = { silownia: gymHero, dom: homeHero, outdoor: outdoorHero };
+  const heroes: Record<Cat, string> = {
+    silownia: gymHero,
+    kobiety: womenHero,
+    redukcja: cutHero,
+    dom: homeHero,
+    kalistenika: calisthenicsHero,
+    outdoor: outdoorHero,
+  };
+  const heroTitles: Record<Cat, { eyebrow: string; main: string; sub: string }> = {
+    silownia: { eyebrow: "Następny trening", main: "Push Day", sub: "Klatka i barki" },
+    kobiety: { eyebrow: "Polecane dla Ciebie", main: "Glute Builder", sub: "Pośladki & nogi" },
+    redukcja: { eyebrow: "Spalanie tłuszczu", main: "HIIT Burn", sub: "25 min · max efekt" },
+    dom: { eyebrow: "Trening w domu", main: "Full Body", sub: "Bez sprzętu" },
+    kalistenika: { eyebrow: "Mistrzostwo ciała", main: "Push-Pull", sub: "Drążek i poręcze" },
+    outdoor: { eyebrow: "Na świeżym powietrzu", main: "Interwały", sub: "Bieganie 5×3 min" },
+  };
+  const hero = heroTitles[cat];
   return (
     <main className="px-5 pt-6">
       <header>
@@ -47,8 +81,8 @@ function Trening() {
         <img src={heroes[cat]} alt="Trening" className="h-56 w-full object-cover" width={1280} height={896} loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
         <div className="absolute inset-x-5 bottom-5">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Następny trening</p>
-          <h2 className="mt-1 font-display text-3xl leading-none text-white">Push Day<br/><span className="text-gradient">Klatka i barki</span></h2>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">{hero.eyebrow}</p>
+          <h2 className="mt-1 font-display text-3xl leading-none text-white">{hero.main}<br/><span className="text-gradient">{hero.sub}</span></h2>
           <div className="mt-3 flex gap-3 text-xs text-white/80">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Clock className="h-3 w-3" /> 55 min</span>
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Flame className="h-3 w-3" /> 412 kcal</span>
@@ -63,7 +97,10 @@ function Trening() {
       {/* Categories */}
       <div className="mt-6 grid grid-cols-3 gap-2">
         <CatBtn active={cat === "silownia"} onClick={() => setCat("silownia")} icon={<Dumbbell className="h-4 w-4" />} label="Siłownia" />
+        <CatBtn active={cat === "kobiety"} onClick={() => setCat("kobiety")} icon={<Heart className="h-4 w-4" />} label="Dla kobiet" />
+        <CatBtn active={cat === "redukcja"} onClick={() => setCat("redukcja")} icon={<Flame className="h-4 w-4" />} label="Redukcja" />
         <CatBtn active={cat === "dom"} onClick={() => setCat("dom")} icon={<Home className="h-4 w-4" />} label="Dom" />
+        <CatBtn active={cat === "kalistenika"} onClick={() => setCat("kalistenika")} icon={<Activity className="h-4 w-4" />} label="Kalistenika" />
         <CatBtn active={cat === "outdoor"} onClick={() => setCat("outdoor")} icon={<Mountain className="h-4 w-4" />} label="Outdoor" />
       </div>
 
