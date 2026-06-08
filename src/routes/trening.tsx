@@ -372,34 +372,58 @@ function TreadmillLog() {
   const [kcal, setKcal] = useState<number | "">("");
   const [incline, setIncline] = useState<number | "">("");
   const [time, setTime] = useState<number | "">("");
-  const [entries, setEntries] = useState<{ km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
+  const [entries, setEntries] = useState<{ id: string; km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const raw = localStorage.getItem("gw_treadmill");
-      if (raw) setEntries(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setEntries(parsed.map((e: any) => ({ id: e.id ?? String(e.ts), ...e })));
+      }
     } catch {}
   }, []);
+
+  const persist = (next: typeof entries) => {
+    setEntries(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_treadmill", JSON.stringify(next));
+  };
 
   const save = () => {
     if (!km || !time) {
       toast.error("Podaj dystans i czas");
       return;
     }
-    const entry = {
-      km: Number(km),
-      kcal: Number(kcal) || 0,
-      incline: Number(incline) || 0,
-      time: Number(time),
-      ts: Date.now(),
-    };
-    const next = [entry, ...entries];
-    setEntries(next);
-    if (typeof window !== "undefined") localStorage.setItem("gw_treadmill", JSON.stringify(next));
+    const kmN = Number(km), timeN = Number(time), kcalN = Number(kcal) || Math.round(Number(km) * 60);
+    if (editingId) {
+      const next = entries.map((e) =>
+        e.id === editingId ? { ...e, km: kmN, kcal: kcalN, incline: Number(incline) || 0, time: timeN } : e
+      );
+      persist(next);
+      updateLog(editingId, { kcal: kcalN, minutes: timeN, title: `Bieżnia ${kmN} km`, meta: { km: kmN, incline: Number(incline) || 0 } });
+      toast.success("Wpis zaktualizowany");
+    } else {
+      const log = addLog({ kind: "biezia", title: `Bieżnia ${kmN} km`, kcal: kcalN, minutes: timeN, meta: { km: kmN, incline: Number(incline) || 0 } });
+      const entry = { id: log.id, km: kmN, kcal: kcalN, incline: Number(incline) || 0, time: timeN, ts: log.ts };
+      persist([entry, ...entries]);
+      toast.success(`Bieżnia · ${kmN} km zapisane`);
+    }
     setKm(""); setKcal(""); setIncline(""); setTime("");
+    setEditingId(null);
     setOpen(false);
-    toast.success(`Bieżnia · ${entry.km} km zapisane`);
+  };
+
+  const startEdit = (e: typeof entries[number]) => {
+    setKm(e.km); setKcal(e.kcal); setIncline(e.incline); setTime(e.time);
+    setEditingId(e.id);
+    setOpen(true);
+  };
+  const remove = (id: string) => {
+    persist(entries.filter((e) => e.id !== id));
+    removeLog(id);
+    toast.success("Wpis usunięty");
   };
 
   return (
@@ -425,7 +449,7 @@ function TreadmillLog() {
         ) : (
           <div className="space-y-2.5">
             {entries.map((e) => (
-              <div key={e.ts} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
+              <div key={e.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--lime)]/15 text-[var(--lime)]">
                   <Activity className="h-4 w-4" />
                 </div>
@@ -434,6 +458,7 @@ function TreadmillLog() {
                   <p className="text-[11px] text-muted-foreground">Nachylenie {e.incline}% · {e.kcal} kcal</p>
                 </div>
                 <p className="text-[10px] text-muted-foreground">{new Date(e.ts).toLocaleDateString("pl")}</p>
+                <EntryActions onEdit={() => startEdit(e)} onDelete={() => remove(e.id)} />
               </div>
             ))}
           </div>
@@ -447,9 +472,9 @@ function TreadmillLog() {
             <div className="mt-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Cardio</p>
-                <h3 className="font-display text-2xl">Bieżnia</h3>
+                <h3 className="font-display text-2xl">{editingId ? "Edytuj bieżnię" : "Bieżnia"}</h3>
               </div>
-              <button onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+              <button onClick={() => { setOpen(false); setEditingId(null); }} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <TextNumField label="Dystans (km)" value={km} onChange={setKm} placeholder="5.0" step="0.1" />
@@ -458,7 +483,7 @@ function TreadmillLog() {
               <TextNumField label="Kalorie (kcal)" value={kcal} onChange={setKcal} placeholder="320" />
             </div>
             <button onClick={save} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] py-3.5 text-sm font-semibold text-background glow-primary">
-              Zapisz bieżnię
+              {editingId ? "Zapisz zmiany" : "Zapisz bieżnię"}
             </button>
           </div>
         </div>
