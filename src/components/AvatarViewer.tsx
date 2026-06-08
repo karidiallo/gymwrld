@@ -2,9 +2,10 @@ import { useRef, useState } from "react";
 import { X, Lock } from "lucide-react";
 import { type AvatarConfig } from "./AvatarSvg";
 import { AvatarModel } from "./AvatarModel";
+import sanctuary from "@/assets/sanctuary.jpg";
 
 const ROOMS = [
-  { id: "starter", name: "Pokój startowy", bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
+  { id: "starter", name: "Apartament startowy", bgImg: sanctuary, bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
   { id: "loft", name: "Loft Premium", bg: "linear-gradient(180deg,#0e1d2a 0%,#0a1320 70%,#000 100%)", floor: "#1d2f44", locked: true, req: "Lvl 20" },
   { id: "penthouse", name: "Penthouse", bg: "linear-gradient(180deg,#2a0e1d 0%,#1a0814 70%,#000 100%)", floor: "#3d1828", locked: true, req: "Lvl 40" },
   { id: "skyhouse", name: "Sky House", bg: "linear-gradient(180deg,#0e2a23 0%,#0a1a18 70%,#000 100%)", floor: "#1d3d33", locked: true, req: "Lvl 60" },
@@ -25,25 +26,13 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
 
   return (
     <div className="fixed inset-0 z-[60] bg-background">
-      <div className="absolute inset-0" style={{ background: room.bg }} />
-      {/* large window */}
-      <div aria-hidden className="absolute left-[8%] right-[8%] top-[10%] bottom-[44%] rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent">
-        <div className="absolute inset-y-0 left-1/2 w-px bg-white/10" />
-        <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
-      </div>
-      {/* skyline silhouette */}
-      <div aria-hidden className="absolute inset-x-[10%] top-[36%] h-10 opacity-30" style={{
-        background: "linear-gradient(180deg, transparent, #000), repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 8px, transparent 8px 22px)",
-      }} />
-      {/* horizon line */}
-      <div className="absolute inset-x-0 bottom-40 h-px bg-white/15" />
-      {/* floor with perspective */}
-      <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: `linear-gradient(180deg, transparent, ${room.floor})` }} />
-      <div className="absolute inset-x-0 bottom-0 h-40 opacity-40" style={{
-        backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
-        backgroundSize: "40px 100%",
-      }} />
-      {/* room glow */}
+      {/* Room background — image when available, else gradient */}
+      {room.bgImg ? (
+        <img src={room.bgImg} alt={room.name} className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <div className="absolute inset-0" style={{ background: room.bg }} />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/3 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[var(--magenta)]/10 blur-3xl" />
 
       {/* close */}

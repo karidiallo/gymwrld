@@ -10,6 +10,49 @@ export type TrainingLog = {
 };
 
 const KEY = "gw_training_log";
+const PROFILE_KEY = "gw_profile";
+
+/** Award XP to user profile, handle level up. Triggered by any training log. */
+export function awardXp(amount: number, reason?: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    const p = raw ? JSON.parse(raw) : {};
+    const prevXp = Number(p.xp ?? 0);
+    const prevLvl = Number(p.level ?? 1);
+    let xp = prevXp + amount;
+    let lvl = prevLvl;
+    while (xp >= 2000) { xp -= 2000; lvl += 1; }
+    const stats = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
+    const next = { ...p, xp, level: lvl, stats };
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event("gw_profile_update"));
+    if (lvl > prevLvl) window.dispatchEvent(new CustomEvent("gw_levelup", { detail: { lvl } }));
+  } catch {}
+}
+
+const XP_PER_KIND: Record<TrainingKind, number> = {
+  silownia: 120, biezia: 80, bieg: 100, street: 90, mind: 30, sen: 40,
+};
+const STAT_BUMP: Record<TrainingKind, Partial<Record<"sila"|"kondycja"|"dieta"|"sen"|"rozwoj", number>>> = {
+  silownia: { sila: 4, rozwoj: 1 },
+  biezia: { kondycja: 3 },
+  bieg: { kondycja: 4 },
+  street: { sila: 2, kondycja: 2 },
+  mind: { rozwoj: 2 },
+  sen: { sen: 5 },
+};
+function bumpStats(kind: TrainingKind) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    const p = raw ? JSON.parse(raw) : {};
+    const s = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
+    for (const [k, v] of Object.entries(STAT_BUMP[kind])) s[k] = Math.min(100, (s[k] ?? 0) + (v as number));
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...p, stats: s }));
+    window.dispatchEvent(new Event("gw_profile_update"));
+  } catch {}
+}
 
 export function readLogs(): TrainingLog[] {
   if (typeof window === "undefined") return [];
@@ -37,6 +80,8 @@ export function addLog(log: Omit<TrainingLog, "id" | "ts"> & { ts?: number; id?:
     meta: log.meta,
   };
   writeLogs([next, ...readLogs()]);
+  awardXp(XP_PER_KIND[next.kind] ?? 30);
+  bumpStats(next.kind);
   return next;
 }
 

@@ -18,10 +18,10 @@ function Dieta() {
   const [water, setWater] = useState(6); // glasses out of 10 (250ml each => 2.5L cel)
   const [toilet, setToilet] = useState({ pee: 4, poop: 1 });
   const [meals, setMeals] = useState<Meal[]>([
-    { id: "m1", icon: "coffee", name: "Śniadanie", items: "Owsianka, jagody, masło orzechowe", kcal: 520, p: 22, c: 68, f: 18 },
-    { id: "m2", icon: "lunch", name: "Obiad", items: "Kurczak, ryż basmati, brokuły", kcal: 680, p: 52, c: 78, f: 14 },
+    { id: "m1", icon: "coffee", name: "Śniadanie", items: "", kcal: 0 },
+    { id: "m2", icon: "lunch", name: "Obiad", items: "", kcal: 0 },
     { id: "m3", icon: "soup", name: "Kolacja", items: "", kcal: 0 },
-    { id: "m4", icon: "snack", name: "Przekąski", items: "Jogurt grecki, banan", kcal: 420, p: 28, c: 48, f: 10 },
+    { id: "m4", icon: "snack", name: "Przekąski", items: "", kcal: 0 },
   ]);
   const eaten = meals.reduce((s, m) => s + m.kcal, 0);
   const goal = 2400;
