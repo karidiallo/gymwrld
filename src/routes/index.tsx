@@ -5,7 +5,6 @@ import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
-import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -23,7 +22,6 @@ function Index() {
   const navigate = useNavigate();
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [customOpen, setCustomOpen] = useState(false);
   const [profile, setProfile] = useState<{ name?: string; level?: number; xp?: number; streak?: number }>({});
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
@@ -106,17 +104,17 @@ function Index() {
             />
           </button>
 
-          {/* Headline */}
-          <div className="pointer-events-none absolute inset-x-5 top-5 z-10">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-              Witaj{profile.name ? " ponownie" : ""}{profile.name ? `, ${profile.name}` : ""}
+          {/* Headline - centered, above face area on mobile */}
+          <div className="pointer-events-none absolute inset-x-0 top-4 z-10 px-5 text-center">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-white/70">
+              Witaj{profile.name ? ` ponownie, ${profile.name}` : ""}
             </p>
-            <h2 className="mt-1 font-display text-3xl leading-tight">
-              Zbuduj <span className="text-gradient">najlepszą wersję</span> siebie
+            <h2 className="mt-1 font-display text-[28px] leading-[1.05]">
+              Buduj <span className="text-gradient">najlepszą wersję</span><br/>siebie
             </h2>
           </div>
 
-          {/* Bottom overlay: level badge + CTA */}
+          {/* Bottom overlay: level badge */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2.5">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom średni · Lvl {profile.level ?? 1}</p>
@@ -126,10 +124,10 @@ function Index() {
               </div>
             </div>
             <button
-              onClick={() => setCustomOpen(true)}
+              onClick={() => setViewerOpen(true)}
               className="glass shrink-0 rounded-full px-4 py-2.5 text-xs font-medium glow-primary"
             >
-              Dostosuj postać
+              Twoje pokoje
             </button>
           </div>
         </div>
@@ -181,25 +179,11 @@ function Index() {
 
       {/* Last activity */}
       <SectionTitle title="Ostatnia aktywność" />
-      <div className="space-y-2.5">
-        <Activity to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Push Day · Klatka, barki" meta="Wczoraj · 58 min · 412 kcal" />
-        <Activity to="/trening" icon={<Footprints className="h-4 w-4" />} title="Spacer poranny" meta="Wczoraj · 32 min · 2 410 kroków" />
-        <Activity to="/profil" icon={<Trophy className="h-4 w-4" />} title="Nowy rekord: Wyciskanie 80 kg × 6" meta="2 dni temu" />
+      <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
+        Brak aktywności · zaloguj pierwszy trening
       </div>
 
       {viewerOpen && <AvatarViewer cfg={avatarCfg} onClose={() => setViewerOpen(false)} />}
-      {customOpen && (
-        <AvatarCustomizer
-          initial={avatarCfg}
-          onClose={() => setCustomOpen(false)}
-          onSave={(cfg) => {
-            setAvatarCfg(cfg);
-            if (typeof window !== "undefined") localStorage.setItem("gw_avatar", JSON.stringify(cfg));
-            toast.success("Wygląd zaktualizowany ✨");
-            setCustomOpen(false);
-          }}
-        />
-      )}
     </main>
   );
 }
