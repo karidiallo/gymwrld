@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
-import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/onboarding")({
@@ -44,7 +43,7 @@ function Onboarding() {
     navigate({ to: "/" });
   };
 
-  const total = 7;
+  const total = 6;
   const progress = ((step + 1) / total) * 100;
 
   // First screen: pure black, huge logo only.
@@ -101,9 +100,6 @@ function Onboarding() {
           />
         )}
         {step === 3 && (
-          <StepAvatar avatar={avatar} setAvatar={setAvatar} onNext={() => setStep(4)} />
-        )}
-        {step === 4 && (
           <StepChoice
             title="Jaki masz cel?"
             subtitle="Dopasujemy plan pod Ciebie."
@@ -115,11 +111,11 @@ function Onboarding() {
             ]}
             value={goal}
             onChange={(v) => setGoal(v as Goal)}
-            onNext={() => setStep(5)}
+            onNext={() => setStep(4)}
             canNext={!!goal}
           />
         )}
-        {step === 5 && (
+        {step === 4 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -130,11 +126,11 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(6)}
+            onNext={() => setStep(5)}
             canNext={!!level}
           />
         )}
-        {step === 6 && (
+        {step === 5 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
@@ -193,19 +189,6 @@ function StepName({
   );
 }
 
-function StepAvatar({ avatar, setAvatar, onNext }: { avatar: AvatarConfig; setAvatar: (a: AvatarConfig) => void; onNext: () => void }) {
-  return (
-    <div>
-      <div>
-        <h1 className="font-display text-3xl leading-tight">Stwórz <span className="text-gradient">swój wygląd</span></h1>
-        <p className="mt-2 text-sm text-muted-foreground">Skóra, fryzura, sylwetka, ciuchy — możesz zmienić to później.</p>
-      </div>
-      <div className="mt-4">
-        <AvatarCustomizer initial={avatar} embedded onSave={(cfg) => { setAvatar(cfg); onNext(); }} />
-      </div>
-    </div>
-  );
-}
 
 function StepPersonal({
   age, setAge, gender, setGender, onNext,
