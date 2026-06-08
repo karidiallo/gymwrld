@@ -173,6 +173,46 @@ function Regeneracja() {
         ))}
       </div>
 
+      {/* Health Journal */}
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Dziennik zdrowia</h3>
+        <button onClick={() => setJournalOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+          <Plus className="h-3 w-3" /> Wpis
+        </button>
+      </div>
+      {(() => {
+        const mindWithNotes = mind.filter((m) => m.note && m.note.trim() && m.note !== "Sesja" && m.note !== "Szybka sesja" && m.note !== "Ukończona sesja");
+        const all = [
+          ...journal,
+          ...mindWithNotes.map((m) => ({ id: m.id, ts: Date.now(), title: m.type, body: m.note ?? "", _mind: true as const })),
+        ].sort((a, b) => b.ts - a.ts);
+        if (all.length === 0) return (
+          <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
+            Brak wpisów · zapisz, jak się dziś czujesz
+          </div>
+        );
+        return (
+          <div className="space-y-2.5">
+            {all.map((e: any) => (
+              <div key={e.id} className="flex items-start gap-3 rounded-2xl glass p-3.5">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--violet)]/15 text-[var(--violet)]"><BookOpen className="h-4 w-4" /></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium capitalize">{e.title}</p>
+                  <p className="mt-0.5 text-[12px] text-muted-foreground whitespace-pre-wrap">{e.body}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground/70">{new Date(e.ts).toLocaleString("pl")}</p>
+                </div>
+                {!e._mind && (
+                  <div className="flex flex-col gap-1">
+                    <button onClick={() => setEditJournal(e)} aria-label="Edytuj" className="grid h-7 w-7 place-items-center rounded-full bg-white/5"><Pencil className="h-3 w-3" /></button>
+                    <button onClick={() => persistJournal(journal.filter((j) => j.id !== e.id))} aria-label="Usuń" className="grid h-7 w-7 place-items-center rounded-full bg-white/5 hover:bg-red-500/30"><Trash2 className="h-3 w-3" /></button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       <h3 className="mb-3 mt-7 text-lg font-semibold">Nastrój</h3>
       <div className="rounded-2xl glass p-4">
         <div className="flex items-center justify-between">
@@ -244,7 +284,49 @@ function Regeneracja() {
       {editing && (
         <EditMindSheet entry={editing} onClose={() => setEditing(null)} onSave={saveEdit} />
       )}
+      {journalOpen && (
+        <JournalSheet
+          onClose={() => setJournalOpen(false)}
+          onSave={(title, body) => {
+            persistJournal([{ id: String(Date.now()), ts: Date.now(), title, body }, ...journal]);
+            setJournalOpen(false);
+            toast.success("Wpis zapisany");
+          }}
+        />
+      )}
+      {editJournal && (
+        <JournalSheet
+          initial={editJournal}
+          onClose={() => setEditJournal(null)}
+          onSave={(title, body) => {
+            persistJournal(journal.map((j) => j.id === editJournal.id ? { ...j, title, body } : j));
+            setEditJournal(null);
+            toast.success("Wpis zaktualizowany");
+          }}
+        />
+      )}
     </main>
+  );
+}
+
+function JournalSheet({ initial, onClose, onSave }: { initial?: { title: string; body: string }; onClose: () => void; onSave: (title: string, body: string) => void }) {
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [body, setBody] = useState(initial?.body ?? "");
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">{initial ? "Edytuj wpis" : "Nowy wpis"}</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Tytuł (np. Jak się czuję)" className="mt-4 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground" />
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Opisz myśli, samopoczucie, refleksje..." rows={6} className="mt-2 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground" />
+        <button onClick={() => title.trim() && onSave(title.trim(), body)} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--violet)] via-[var(--magenta)] to-[var(--orange)] py-3.5 text-sm font-semibold text-background glow-primary">
+          Zapisz wpis
+        </button>
+      </div>
+    </div>
   );
 }
 
