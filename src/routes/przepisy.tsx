@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import foodHero from "@/assets/food-hero.jpg";
-import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2 } from "lucide-react";
 
-type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe";
+type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska";
 
 type Recipe = {
   id: string;
@@ -58,6 +58,65 @@ const RECIPES: Recipe[] = [
   { id: "wege-burger", title: "Wege burger z ciecierzycą", kcal: 460, time: 30, cat: "wege", tags: ["wege"], macro: { p: 22, c: 54, f: 14 }, emoji: "🍔",
     ingredients: ["Puszka ciecierzycy", "Cebula, czosnek", "Bułka pełnoziarnista", "Sałata, pomidor"],
     steps: ["Zmiksuj ciecierzycę z cebulą.", "Uformuj kotlety.", "Smaż po 4 min z każdej strony.", "Złóż burgera."] },
+  // —— więcej przekąsek
+  { id: "edamame", title: "Edamame z solą morską", kcal: 180, time: 6, cat: "przekaski", tags: ["wege", "bialkowe"], macro: { p: 18, c: 14, f: 8 }, emoji: "🫛",
+    ingredients: ["200g edamame", "Sól morska", "Sok z limonki"],
+    steps: ["Zagotuj edamame 5 min.", "Posyp solą i skrop limonką."] },
+  { id: "skyr-mango", title: "Skyr z mango", kcal: 230, time: 3, cat: "przekaski", tags: ["bialkowe"], macro: { p: 22, c: 28, f: 2 }, emoji: "🥭",
+    ingredients: ["200g skyru", "1/2 mango", "Wiórki kokosowe"],
+    steps: ["Wymieszaj skyr z mango.", "Posyp wiórkami."] },
+  { id: "ryzowe-wafle", title: "Wafle ryżowe z twarożkiem", kcal: 210, time: 4, cat: "przekaski", tags: ["szybkie"], macro: { p: 18, c: 26, f: 4 }, emoji: "🍘",
+    ingredients: ["2 wafle ryżowe", "100g twarożku", "Rzodkiewka, szczypiorek"],
+    steps: ["Posmaruj wafle twarożkiem.", "Udekoruj rzodkiewką."] },
+  // —— więcej wege
+  { id: "buddha-bowl", title: "Buddha bowl", kcal: 520, time: 25, cat: "wege", tags: ["wege", "bowl"], macro: { p: 22, c: 68, f: 14 }, emoji: "🥙",
+    ingredients: ["Komosa ryżowa", "Ciecierzyca", "Awokado", "Pieczone warzywa", "Tahini"],
+    steps: ["Ugotuj komosę.", "Upiecz warzywa 20 min.", "Złóż bowl, polej tahini."] },
+  { id: "soczewicowa", title: "Zupa z czerwonej soczewicy", kcal: 360, time: 25, cat: "wege", tags: ["wege"], macro: { p: 20, c: 48, f: 8 }, emoji: "🍲",
+    ingredients: ["150g czerwonej soczewicy", "Marchew, cebula, czosnek", "Mleczko kokosowe", "Curry"],
+    steps: ["Podsmaż warzywa.", "Dodaj soczewicę i bulion.", "Gotuj 20 min.", "Dolej mleczko, dopraw."] },
+  // —— więcej białkowych
+  { id: "wolowina-ryz", title: "Wołowina po orientalnu z ryżem", kcal: 580, time: 25, cat: "bialkowe", tags: ["bialkowe", "azjatycka"], macro: { p: 48, c: 60, f: 14 }, emoji: "🥩",
+    ingredients: ["200g wołowiny", "100g ryżu", "Brokuł", "Sos sojowy, czosnek, imbir"],
+    steps: ["Marynuj wołowinę 10 min.", "Smaż 5 min na woku.", "Dodaj warzywa.", "Podaj z ryżem."] },
+  { id: "indyk-quinoa", title: "Indyk z quinoa i szpinakiem", kcal: 520, time: 22, cat: "bialkowe", tags: ["bialkowe"], macro: { p: 50, c: 50, f: 10 }, emoji: "🦃",
+    ingredients: ["200g indyka", "80g quinoa", "Szpinak, czosnek"],
+    steps: ["Smaż indyka 6 min.", "Quinoa ugotuj.", "Szpinak podduś z czosnkiem."] },
+  // —— Włoska
+  { id: "pasta-pesto", title: "Makaron z pesto i kurczakiem", kcal: 620, time: 18, cat: "obiady", tags: ["wloska"], macro: { p: 42, c: 68, f: 18 }, emoji: "🍝",
+    ingredients: ["100g makaronu pełnoziarnistego", "150g kurczaka", "2 łyżki pesto", "Pomidorki koktajlowe", "Parmezan"],
+    steps: ["Ugotuj makaron al dente.", "Smaż kurczaka 6 min.", "Wymieszaj z pesto i pomidorkami."] },
+  { id: "caprese", title: "Caprese z mozzarellą", kcal: 380, time: 5, cat: "kolacje", tags: ["wloska", "wege"], macro: { p: 22, c: 12, f: 28 }, emoji: "🍅",
+    ingredients: ["Mozzarella di Bufala", "Pomidory", "Bazylia", "Oliwa extra vergine"],
+    steps: ["Pokrój pomidory i mozzarellę.", "Ułóż naprzemiennie.", "Skrop oliwą, posyp bazylią."] },
+  // —— Azjatycka
+  { id: "ramen-light", title: "Ramen z kurczakiem", kcal: 540, time: 25, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 62, f: 14 }, emoji: "🍜",
+    ingredients: ["Makaron ramen", "150g kurczaka", "Bulion miso", "Jajko, szczypiorek, nori"],
+    steps: ["Zagotuj bulion.", "Dodaj makaron.", "Włóż kurczaka i jajko.", "Posyp nori i szczypiorkiem."] },
+  { id: "sushi-bowl", title: "Sushi bowl z łososiem", kcal: 580, time: 20, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 64, f: 18 }, emoji: "🍣",
+    ingredients: ["150g surowego łososia", "100g ryżu sushi", "Awokado, ogórek, edamame", "Sojowa, sezam"],
+    steps: ["Ugotuj ryż.", "Pokrój łososia.", "Złóż bowl z warzywami i sosem."] },
+  // —— Meksykańska
+  { id: "burrito-bowl", title: "Burrito bowl", kcal: 640, time: 20, cat: "obiady", tags: ["meksykanska"], macro: { p: 42, c: 72, f: 18 }, emoji: "🌯",
+    ingredients: ["150g kurczaka", "Czarna fasola", "Ryż, kukurydza, salsa, guacamole"],
+    steps: ["Smaż kurczaka z przyprawami Tex-Mex.", "Złóż bowl.", "Polej salsą i guacamole."] },
+  { id: "tacos-fish", title: "Tacos z rybą", kcal: 480, time: 18, cat: "kolacje", tags: ["meksykanska"], macro: { p: 32, c: 48, f: 16 }, emoji: "🌮",
+    ingredients: ["3 tortille kukurydziane", "180g białej ryby", "Kapusta pekińska, limonka, salsa"],
+    steps: ["Smaż rybę 5 min.", "Złóż tacos: ryba, kapusta, salsa.", "Skrop limonką."] },
+  // —— Śródziemnomorska
+  { id: "grek-salad", title: "Sałatka grecka XL", kcal: 420, time: 8, cat: "kolacje", tags: ["srodziemnomorska", "wege"], macro: { p: 16, c: 24, f: 28 }, emoji: "🥗",
+    ingredients: ["Pomidor, ogórek, papryka, oliwki", "Feta", "Cebula czerwona, oregano", "Oliwa"],
+    steps: ["Pokrój warzywa.", "Dodaj fetę i oliwki.", "Polej oliwą, posyp oregano."] },
+  { id: "hummus-pita", title: "Hummus z pitą i warzywami", kcal: 460, time: 10, cat: "obiady", tags: ["srodziemnomorska", "wege"], macro: { p: 18, c: 60, f: 16 }, emoji: "🫓",
+    ingredients: ["150g hummusu", "2 pity pełnoziarniste", "Marchew, ogórek, papryka"],
+    steps: ["Podgrzej pity.", "Pokrój warzywa.", "Podaj z hummusem."] },
+  // —— Polska
+  { id: "schab-kasza", title: "Schab pieczony z kaszą", kcal: 620, time: 40, cat: "obiady", tags: ["polska"], macro: { p: 48, c: 56, f: 18 }, emoji: "🍖",
+    ingredients: ["200g schabu", "80g kaszy gryczanej", "Surówka z kapusty"],
+    steps: ["Schab przypraw i piecz 30 min w 180°C.", "Ugotuj kaszę.", "Podaj z surówką."] },
+  { id: "rosolek", title: "Rosół z makaronem", kcal: 340, time: 60, cat: "obiady", tags: ["polska"], macro: { p: 26, c: 38, f: 8 }, emoji: "🍜",
+    ingredients: ["Mięso na rosół", "Włoszczyzna", "Makaron, natka pietruszki"],
+    steps: ["Gotuj wywar 50 min.", "Dodaj makaron.", "Podaj z natką."] },
 ];
 
 const CATS: { id: RecipeCat; label: string; icon: React.ReactNode }[] = [
@@ -68,6 +127,14 @@ const CATS: { id: RecipeCat; label: string; icon: React.ReactNode }[] = [
   { id: "przekaski", label: "Przekąski", icon: <Cookie className="h-3.5 w-3.5" /> },
   { id: "wege", label: "Wege", icon: <Leaf className="h-3.5 w-3.5" /> },
   { id: "bialkowe", label: "Białkowe", icon: <Heart className="h-3.5 w-3.5" /> },
+];
+
+const CUISINES: { id: Exclude<RecipeCat, "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe">; label: string; emoji: string; gradient: string }[] = [
+  { id: "wloska", label: "Włoska", emoji: "🇮🇹", gradient: "from-[#0c8e3a]/40 via-white/10 to-[#cd2026]/40" },
+  { id: "azjatycka", label: "Azjatycka", emoji: "🥢", gradient: "from-[#cd2026]/40 via-[var(--orange)]/30 to-[#1a1a1a]/40" },
+  { id: "meksykanska", label: "Meksykańska", emoji: "🌶️", gradient: "from-[#006847]/40 via-[var(--lime)]/30 to-[#ce1126]/40" },
+  { id: "srodziemnomorska", label: "Śródziemnomorska", emoji: "🫒", gradient: "from-[#0072c6]/40 via-[var(--lime)]/20 to-[#ffd200]/40" },
+  { id: "polska", label: "Polska", emoji: "🇵🇱", gradient: "from-white/20 via-white/5 to-[#dc143c]/40" },
 ];
 
 export const Route = createFileRoute("/przepisy")({
@@ -85,6 +152,9 @@ function Przepisy() {
   const list = useMemo(() => {
     return RECIPES.filter((r) => {
       if (cat === "bialkowe") return r.tags.includes("bialkowe");
+      if (cat === "wloska" || cat === "azjatycka" || cat === "meksykanska" || cat === "srodziemnomorska" || cat === "polska") {
+        return r.tags.includes(cat);
+      }
       if (cat !== "all" && r.cat !== cat) return false;
       if (q && !r.title.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
@@ -128,6 +198,34 @@ function Przepisy() {
             >
               {c.icon}
               {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Cuisines banners */}
+      <div className="mt-5">
+        <p className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <Globe2 className="h-3 w-3" /> Kuchnie świata
+        </p>
+        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+          {CUISINES.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setCat(c.id)}
+              className={`relative h-24 w-44 shrink-0 overflow-hidden rounded-2xl border text-left transition ${
+                cat === c.id ? "border-[var(--lime)] ring-1 ring-[var(--lime)] glow-primary" : "border-white/10"
+              }`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient}`} />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="relative flex h-full flex-col justify-between p-3">
+                <span className="text-2xl">{c.emoji}</span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-white/70">Kuchnia</p>
+                  <p className="font-display text-base leading-tight text-white">{c.label}</p>
+                </div>
+              </div>
             </button>
           ))}
         </div>
