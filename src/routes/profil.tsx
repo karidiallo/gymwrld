@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import avatar from "@/assets/avatar.png";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Target } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Target, Scale, Ruler, Pencil, TrendingDown, X } from "lucide-react";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Profil — GymWrld" }] }),
@@ -8,6 +10,25 @@ export const Route = createFileRoute("/profil")({
 });
 
 function Profil() {
+  const [open, setOpen] = useState(false);
+  const [body, setBody] = useState({
+    weight: 78.4, height: 182, chest: 102, waist: 84, hips: 98, biceps: 38, thigh: 58,
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem("gw_body");
+    if (raw) try { setBody({ ...body, ...JSON.parse(raw) }); } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveBody = (next: typeof body) => {
+    setBody(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_body", JSON.stringify(next));
+    toast.success("Zaktualizowano pomiary");
+    setOpen(false);
+  };
+
   return (
     <main className="px-5 pt-6">
       <header className="flex items-center justify-between">
@@ -53,6 +74,38 @@ function Profil() {
         </div>
       </section>
 
+      {/* Body measurements */}
+      <div className="mb-3 mt-7 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Ciało & pomiary</h3>
+        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+          <Pencil className="h-3 w-3" /> Edytuj
+        </button>
+      </div>
+      <section className="rounded-3xl glass p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--magenta)]/15 text-[var(--magenta)]">
+              <Scale className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-display text-3xl leading-none">{body.weight.toFixed(1)} <span className="text-sm text-muted-foreground">kg</span></p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Waga · zaktualizowano dziś</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2.5 py-1 text-[10px] font-semibold text-[var(--lime)]">
+            <TrendingDown className="h-3 w-3" /> -1.2 kg / 30 dni
+          </span>
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <BodyStat label="Wzrost" value={`${body.height} cm`} />
+          <BodyStat label="Klatka" value={`${body.chest} cm`} />
+          <BodyStat label="Talia" value={`${body.waist} cm`} />
+          <BodyStat label="Biodra" value={`${body.hips} cm`} />
+          <BodyStat label="Biceps" value={`${body.biceps} cm`} />
+          <BodyStat label="Udo" value={`${body.thigh} cm`} />
+        </div>
+      </section>
+
       {/* Quests */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Dzienne questy</h3>
       <div className="space-y-2.5">
@@ -92,6 +145,8 @@ function Profil() {
           </div>
         ))}
       </div>
+
+      {open && <BodySheet body={body} onSave={saveBody} onClose={() => setOpen(false)} />}
     </main>
   );
 }
@@ -129,5 +184,60 @@ function Collect({ icon, label, count }: { icon: React.ReactNode; label: string;
       <p className="mt-2 text-[11px] font-medium">{label}</p>
       <p className="text-[10px] text-muted-foreground">{count} szt.</p>
     </button>
+  );
+}
+
+function BodyStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/[0.03] p-2.5">
+      <p className="font-display text-base leading-none">{value}</p>
+      <p className="mt-1 text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function BodySheet({ body, onSave, onClose }: { body: any; onSave: (b: any) => void; onClose: () => void }) {
+  const [s, setS] = useState(body);
+  const fields: { key: keyof typeof body; label: string; unit: string; icon: React.ReactNode }[] = [
+    { key: "weight", label: "Waga", unit: "kg", icon: <Scale className="h-4 w-4" /> },
+    { key: "height", label: "Wzrost", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+    { key: "chest", label: "Klatka", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+    { key: "waist", label: "Talia", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+    { key: "hips", label: "Biodra", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+    { key: "biceps", label: "Biceps", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+    { key: "thigh", label: "Udo", unit: "cm", icon: <Ruler className="h-4 w-4" /> },
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Pomiary ciała</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {fields.map((f) => (
+            <label key={String(f.key)} className="rounded-2xl bg-white/5 p-3">
+              <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                {f.icon}{f.label} ({f.unit})
+              </span>
+              <input
+                type="number"
+                step={f.key === "weight" ? "0.1" : "1"}
+                value={s[f.key]}
+                onChange={(e) => setS({ ...s, [f.key]: parseFloat(e.target.value) || 0 })}
+                className="mt-1 w-full bg-transparent font-display text-2xl outline-none"
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          onClick={() => onSave(s)}
+          className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"
+        >
+          Zapisz pomiary
+        </button>
+      </div>
+    </div>
   );
 }

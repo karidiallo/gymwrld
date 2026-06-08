@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
 import avatar from "@/assets/avatar.png";
-import logo from "@/assets/logo.png";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -81,7 +81,7 @@ function Index() {
           {/* Top overlay: branding + tagline */}
           <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <img src={logo} alt="GymWrld" className="h-7 w-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]" />
+              <img src={logoAsset.url} alt="GymWrld" className="h-8 w-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]" />
               <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1 text-[10px]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
                 Sanktuarium
