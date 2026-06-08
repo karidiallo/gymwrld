@@ -30,8 +30,8 @@ function Premium() {
       id: "pro",
       name: "Pro",
       tag: "Najpopularniejsze",
-      tone: "from-primary/30 via-secondary/20 to-transparent",
-      ring: "ring-primary/40",
+      tone: "from-[#7a1a1a]/40 via-[#3b0a0a]/30 to-transparent",
+      ring: "ring-[#a52a2a]/40",
       price: { monthly: 9.99, yearly: 79.99 },
       perks: [
         "Wszystko z Free",
@@ -47,8 +47,8 @@ function Premium() {
       id: "premium",
       name: "Premium",
       tag: "Elite",
-      tone: "from-[var(--orange)]/30 via-[var(--magenta)]/25 to-[var(--lime)]/15",
-      ring: "ring-[var(--orange)]/50",
+      tone: "from-[#b91c1c]/40 via-[#7a1a1a]/30 to-black/40",
+      ring: "ring-[#dc2626]/50",
       price: { monthly: 24.99, yearly: 199.99 },
       perks: [
         "Wszystko z Pro",
@@ -66,9 +66,9 @@ function Premium() {
   const yearlyDiscount = 33;
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-5 pt-6 pb-32">
-      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-[var(--orange)]/15 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-[#0a0303] px-5 pt-6 pb-32 text-white">
+      <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#7a1a1a]/40 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-[#dc2626]/15 blur-3xl" />
 
       <header className="relative flex items-center justify-between">
         <Link to="/profil" className="grid h-9 w-9 place-items-center rounded-full glass">
@@ -86,7 +86,7 @@ function Premium() {
           style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 30px rgba(255,255,255,0.2))" }}
         />
         <h1 className="mt-5 font-display text-4xl leading-tight">
-          Wejdź na <span className="text-gradient">wyższy poziom</span>
+          Wejdź na <span className="bg-gradient-to-r from-[#dc2626] via-[#f59e0b] to-white bg-clip-text text-transparent">wyższy poziom</span>
         </h1>
         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
           AI Coach, ekskluzywne skiny, plany premium i pełne pomieszczenia.
@@ -97,15 +97,15 @@ function Premium() {
       <div className="relative mx-auto mt-6 inline-flex w-full max-w-[280px] items-center justify-center rounded-full bg-white/5 p-1 text-xs">
         <button
           onClick={() => setCycle("monthly")}
-          className={`flex-1 rounded-full px-4 py-2 font-medium transition ${cycle === "monthly" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+          className={`flex-1 rounded-full px-4 py-2 font-medium transition ${cycle === "monthly" ? "bg-[#7a1a1a] text-white" : "text-muted-foreground"}`}
         >
           Miesięcznie
         </button>
         <button
           onClick={() => setCycle("yearly")}
-          className={`flex-1 rounded-full px-4 py-2 font-medium transition ${cycle === "yearly" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+          className={`flex-1 rounded-full px-4 py-2 font-medium transition ${cycle === "yearly" ? "bg-[#7a1a1a] text-white" : "text-muted-foreground"}`}
         >
-          Rocznie <span className="ml-1 rounded-full bg-[var(--lime)]/20 px-1.5 py-0.5 text-[9px] text-[var(--lime)]">-{yearlyDiscount}%</span>
+          Rocznie <span className="ml-1 rounded-full bg-[#dc2626]/25 px-1.5 py-0.5 text-[9px] text-[#fca5a5]">-{yearlyDiscount}%</span>
         </button>
       </div>
 
@@ -115,13 +115,13 @@ function Premium() {
           const price = p.price[cycle];
           return (
             <div key={p.id} className={`relative overflow-hidden rounded-3xl p-[1px] ring-1 ${p.ring} bg-gradient-to-br ${p.tone}`}>
-              <div className="rounded-[calc(1.5rem-1px)] bg-card/70 p-5 backdrop-blur-xl">
+                <div className="rounded-[calc(1.5rem-1px)] bg-black/60 p-5 backdrop-blur-xl">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-display text-2xl">{p.name}</h3>
                       {p.badge && (
-                        <span className="rounded-full bg-gradient-to-r from-[var(--orange)] to-[var(--magenta)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white">
+                       <span className="rounded-full bg-gradient-to-r from-[#dc2626] to-[#7a1a1a] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white">
                           {p.badge}
                         </span>
                       )}
@@ -144,7 +144,7 @@ function Premium() {
                 <ul className="mt-4 space-y-1.5">
                   {p.perks.map((perk) => (
                     <li key={perk} className="flex items-center gap-2 text-xs">
-                      <span className="grid h-4 w-4 place-items-center rounded-full bg-[var(--lime)]/20 text-[var(--lime)]">
+                      <span className="grid h-4 w-4 place-items-center rounded-full bg-[#dc2626]/25 text-[#fca5a5]">
                         <Check className="h-2.5 w-2.5" />
                       </span>
                       {perk}
@@ -158,8 +158,8 @@ function Premium() {
                     p.id === "free"
                       ? "bg-white/5 text-muted-foreground"
                       : p.id === "premium"
-                      ? "bg-gradient-to-r from-[var(--orange)] via-[var(--magenta)] to-[var(--lime)] text-background glow-primary"
-                      : "bg-gradient-to-r from-primary to-secondary text-primary-foreground glow-primary"
+                      ? "bg-gradient-to-r from-[#dc2626] via-[#7a1a1a] to-black text-white shadow-[0_10px_40px_-10px_rgba(220,38,38,0.6)]"
+                      : "bg-gradient-to-r from-[#7a1a1a] to-[#3b0a0a] text-white shadow-[0_10px_40px_-10px_rgba(122,26,26,0.6)]"
                   }`}
                 >
                   {p.id === "premium" && <Zap className="mr-1 inline h-4 w-4" />}
