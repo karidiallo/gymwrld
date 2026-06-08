@@ -7,7 +7,7 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2 } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -18,7 +18,33 @@ type Cat = "silownia" | "kobiety" | "redukcja" | "dom" | "kalistenika" | "outdoo
 
 type Exercise = { id: string; name: string; sets: number; reps: number; weight?: number; done?: boolean };
 
+type Profile = { gender?: "m" | "k" | "nb"; weight?: number; level?: "poczatkujacy" | "sredni" | "zaawansowany" };
+
+/**
+ * AI-style heuristic: scale recommended weight by user gender, bodyweight and level.
+ * Returns sets, reps and weight tailored to a "base" exercise weight for an athletic 75kg adult man.
+ */
+function recommendForUser(baseWeight: number, baseSets: number, baseReps: number, profile: Profile): { sets: number; reps: number; weight: number } {
+  const bw = profile.weight ?? 75;
+  const genderFactor = profile.gender === "k" ? 0.55 : profile.gender === "nb" ? 0.78 : 1.0;
+  const levelFactor = profile.level === "poczatkujacy" ? 0.7 : profile.level === "zaawansowany" ? 1.15 : 0.9;
+  const bwFactor = Math.max(0.6, Math.min(1.3, bw / 75));
+  const recWeight = Math.round((baseWeight * genderFactor * levelFactor * bwFactor) / 2.5) * 2.5;
+  const reps = profile.level === "poczatkujacy" ? baseReps + 2 : profile.level === "zaawansowany" ? Math.max(5, baseReps - 1) : baseReps;
+  const sets = baseSets;
+  return { sets, reps, weight: Math.max(2.5, recWeight) };
+}
+
 function Trening() {
+  const [profile, setProfile] = useState<Profile>({});
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_profile");
+      if (raw) setProfile(JSON.parse(raw));
+    } catch {}
+  }, []);
+
   const [cat, setCat] = useState<Cat>("silownia");
   const [view, setView] = useState<"dzien" | "tydzien" | "miesiac">("tydzien");
   const [session, setSession] = useState<{ title: string; exercises: Exercise[] } | null>(null);
@@ -76,13 +102,17 @@ function Trening() {
   };
   const hero = heroTitles[cat];
 
-  const defaultPushDay: Exercise[] = [
-    { id: "e1", name: "Wyciskanie sztangi (klatka)", sets: 4, reps: 8, weight: 70 },
-    { id: "e2", name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40 },
-    { id: "e3", name: "Rozpiętki hantle", sets: 3, reps: 12, weight: 14 },
-    { id: "e4", name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10 },
-    { id: "e5", name: "Triceps wyciąg", sets: 3, reps: 12, weight: 30 },
+  const basePushDay = [
+    { name: "Wyciskanie sztangi (klatka)", sets: 4, reps: 8, weight: 70 },
+    { name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40 },
+    { name: "Rozpiętki hantle", sets: 3, reps: 12, weight: 14 },
+    { name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10 },
+    { name: "Triceps wyciąg", sets: 3, reps: 12, weight: 30 },
   ];
+  const defaultPushDay: Exercise[] = basePushDay.map((b, i) => {
+    const r = recommendForUser(b.weight, b.sets, b.reps, profile);
+    return { id: `e${i + 1}`, name: b.name, sets: r.sets, reps: r.reps, weight: r.weight };
+  });
 
   const startMain = () => {
     setSession({ title: hero.main, exercises: defaultPushDay.map((e) => ({ ...e })) });
@@ -202,6 +232,7 @@ function Trening() {
         <WorkoutSession
           title={session.title}
           exercises={session.exercises}
+          profile={profile}
           onClose={() => setSession(null)}
           onFinish={() => {
             toast.success("Trening zapisany · +120 XP");
@@ -340,14 +371,16 @@ function PR({ title, value }: { title: string; value: string }) {
 
 /* ============ Workout Session (live screen) ============ */
 function WorkoutSession({
-  title, exercises, onClose, onFinish,
+  title, exercises, profile, onClose, onFinish,
 }: {
   title: string; exercises: Exercise[];
+  profile: Profile;
   onClose: () => void; onFinish: () => void;
 }) {
   const [items, setItems] = useState(exercises);
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!running) return;
@@ -396,6 +429,9 @@ function WorkoutSession({
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
                 <p className="mt-1 font-display text-lg leading-tight">{ex.name}</p>
+                <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
+                  <Sparkles className="h-3 w-3" /> Sugerowane AI dla Ciebie
+                </p>
               </div>
               <button
                 onClick={() => setItems((arr) => arr.map((e, i) => i === idx ? { ...e, done: !e.done } : e))}
@@ -406,10 +442,31 @@ function WorkoutSession({
                 <Check className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-              <SetStat label="Serie" value={ex.sets} />
-              <SetStat label="Powt." value={ex.reps} />
-              <SetStat label="Ciężar" value={ex.weight ? `${ex.weight} kg` : "—"} />
+            {editingId === ex.id ? (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <NumField label="Serie" value={ex.sets} onChange={(v) => setItems((arr) => arr.map((e) => e.id === ex.id ? { ...e, sets: v } : e))} step={1} min={1} />
+                <NumField label="Powt." value={ex.reps} onChange={(v) => setItems((arr) => arr.map((e) => e.id === ex.id ? { ...e, reps: v } : e))} step={1} min={1} />
+                <NumField label="Ciężar (kg)" value={ex.weight ?? 0} onChange={(v) => setItems((arr) => arr.map((e) => e.id === ex.id ? { ...e, weight: v } : e))} step={2.5} min={0} />
+              </div>
+            ) : (
+              <button
+                onClick={() => setEditingId(ex.id)}
+                className="mt-3 grid w-full grid-cols-3 gap-2 text-center"
+              >
+                <SetStat label="Serie" value={ex.sets} />
+                <SetStat label="Powt." value={ex.reps} />
+                <SetStat label="Ciężar" value={ex.weight ? `${ex.weight} kg` : "—"} />
+              </button>
+            )}
+            <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+              {editingId === ex.id ? (
+                <button onClick={() => setEditingId(null)} className="rounded-full bg-[var(--lime)]/20 px-3 py-1 text-[var(--lime)]">Gotowe</button>
+              ) : (
+                <button onClick={() => setEditingId(ex.id)} className="underline-offset-2 hover:underline">Edytuj serie / powt. / ciężar</button>
+              )}
+              {profile.gender && (
+                <span>Dostosowane do: {profile.gender === "k" ? "♀" : profile.gender === "nb" ? "⚧" : "♂"} {profile.level ?? ""}</span>
+              )}
             </div>
             <div className="mt-3 flex gap-1.5">
               {Array.from({ length: ex.sets }).map((_, i) => (
@@ -438,6 +495,30 @@ function SetStat({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="rounded-xl bg-white/[0.04] p-2">
       <p className="font-display text-base leading-none">{value}</p>
       <p className="mt-1 text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function NumField({ label, value, onChange, step, min }: { label: string; value: number; onChange: (v: number) => void; step: number; min: number }) {
+  return (
+    <div className="rounded-xl bg-white/[0.04] p-2">
+      <div className="flex items-center justify-between gap-1">
+        <button onClick={() => onChange(Math.max(min, +(value - step).toFixed(2)))} className="grid h-6 w-6 place-items-center rounded-full bg-white/10">
+          <Minus className="h-3 w-3" />
+        </button>
+        <input
+          type="number"
+          value={value}
+          step={step}
+          min={min}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          className="w-full bg-transparent text-center font-display text-base outline-none"
+        />
+        <button onClick={() => onChange(+(value + step).toFixed(2))} className="grid h-6 w-6 place-items-center rounded-full bg-white/10">
+          <Plus className="h-3 w-3" />
+        </button>
+      </div>
+      <p className="mt-1 text-center text-[10px] text-muted-foreground">{label}</p>
     </div>
   );
 }

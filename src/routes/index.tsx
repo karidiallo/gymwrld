@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
-import avatar from "@/assets/avatar.png";
+import avatarImg from "@/assets/avatar.png";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
+import { AvatarCustomizer } from "@/components/AvatarCustomizer";
+import { AvatarViewer } from "@/components/AvatarViewer";
+import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,9 +22,19 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
       navigate({ to: "/onboarding" });
+      return;
+    }
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("gw_avatar");
+        if (raw) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(raw) });
+      } catch {}
     }
   }, [navigate]);
   const [quests, setQuests] = useState([
@@ -70,13 +83,22 @@ function Index() {
           <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background" />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-secondary/10" />
 
-          <img
-            src={avatar}
-            alt="Twój avatar"
-            className="animate-float pointer-events-none absolute bottom-0 left-1/2 h-[78%] -translate-x-1/2 select-none object-contain drop-shadow-[0_20px_40px_rgba(79,140,255,0.35)]"
-            width={768}
-            height={1280}
-          />
+          <button
+            onClick={() => setViewerOpen(true)}
+            aria-label="Otwórz widok 360°"
+            className="animate-float absolute bottom-0 left-1/2 h-[78%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+          >
+            <img
+              src={avatarImg}
+              alt="Twój avatar"
+              className="pointer-events-none h-full object-contain drop-shadow-[0_20px_40px_rgba(79,140,255,0.35)]"
+              width={768}
+              height={1280}
+            />
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-widest text-muted-foreground">
+              Dotknij · 360°
+            </span>
+          </button>
 
           {/* Top overlay: branding + tagline */}
           <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
@@ -102,7 +124,7 @@ function Index() {
               </div>
             </div>
             <button
-              onClick={() => toast("Edytor postaci wkrótce ✨", { description: "Pracujemy nad customizacją avatara." })}
+              onClick={() => setCustomOpen(true)}
               className="glass shrink-0 rounded-full px-4 py-2.5 text-xs font-medium glow-primary"
             >
               Dostosuj postać
@@ -116,7 +138,7 @@ function Index() {
       <div className="grid grid-cols-3 gap-3">
         <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={68} />
         <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={82} />
-        <StatCard to="/profil" icon={<Moon className="h-4 w-4" />} title="Sen" value={74} />
+        <StatCard to="/regeneracja" icon={<Moon className="h-4 w-4" />} title="Sen" value={74} />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={55} />
@@ -162,6 +184,20 @@ function Index() {
         <Activity to="/trening" icon={<Footprints className="h-4 w-4" />} title="Spacer poranny" meta="Wczoraj · 32 min · 2 410 kroków" />
         <Activity to="/profil" icon={<Trophy className="h-4 w-4" />} title="Nowy rekord: Wyciskanie 80 kg × 6" meta="2 dni temu" />
       </div>
+
+      {viewerOpen && <AvatarViewer cfg={avatarCfg} onClose={() => setViewerOpen(false)} />}
+      {customOpen && (
+        <AvatarCustomizer
+          initial={avatarCfg}
+          onClose={() => setCustomOpen(false)}
+          onSave={(cfg) => {
+            setAvatarCfg(cfg);
+            if (typeof window !== "undefined") localStorage.setItem("gw_avatar", JSON.stringify(cfg));
+            toast.success("Wygląd zaktualizowany ✨");
+            setCustomOpen(false);
+          }}
+        />
+      )}
     </main>
   );
 }

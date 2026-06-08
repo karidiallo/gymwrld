@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import { AvatarCustomizer } from "@/components/AvatarCustomizer";
+import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -19,6 +21,7 @@ function Onboarding() {
   const [email, setEmail] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
+  const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [goal, setGoal] = useState<Goal | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
@@ -33,12 +36,13 @@ function Onboarding() {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
       localStorage.setItem("gw_profile", JSON.stringify({ goal, level, freq, age, gender }));
+      localStorage.setItem("gw_avatar", JSON.stringify(avatar));
     }
     toast.success("Witaj w GymWrld!", { description: "Twoja postać została stworzona ✨" });
     navigate({ to: "/" });
   };
 
-  const total = 5;
+  const total = 6;
   const progress = ((step + 1) / total) * 100;
 
   return (
@@ -67,10 +71,13 @@ function Onboarding() {
           <StepPersonal
             age={age} setAge={setAge}
             gender={gender} setGender={setGender}
-            onNext={() => setStep(2)}
+            onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(2); }}
           />
         )}
         {step === 2 && (
+          <StepAvatar avatar={avatar} setAvatar={setAvatar} onNext={() => setStep(3)} />
+        )}
+        {step === 3 && (
           <StepChoice
             title="Jaki masz cel?"
             subtitle="Dopasujemy plan pod Ciebie."
@@ -82,11 +89,11 @@ function Onboarding() {
             ]}
             value={goal}
             onChange={(v) => setGoal(v as Goal)}
-            onNext={() => setStep(3)}
+            onNext={() => setStep(4)}
             canNext={!!goal}
           />
         )}
-        {step === 3 && (
+        {step === 4 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -97,15 +104,29 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(4)}
+            onNext={() => setStep(5)}
             canNext={!!level}
           />
         )}
-        {step === 4 && (
+        {step === 5 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
     </main>
+  );
+}
+
+function StepAvatar({ avatar, setAvatar, onNext }: { avatar: AvatarConfig; setAvatar: (a: AvatarConfig) => void; onNext: () => void }) {
+  return (
+    <div>
+      <div>
+        <h1 className="font-display text-3xl leading-tight">Stwórz <span className="text-gradient">swój wygląd</span></h1>
+        <p className="mt-2 text-sm text-muted-foreground">Skóra, fryzura, sylwetka, ciuchy — możesz zmienić to później.</p>
+      </div>
+      <div className="mt-4">
+        <AvatarCustomizer initial={avatar} embedded onSave={(cfg) => { setAvatar(cfg); onNext(); }} />
+      </div>
+    </div>
   );
 }
 
