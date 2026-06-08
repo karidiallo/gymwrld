@@ -129,10 +129,10 @@ function Index() {
           {/* Bottom overlay: level + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom 14</p>
-              <p className="text-xs font-medium">1 240 / 2 000 XP</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom {profile.level ?? 1}</p>
+              <p className="text-xs font-medium">{profile.xp ?? 0} / {2000} XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
+                <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
               </div>
             </div>
             <button
