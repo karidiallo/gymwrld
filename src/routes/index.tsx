@@ -22,24 +22,29 @@ function Index() {
   const navigate = useNavigate();
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [profile, setProfile] = useState<{ name?: string; level?: number; xp?: number; streak?: number }>({});
+  const [profile, setProfile] = useState<{ name?: string; level?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
       navigate({ to: "/onboarding" });
       return;
     }
+    const loadProfile = () => {
+      try {
+        const raw = localStorage.getItem("gw_profile");
+        if (raw) {
+          const p = JSON.parse(raw);
+          setProfile({ name: p.name, level: p.level, xp: p.xp, streak: p.streak, stats: p.stats });
+        }
+      } catch {}
+    };
     if (typeof window !== "undefined") {
       try {
         const raw = localStorage.getItem("gw_avatar");
         if (raw) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(raw) });
       } catch {}
-      try {
-        const raw = localStorage.getItem("gw_profile");
-        if (raw) {
-          const p = JSON.parse(raw);
-          setProfile({ name: p.name, level: p.level, xp: p.xp, streak: p.streak });
-        }
-      } catch {}
+      loadProfile();
+      window.addEventListener("gw_profile_update", loadProfile);
+      return () => window.removeEventListener("gw_profile_update", loadProfile);
     }
   }, [navigate]);
   const [quests, setQuests] = useState([
@@ -71,7 +76,7 @@ function Index() {
           />
         </Link>
         <div className="flex items-center gap-2">
-          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label="Lvl 1" />
+          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.level ?? 1}`} />
           <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label={`${profile.streak ?? 0} dni`} />
         </div>
       </header>
@@ -112,7 +117,7 @@ function Index() {
           </div>
 
           {/* Headline at waist height */}
-          <div className="pointer-events-none absolute inset-x-5 top-[42%] z-10">
+          <div className="pointer-events-none absolute inset-x-5 top-[58%] z-10">
             <h2 className="font-display text-[34px] leading-[1.02] drop-shadow-[0_4px_18px_rgba(0,0,0,0.6)]">
               Buduj <span className="text-gradient">swoją</span><br/>najlepszą wersję
             </h2>
@@ -121,7 +126,7 @@ function Index() {
           {/* Bottom overlay: level badge */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Początkujący · Lvl 1</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Początkujący · Lvl {profile.level ?? 1}</p>
               <p className="text-xs font-medium">{profile.xp ?? 0} / 2000 XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
@@ -140,13 +145,13 @@ function Index() {
       {/* Today's progress */}
       <SectionTitle title="Dzisiejszy progres" actionTo="/profil" action="Zobacz szczegóły" />
       <div className="grid grid-cols-3 gap-3">
-        <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={0} />
-        <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={0} />
-        <StatCard to="/regeneracja" icon={<Moon className="h-4 w-4" />} title="Sen" value={0} />
+        <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={profile.stats?.sila ?? 0} />
+        <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={profile.stats?.dieta ?? 0} />
+        <StatCard to="/regeneracja" icon={<Moon className="h-4 w-4" />} title="Sen" value={profile.stats?.sen ?? 0} />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={0} />
-        <StatCard to="/profil" icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={0} />
+        <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={profile.stats?.kondycja ?? 0} />
+        <StatCard to="/profil" icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={profile.stats?.rozwoj ?? 0} />
       </div>
 
       {/* Steps card */}
