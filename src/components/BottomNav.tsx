@@ -24,9 +24,9 @@ export function BottomNav() {
             {({ isActive }) => (
               <>
                 {isActive && (
-                  <span className="absolute inset-0 -z-10 rounded-full bg-gradient-to-b from-primary/25 to-primary/5 ring-1 ring-primary/30" />
+                  <span className="absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--violet)]/20 ring-1 ring-white/15" />
                 )}
-                <Icon className={`h-5 w-5 transition-transform ${isActive ? "scale-110 text-primary" : "group-hover:scale-105"}`} strokeWidth={2.2} />
+                <Icon className={`h-5 w-5 transition-transform ${isActive ? "scale-110 text-white" : "group-hover:scale-105"}`} strokeWidth={2.2} />
                 <span>{label}</span>
               </>
             )}

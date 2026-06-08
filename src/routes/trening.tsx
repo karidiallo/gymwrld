@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import gymHero from "@/assets/gym-hero.jpg";
+import homeHero from "@/assets/home-hero.jpg";
+import outdoorHero from "@/assets/outdoor-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
@@ -31,26 +34,27 @@ function Trening() {
     ],
   };
 
+  const heroes: Record<Cat, string> = { silownia: gymHero, dom: homeHero, outdoor: outdoorHero };
   return (
     <main className="px-5 pt-6">
       <header>
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Twój plan</p>
-        <h1 className="mt-1 text-2xl font-semibold">Trening</h1>
+        <h1 className="mt-1 font-display text-3xl">Trening</h1>
       </header>
 
       {/* Hero */}
-      <section className="relative mt-5 overflow-hidden rounded-3xl glass p-5">
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-secondary/20 blur-3xl" />
-        <div className="relative">
-          <p className="text-xs text-muted-foreground">Następny trening</p>
-          <h2 className="mt-1 text-2xl font-semibold leading-tight">Push Day<br/><span className="text-gradient">Klatka i barki</span></h2>
-          <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 55 min</span>
-            <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5" /> ~412 kcal</span>
-            <span className="inline-flex items-center gap-1"><Dumbbell className="h-3.5 w-3.5" /> 5 ćwiczeń</span>
+      <section className="relative mt-5 overflow-hidden rounded-3xl">
+        <img src={heroes[cat]} alt="Trening" className="h-56 w-full object-cover" width={1280} height={896} loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
+        <div className="absolute inset-x-5 bottom-5">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Następny trening</p>
+          <h2 className="mt-1 font-display text-3xl leading-none text-white">Push Day<br/><span className="text-gradient">Klatka i barki</span></h2>
+          <div className="mt-3 flex gap-3 text-xs text-white/80">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Clock className="h-3 w-3" /> 55 min</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Flame className="h-3 w-3" /> 412 kcal</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Dumbbell className="h-3 w-3" /> 5</span>
           </div>
-          <button className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground glow-primary">
+          <button className="mt-4 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-2.5 text-sm font-semibold text-background glow-primary">
             Rozpocznij trening
           </button>
         </div>
@@ -64,9 +68,9 @@ function Trening() {
       </div>
 
       <div className="mt-4 space-y-2.5">
-        {plans[cat].map((p) => (
+        {plans[cat].map((p, i) => (
           <button key={p.title} className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left hover:bg-white/[0.04]">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
+            <div className={`grid h-11 w-11 place-items-center rounded-xl text-background ${["bg-[var(--magenta)]","bg-[var(--orange)]","bg-[var(--lime)]"][i % 3]}`}>
               <Dumbbell className="h-4 w-4" />
             </div>
             <div className="flex-1">

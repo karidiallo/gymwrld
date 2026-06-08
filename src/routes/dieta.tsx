@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Ring } from "@/components/Ring";
+import foodHero from "@/assets/food-hero.jpg";
 import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet } from "lucide-react";
 
 export const Route = createFileRoute("/dieta")({
@@ -16,17 +17,30 @@ function Dieta() {
       <header className="flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Dzisiaj</p>
-          <h1 className="mt-1 text-2xl font-semibold">Dieta</h1>
+          <h1 className="mt-1 font-display text-3xl">Dieta</h1>
         </div>
-        <button className="rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground glow-primary">
+        <button className="rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-4 py-2 text-xs font-medium text-white glow-primary">
           <Plus className="inline h-3.5 w-3.5" /> Dodaj posiłek
         </button>
       </header>
 
+      {/* Food hero */}
+      <section className="relative mt-5 overflow-hidden rounded-3xl">
+        <img src={foodHero} alt="Zdrowy posiłek" className="h-44 w-full object-cover" width={1280} height={896} loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-x-4 bottom-3 flex items-end justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Polecane dziś</p>
+            <p className="font-display text-lg text-white">Power Bowl · 540 kcal</p>
+          </div>
+          <span className="rounded-full bg-[var(--lime)]/90 px-3 py-1 text-[10px] font-semibold text-background">+45g białka</span>
+        </div>
+      </section>
+
       {/* Summary */}
       <section className="mt-5 rounded-3xl glass p-5">
         <div className="flex items-center gap-5">
-          <Ring value={eaten} max={goal} size={132} stroke={12} color="var(--primary)">
+          <Ring value={eaten} max={goal} size={132} stroke={12} color="var(--magenta)">
             <span className="text-2xl font-semibold">{remaining}</span>
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground">kcal pozostało</span>
           </Ring>
@@ -38,10 +52,10 @@ function Dieta() {
         </div>
 
         <div className="mt-5 grid grid-cols-4 gap-3 text-center">
-          <Macro label="Białko" value={112} goal={160} color="var(--primary)" unit="g" />
-          <Macro label="Węgle" value={184} goal={280} color="var(--secondary)" unit="g" />
-          <Macro label="Tłuszcze" value={48} goal={75} color="var(--accent)" unit="g" />
-          <Macro label="Woda" value={1.8} goal={2.5} color="#7DD3FC" unit="L" />
+          <Macro label="Białko" value={112} goal={160} color="var(--magenta)" unit="g" />
+          <Macro label="Węgle" value={184} goal={280} color="var(--orange)" unit="g" />
+          <Macro label="Tłuszcze" value={48} goal={75} color="var(--lime)" unit="g" />
+          <Macro label="Woda" value={1.8} goal={2.5} color="var(--violet)" unit="L" />
         </div>
       </section>
 
