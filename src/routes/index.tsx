@@ -64,14 +64,13 @@ function Index() {
     <main className="px-5 pt-6">
       {/* Header */}
       <header className="flex items-center justify-between">
-        <Link to="/profil" className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] font-display text-background">
-            {(profile.name?.[0] ?? "?").toUpperCase()}
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Witaj{profile.name ? " ponownie" : ""}</p>
-            <h1 className="text-xl font-display">{profile.name || "Nowa postać"}</h1>
-          </div>
+        <Link to="/profil" className="flex items-center gap-2">
+          <img
+            src={logoAsset.url}
+            alt="GymWrld"
+            className="h-8 w-auto"
+            style={{ filter: "brightness(0) invert(1)" }}
+          />
         </Link>
         <div className="flex items-center gap-2">
           <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.level ?? 1}`} />
@@ -95,7 +94,7 @@ function Index() {
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="absolute -bottom-2 left-1/2 h-[132%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="absolute bottom-2 left-1/2 h-[92%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
             <img
               src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
@@ -107,13 +106,14 @@ function Index() {
             />
           </button>
 
-          <div className="pointer-events-none absolute left-4 bottom-[104px] z-10">
-            <img
-              src={logoAsset.url}
-              alt="GymWrld"
-              className="h-20 w-auto"
-              style={{ filter: "brightness(0) invert(1) drop-shadow(0 6px 22px rgba(0,0,0,0.9))" }}
-            />
+          {/* Headline */}
+          <div className="pointer-events-none absolute inset-x-5 top-5 z-10">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              Witaj{profile.name ? " ponownie" : ""}{profile.name ? `, ${profile.name}` : ""}
+            </p>
+            <h2 className="mt-1 font-display text-3xl leading-tight">
+              Zbuduj <span className="text-gradient">najlepszą wersję</span> siebie
+            </h2>
           </div>
 
           {/* Bottom overlay: level badge + CTA */}
