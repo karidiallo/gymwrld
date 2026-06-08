@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
 import avatar from "@/assets/avatar.png";
+import logo from "@/assets/logo.png";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -19,13 +20,16 @@ function Index() {
     <main className="px-5 pt-6">
       {/* Header */}
       <header className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Witaj ponownie</p>
-          <h1 className="mt-1 text-2xl font-semibold">Aleks</h1>
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="GymWrld" className="h-9 w-auto opacity-90 invert" />
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Witaj ponownie</p>
+            <h1 className="text-xl font-display">Aleks</h1>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Chip icon={<Sparkles className="h-3.5 w-3.5" />} label="Lvl 14" />
-          <Chip icon={<Flame className="h-3.5 w-3.5 text-orange-300" />} label="12 dni" />
+          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label="Lvl 14" />
+          <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label="12 dni" />
         </div>
       </header>
 
