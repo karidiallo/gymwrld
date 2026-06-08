@@ -23,6 +23,10 @@ function Regeneracja() {
   ]);
   const [openSleep, setOpenSleep] = useState(false);
   const [openMind, setOpenMind] = useState(false);
+  const [moods, setMoods] = useState<number[]>([3, 4, 2, 4, 5]); // 1-5 scale, last 5 entries
+  const todayMood = moods[moods.length - 1];
+  const avgMood = moods.length ? moods.reduce((s, m) => s + m, 0) / moods.length : 0;
+  const happiness = Math.round((avgMood / 5) * 100);
 
   const todaySleep = sleep[0];
   const sleepGoal = 8;
@@ -117,16 +121,50 @@ function Regeneracja() {
       </div>
 
       <h3 className="mb-3 mt-7 text-lg font-semibold">Nastrój</h3>
-      <div className="flex justify-between rounded-2xl glass p-4">
-        {["😞","😕","😐","🙂","😄"].map((e, i) => (
-          <button
-            key={i}
-            onClick={() => toast.success(`Nastrój zapisany ${e}`)}
-            className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-2xl transition hover:scale-110 hover:bg-white/10"
-          >
-            {e}
-          </button>
-        ))}
+      <div className="rounded-2xl glass p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Pasek zadowolenia</p>
+            <p className="font-display text-3xl">{happiness}%</p>
+          </div>
+          <span className="text-3xl">{["😞","😕","😐","🙂","😄"][Math.max(0, Math.round(avgMood) - 1)]}</span>
+        </div>
+        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/8">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] transition-all duration-500"
+            style={{ width: `${happiness}%` }}
+          />
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Średnia z ostatnich {moods.length} wpisów · dziś {["😞","😕","😐","🙂","😄"][todayMood - 1]}
+        </p>
+        <div className="mt-3 flex justify-between">
+          {["😞","😕","😐","🙂","😄"].map((e, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setMoods((m) => [...m.slice(-9), i + 1]);
+                toast.success(`Nastrój zapisany ${e}`);
+              }}
+              className={`grid h-12 w-12 place-items-center rounded-full text-2xl transition hover:scale-110 ${
+                todayMood === i + 1 ? "bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] ring-2 ring-white/30" : "bg-white/5 hover:bg-white/10"
+              }`}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 flex items-end gap-1 border-t border-white/5 pt-3">
+          {moods.slice(-10).map((m, i) => (
+            <div key={i} className="flex-1">
+              <div
+                className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--lime)]"
+                style={{ height: `${(m / 5) * 36 + 4}px` }}
+              />
+            </div>
+          ))}
+        </div>
+        <p className="mt-1 text-center text-[10px] text-muted-foreground">Trend nastroju</p>
       </div>
       <div className="h-24" />
 

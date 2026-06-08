@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import foodHero from "@/assets/food-hero.jpg";
-import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus } from "lucide-react";
+import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/dieta")({
   head: () => ({ meta: [{ title: "Dieta — GymWrld" }, { name: "description", content: "Twój dzienny plan żywieniowy." }] }),
@@ -16,6 +16,7 @@ function Dieta() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Meal | null>(null);
   const [water, setWater] = useState(6); // glasses out of 10 (250ml each => 2.5L cel)
+  const [toilet, setToilet] = useState({ pee: 4, poop: 1 });
   const [meals, setMeals] = useState<Meal[]>([
     { id: "m1", icon: "coffee", name: "Śniadanie", items: "Owsianka, jagody, masło orzechowe", kcal: 520, p: 22, c: 68, f: 18 },
     { id: "m2", icon: "lunch", name: "Obiad", items: "Kurczak, ryż basmati, brokuły", kcal: 680, p: 52, c: 78, f: 14 },
@@ -168,7 +169,7 @@ function Dieta() {
             </button>
           </div>
         </div>
-        <div className="mt-4 flex gap-1.5">
+        <div className="mt-4 grid grid-cols-5 gap-1.5">
           {Array.from({ length: waterMaxGlasses }).map((_, i) => {
             const filled = i < water;
             return (
@@ -176,19 +177,26 @@ function Dieta() {
                 key={i}
                 onClick={() => setWater(i + 1 === water ? i : i + 1)}
                 aria-label={`Szklanka ${i + 1}`}
-                className={`group h-9 flex-1 rounded-md transition ${
+                className={`h-10 rounded-lg transition ${
                   filled
                     ? "bg-gradient-to-t from-[var(--violet)] to-[var(--magenta)] shadow-[0_0_10px_rgba(120,80,255,0.4)]"
                     : "bg-white/[0.06] hover:bg-white/10"
                 }`}
               >
-                <Droplet className={`mx-auto h-3 w-3 ${filled ? "text-background" : "text-muted-foreground"}`} />
+                <Droplet className={`mx-auto h-3.5 w-3.5 ${filled ? "text-background" : "text-muted-foreground"}`} />
               </button>
             );
           })}
         </div>
-        <div className="h-24" />
       </div>
+
+      {/* Toilet log */}
+      <h3 className="mb-3 mt-7 text-lg font-semibold">Dziennik łazienki</h3>
+      <div className="grid grid-cols-2 gap-3">
+        <ToiletCard label="Siku" emoji="💧" value={toilet.pee} onAdd={() => setToilet((t) => ({ ...t, pee: t.pee + 1 }))} onSub={() => setToilet((t) => ({ ...t, pee: Math.max(0, t.pee - 1) }))} hint="Norma 4-7/dzień" />
+        <ToiletCard label="Kupa" emoji="💩" value={toilet.poop} onAdd={() => setToilet((t) => ({ ...t, poop: t.poop + 1 }))} onSub={() => setToilet((t) => ({ ...t, poop: Math.max(0, t.poop - 1) }))} hint="Norma 1-2/dzień" />
+      </div>
+      <div className="h-24" />
 
       {open && <AddMealSheet onClose={() => setOpen(false)} onAdd={addMeal} />}
       {editing && (
@@ -208,6 +216,27 @@ function Row({ label, value, muted }: { label: string; value: string; muted?: bo
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className={muted ? "text-muted-foreground" : "font-medium"}>{value}</span>
+    </div>
+  );
+}
+
+function ToiletCard({ label, emoji, value, onAdd, onSub, hint }: { label: string; emoji: string; value: number; onAdd: () => void; onSub: () => void; hint: string }) {
+  return (
+    <div className="rounded-2xl glass p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{emoji}</span>
+          <div>
+            <p className="text-sm font-medium">{label}</p>
+            <p className="text-[10px] text-muted-foreground">{hint}</p>
+          </div>
+        </div>
+        <p className="font-display text-2xl">{value}</p>
+      </div>
+      <div className="mt-3 flex gap-1.5">
+        <button onClick={onSub} className="grid h-8 flex-1 place-items-center rounded-lg bg-white/5"><Minus className="h-3.5 w-3.5" /></button>
+        <button onClick={onAdd} className="grid h-8 flex-1 place-items-center rounded-lg bg-gradient-to-br from-[var(--violet)] to-[var(--magenta)] text-background"><Plus className="h-3.5 w-3.5" /></button>
+      </div>
     </div>
   );
 }
