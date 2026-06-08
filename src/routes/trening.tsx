@@ -370,10 +370,10 @@ function TreadmillLog() {
               <button onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <NumField label="Dystans (km)" value={km} onChange={setKm} placeholder="5.0" step="0.1" />
-              <NumField label="Czas (min)" value={time} onChange={setTime} placeholder="30" />
-              <NumField label="Nachylenie (%)" value={incline} onChange={setIncline} placeholder="2" />
-              <NumField label="Kalorie (kcal)" value={kcal} onChange={setKcal} placeholder="320" />
+              <TextNumField label="Dystans (km)" value={km} onChange={setKm} placeholder="5.0" step="0.1" />
+              <TextNumField label="Czas (min)" value={time} onChange={setTime} placeholder="30" />
+              <TextNumField label="Nachylenie (%)" value={incline} onChange={setIncline} placeholder="2" />
+              <TextNumField label="Kalorie (kcal)" value={kcal} onChange={setKcal} placeholder="320" />
             </div>
             <button onClick={save} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] py-3.5 text-sm font-semibold text-background glow-primary">
               Zapisz bieżnię
@@ -385,7 +385,7 @@ function TreadmillLog() {
   );
 }
 
-function NumField({ label, value, onChange, placeholder, step }: { label: string; value: number | ""; onChange: (v: number | "") => void; placeholder?: string; step?: string }) {
+function TextNumField({ label, value, onChange, placeholder, step }: { label: string; value: number | ""; onChange: (v: number | "") => void; placeholder?: string; step?: string }) {
   return (
     <label className="block rounded-2xl bg-white/[0.04] p-3">
       <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</span>
