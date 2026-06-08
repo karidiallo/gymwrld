@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ChevronLeft, MapPin, Plus, X, Activity, Dumbbell, Info } from "lucide-react";
+import { addLog, removeLog, updateLog } from "@/lib/training-log";
+import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/street")({
   head: () => ({ meta: [{ title: "Street Workout — GymWrld" }, { name: "description", content: "Mapa lokalnych outdoor siłek, baza ćwiczeń kalistenicznych i logowanie treningów." }] }),
@@ -31,6 +33,7 @@ function Street() {
   const [name, setName] = useState("");
   const [sets, setSets] = useState<number | "">(3);
   const [reps, setReps] = useState<number | "">(8);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -42,12 +45,37 @@ function Street() {
 
   const save = () => {
     if (!name || !sets || !reps) { toast.error("Uzupełnij dane"); return; }
-    const next: Log[] = [{ id: String(Date.now()), name, sets: Number(sets), reps: Number(reps), ts: Date.now() }, ...logs];
+    const setsN = Number(sets), repsN = Number(reps);
+    if (editingId) {
+      const next = logs.map((l) => l.id === editingId ? { ...l, name, sets: setsN, reps: repsN } : l);
+      setLogs(next);
+      if (typeof window !== "undefined") localStorage.setItem("gw_street", JSON.stringify(next));
+      updateLog(editingId, { title: `${name}`, meta: { sets: setsN, reps: repsN } });
+      toast.success("Wpis zaktualizowany");
+    } else {
+      const kcal = Math.round(setsN * repsN * 0.6);
+      const log = addLog({ kind: "street", title: name, kcal, minutes: Math.max(5, Math.round(setsN * 1.5)), meta: { sets: setsN, reps: repsN } });
+      const next: Log[] = [{ id: log.id, name, sets: setsN, reps: repsN, ts: log.ts }, ...logs];
+      setLogs(next);
+      if (typeof window !== "undefined") localStorage.setItem("gw_street", JSON.stringify(next));
+      toast.success("Zapisano ćwiczenie");
+    }
+    setName(""); setSets(3); setReps(8);
+    setEditingId(null);
+    setOpen(false);
+  };
+
+  const startEdit = (l: Log) => {
+    setName(l.name); setSets(l.sets); setReps(l.reps);
+    setEditingId(l.id);
+    setOpen(true);
+  };
+  const remove = (id: string) => {
+    const next = logs.filter((l) => l.id !== id);
     setLogs(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_street", JSON.stringify(next));
-    setName(""); setSets(3); setReps(8);
-    setOpen(false);
-    toast.success("Zapisano ćwiczenie");
+    removeLog(id);
+    toast.success("Wpis usunięty");
   };
 
   return (
@@ -130,6 +158,7 @@ function Street() {
                 <p className="text-[11px] text-muted-foreground">{l.sets} × {l.reps}</p>
               </div>
               <p className="text-[10px] text-muted-foreground">{new Date(l.ts).toLocaleDateString("pl")}</p>
+              <EntryActions onEdit={() => startEdit(l)} onDelete={() => remove(l.id)} />
             </div>
           ))}
         </div>
