@@ -9,6 +9,8 @@ import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
+import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
+import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -69,6 +71,13 @@ function Trening() {
       { title: "Push Day · Klatka, barki", meta: "5 ćwiczeń · 55 min" },
       { title: "Pull Day · Plecy, biceps", meta: "6 ćwiczeń · 60 min" },
       { title: "Leg Day · Hipertrofia", meta: "5 ćwiczeń · 70 min" },
+      { title: "Klatka focus · Hipertrofia", meta: "6 ćwiczeń · 50 min" },
+      { title: "Plecy szerokie · V-taper", meta: "6 ćwiczeń · 55 min" },
+      { title: "Ramiona delty 3D", meta: "5 ćwiczeń · 40 min" },
+      { title: "Biceps & triceps · Arms day", meta: "8 ćwiczeń · 45 min" },
+      { title: "Brzuch & core", meta: "6 ćwiczeń · 25 min" },
+      { title: "Full Body siła", meta: "7 ćwiczeń · 65 min" },
+      { title: "Upper / Lower · Split A", meta: "6 ćwiczeń · 60 min" },
     ],
     kobiety: [
       { title: "Glute Builder · Pośladki & nogi", meta: "6 ćwiczeń · 45 min" },
@@ -190,6 +199,37 @@ function Trening() {
         </div>
         <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </Link>
+
+      {/* Body-part banners */}
+      {cat === "silownia" && (
+        <>
+          <h3 className="mb-2 mt-6 text-sm font-semibold text-muted-foreground">Trenuj po partii ciała</h3>
+          <div className="grid grid-cols-2 gap-2.5">
+            {[
+              { label: "Klatka", emoji: "💪", grad: "from-[#e94560] to-[#7a1a1a]" },
+              { label: "Plecy", emoji: "🦅", grad: "from-[#1e3a8a] to-[#0c1a3a]" },
+              { label: "Nogi", emoji: "🦵", grad: "from-[#15803d] to-[#052e16]" },
+              { label: "Ramiona", emoji: "🪖", grad: "from-[#a16207] to-[#3a2306]" },
+              { label: "Biceps", emoji: "💥", grad: "from-[#c026d3] to-[#3a0a40]" },
+              { label: "Triceps", emoji: "🔥", grad: "from-[#ea580c] to-[#3a1a06]" },
+              { label: "Brzuch", emoji: "🔲", grad: "from-[#0891b2] to-[#062e3a]" },
+              { label: "Full Body", emoji: "⚡", grad: "from-[#7c3aed] to-[#1a0a3a]" },
+            ].map((p) => (
+              <Link
+                key={p.label}
+                to="/cwiczenia"
+                className={`flex items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${p.grad} p-3 transition active:scale-[0.98]`}
+              >
+                <span className="text-2xl">{p.emoji}</span>
+                <span className="font-display text-base text-white">{p.label}</span>
+              </Link>
+            ))}
+          </div>
+          <Link to="/cwiczenia" className="mt-2.5 flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/15 p-3 text-xs text-muted-foreground hover:bg-white/[0.03]">
+            Więcej zestawów ćwiczeń <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      )}
 
       <div className="mt-4 space-y-2.5">
         {plans[cat].map((p, i) => (
@@ -332,34 +372,58 @@ function TreadmillLog() {
   const [kcal, setKcal] = useState<number | "">("");
   const [incline, setIncline] = useState<number | "">("");
   const [time, setTime] = useState<number | "">("");
-  const [entries, setEntries] = useState<{ km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
+  const [entries, setEntries] = useState<{ id: string; km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const raw = localStorage.getItem("gw_treadmill");
-      if (raw) setEntries(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setEntries(parsed.map((e: any) => ({ id: e.id ?? String(e.ts), ...e })));
+      }
     } catch {}
   }, []);
+
+  const persist = (next: typeof entries) => {
+    setEntries(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_treadmill", JSON.stringify(next));
+  };
 
   const save = () => {
     if (!km || !time) {
       toast.error("Podaj dystans i czas");
       return;
     }
-    const entry = {
-      km: Number(km),
-      kcal: Number(kcal) || 0,
-      incline: Number(incline) || 0,
-      time: Number(time),
-      ts: Date.now(),
-    };
-    const next = [entry, ...entries];
-    setEntries(next);
-    if (typeof window !== "undefined") localStorage.setItem("gw_treadmill", JSON.stringify(next));
+    const kmN = Number(km), timeN = Number(time), kcalN = Number(kcal) || Math.round(Number(km) * 60);
+    if (editingId) {
+      const next = entries.map((e) =>
+        e.id === editingId ? { ...e, km: kmN, kcal: kcalN, incline: Number(incline) || 0, time: timeN } : e
+      );
+      persist(next);
+      updateLog(editingId, { kcal: kcalN, minutes: timeN, title: `Bieżnia ${kmN} km`, meta: { km: kmN, incline: Number(incline) || 0 } });
+      toast.success("Wpis zaktualizowany");
+    } else {
+      const log = addLog({ kind: "biezia", title: `Bieżnia ${kmN} km`, kcal: kcalN, minutes: timeN, meta: { km: kmN, incline: Number(incline) || 0 } });
+      const entry = { id: log.id, km: kmN, kcal: kcalN, incline: Number(incline) || 0, time: timeN, ts: log.ts };
+      persist([entry, ...entries]);
+      toast.success(`Bieżnia · ${kmN} km zapisane`);
+    }
     setKm(""); setKcal(""); setIncline(""); setTime("");
+    setEditingId(null);
     setOpen(false);
-    toast.success(`Bieżnia · ${entry.km} km zapisane`);
+  };
+
+  const startEdit = (e: typeof entries[number]) => {
+    setKm(e.km); setKcal(e.kcal); setIncline(e.incline); setTime(e.time);
+    setEditingId(e.id);
+    setOpen(true);
+  };
+  const remove = (id: string) => {
+    persist(entries.filter((e) => e.id !== id));
+    removeLog(id);
+    toast.success("Wpis usunięty");
   };
 
   return (
@@ -385,7 +449,7 @@ function TreadmillLog() {
         ) : (
           <div className="space-y-2.5">
             {entries.map((e) => (
-              <div key={e.ts} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
+              <div key={e.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--lime)]/15 text-[var(--lime)]">
                   <Activity className="h-4 w-4" />
                 </div>
@@ -394,6 +458,7 @@ function TreadmillLog() {
                   <p className="text-[11px] text-muted-foreground">Nachylenie {e.incline}% · {e.kcal} kcal</p>
                 </div>
                 <p className="text-[10px] text-muted-foreground">{new Date(e.ts).toLocaleDateString("pl")}</p>
+                <EntryActions onEdit={() => startEdit(e)} onDelete={() => remove(e.id)} />
               </div>
             ))}
           </div>
@@ -407,9 +472,9 @@ function TreadmillLog() {
             <div className="mt-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Cardio</p>
-                <h3 className="font-display text-2xl">Bieżnia</h3>
+                <h3 className="font-display text-2xl">{editingId ? "Edytuj bieżnię" : "Bieżnia"}</h3>
               </div>
-              <button onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+              <button onClick={() => { setOpen(false); setEditingId(null); }} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <TextNumField label="Dystans (km)" value={km} onChange={setKm} placeholder="5.0" step="0.1" />
@@ -418,7 +483,7 @@ function TreadmillLog() {
               <TextNumField label="Kalorie (kcal)" value={kcal} onChange={setKcal} placeholder="320" />
             </div>
             <button onClick={save} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] py-3.5 text-sm font-semibold text-background glow-primary">
-              Zapisz bieżnię
+              {editingId ? "Zapisz zmiany" : "Zapisz bieżnię"}
             </button>
           </div>
         </div>
@@ -484,8 +549,25 @@ function MonthView() {
   const month = today.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
-  const logged = new Set([2, 4, 6, 9, 11, 13, 16, 18, 20, 23, 25, 27]);
   const monthName = today.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
+  const [logs, setLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    const refresh = () => setLogs(readLogs());
+    refresh();
+    if (typeof window !== "undefined") {
+      window.addEventListener("gw_training_log_update", refresh);
+      return () => window.removeEventListener("gw_training_log_update", refresh);
+    }
+  }, []);
+  const byDay = new Map<number, Set<string>>();
+  logs.forEach((l) => {
+    const d = new Date(l.ts);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const set = byDay.get(d.getDate()) ?? new Set();
+      set.add(l.kind);
+      byDay.set(d.getDate(), set);
+    }
+  });
 
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
@@ -500,7 +582,7 @@ function MonthView() {
       <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
           if (d === null) return <span key={`e${i}`} />;
-          const isLogged = logged.has(d);
+          const kinds = byDay.get(d);
           const isToday = d === today.getDate();
           return (
             <div
@@ -510,20 +592,26 @@ function MonthView() {
               }`}
             >
               <span className={isToday ? "font-semibold" : "text-foreground/80"}>{d}</span>
-              {isLogged && (
-                <span className="mt-0.5 h-1 w-1 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--lime)]" />
+              {kinds && (
+                <div className="mt-0.5 flex gap-0.5">
+                  {[...kinds].slice(0, 4).map((k) => (
+                    <span key={k} className="h-1 w-1 rounded-full" style={{ background: KIND_COLOR[k as keyof typeof KIND_COLOR] }} />
+                  ))}
+                </div>
               )}
             </div>
           );
         })}
       </div>
-      <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--lime)]" />
-          Trening zalogowany
-        </span>
-        <span>Streak: 12 dni · {logged.size} sesji</span>
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+        {(["silownia","biezia","bieg","street","mind","sen"] as const).map((k) => (
+          <span key={k} className="inline-flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: KIND_COLOR[k] }} />
+            {k === "silownia" ? "Siłownia" : k === "biezia" ? "Bieżnia" : k === "bieg" ? "Bieg" : k === "street" ? "Street" : k === "mind" ? "Mind" : "Sen"}
+          </span>
+        ))}
       </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">{logs.length} sesji w bazie</p>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import { Moon, Brain, Wind, Plus, X, BookOpen, Sun, Footprints, Bath, Play } from "lucide-react";
+import { Moon, Brain, Wind, Plus, X, BookOpen, Sun, Footprints, Bath, Play, Pause, Square } from "lucide-react";
+import { addLog, removeLog, updateLog } from "@/lib/training-log";
+import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/regeneracja")({
   head: () => ({ meta: [{ title: "Regeneracja — GymWrld" }, { name: "description", content: "Sen, medytacja i mind health." }] }),
@@ -19,6 +21,41 @@ function Regeneracja() {
   const [openSleep, setOpenSleep] = useState(false);
   const [openMind, setOpenMind] = useState(false);
   const [moods, setMoods] = useState<number[]>([]);
+  const [active, setActive] = useState<{ type: MindType; targetMin: number; startedAt: number; paused: boolean; pausedAt?: number; elapsedBeforePause: number } | null>(null);
+  const [editing, setEditing] = useState<MindEntry | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
+  }, []);
+  const persistMind = (next: MindEntry[]) => {
+    setMind(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_mind", JSON.stringify(next));
+  };
+
+  const startSession = (type: MindType, targetMin: number) => {
+    setActive({ type, targetMin, startedAt: Date.now(), paused: false, elapsedBeforePause: 0 });
+  };
+  const finishSession = (mins: number) => {
+    if (!active) return;
+    const kcal = Math.round(mins * 2);
+    const log = addLog({ kind: "mind", title: active.type, kcal, minutes: mins });
+    const entry: MindEntry = { id: log.id, type: active.type, minutes: mins, note: "Ukończona sesja" };
+    persistMind([entry, ...mind]);
+    setActive(null);
+    toast.success(`Sesja ${active.type} · ${mins} min zapisana`);
+  };
+  const removeMind = (id: string) => {
+    persistMind(mind.filter((m) => m.id !== id));
+    removeLog(id);
+    toast.success("Wpis usunięty");
+  };
+  const saveEdit = (next: MindEntry) => {
+    persistMind(mind.map((m) => m.id === next.id ? next : m));
+    updateLog(next.id, { minutes: next.minutes, title: next.type });
+    setEditing(null);
+    toast.success("Wpis zaktualizowany");
+  };
   const todayMood = moods[moods.length - 1] ?? 0;
   const avgMood = moods.length ? moods.reduce((s, m) => s + m, 0) / moods.length : 0;
   const happiness = Math.round((avgMood / 5) * 100);
@@ -97,12 +134,12 @@ function Regeneracja() {
       {/* Mind sessions */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Mind health</h3>
       <div className="grid grid-cols-2 gap-3">
-        <SessionTile icon={<Brain className="h-5 w-5" />} label="Medytacja" desc="10 min · focus + spokój" min={10} onClick={() => addQuick(setMind, "medytacja", 10)} startable />
-        <SessionTile icon={<Wind className="h-5 w-5" />} label="Oddech 4-7-8" desc="5 min · układ nerwowy" min={5} onClick={() => addQuick(setMind, "oddech", 5)} startable />
-        <SessionTile icon={<BookOpen className="h-5 w-5" />} label="Journal" desc="5 min · zapis myśli" min={5} onClick={() => addQuick(setMind, "journal", 5)} />
-        <SessionTile icon={<Sun className="h-5 w-5" />} label="Afirmacja" desc="3 min · pozytywny start" min={3} onClick={() => addQuick(setMind, "afirmacja", 3)} startable />
-        <SessionTile icon={<Footprints className="h-5 w-5" />} label="Spacer" desc="15 min · ruch + powietrze" min={15} onClick={() => addQuick(setMind, "spacer", 15)} startable />
-        <SessionTile icon={<Bath className="h-5 w-5" />} label="Kąpiel relaksacyjna" desc="20 min · pełen reset" min={20} onClick={() => addQuick(setMind, "kapiel", 20)} />
+        <SessionTile icon={<Brain className="h-5 w-5" />} label="Medytacja" desc="10 min · focus + spokój" min={10} onQuick={() => quickAdd("medytacja", 10, mind, persistMind)} onStart={() => startSession("medytacja", 10)} />
+        <SessionTile icon={<Wind className="h-5 w-5" />} label="Oddech 4-7-8" desc="5 min · układ nerwowy" min={5} onQuick={() => quickAdd("oddech", 5, mind, persistMind)} onStart={() => startSession("oddech", 5)} />
+        <SessionTile icon={<BookOpen className="h-5 w-5" />} label="Journal" desc="5 min · zapis myśli" min={5} onQuick={() => quickAdd("journal", 5, mind, persistMind)} />
+        <SessionTile icon={<Sun className="h-5 w-5" />} label="Afirmacja" desc="3 min · pozytywny start" min={3} onQuick={() => quickAdd("afirmacja", 3, mind, persistMind)} onStart={() => startSession("afirmacja", 3)} />
+        <SessionTile icon={<Footprints className="h-5 w-5" />} label="Spacer" desc="15 min · ruch + powietrze" min={15} onQuick={() => quickAdd("spacer", 15, mind, persistMind)} onStart={() => startSession("spacer", 15)} />
+        <SessionTile icon={<Bath className="h-5 w-5" />} label="Kąpiel relaksacyjna" desc="20 min · pełen reset" min={20} onQuick={() => quickAdd("kapiel", 20, mind, persistMind)} />
       </div>
 
       <div className="mt-4 space-y-2.5">
@@ -123,6 +160,7 @@ function Regeneracja() {
             <div className="text-right">
               <p className="text-sm font-semibold">{m.minutes} min</p>
             </div>
+            <EntryActions onEdit={() => setEditing(m)} onDelete={() => removeMind(m.id)} />
           </div>
         ))}
       </div>
@@ -182,20 +220,33 @@ function Regeneracja() {
         setOpenSleep(false);
       }} />}
       {openMind && <MindSheet onClose={() => setOpenMind(false)} onSave={(t, m, note) => {
-        setMind((prev) => [{ id: String(Date.now()), type: t, minutes: m, note }, ...prev]);
+        const log = addLog({ kind: "mind", title: t, kcal: Math.round(m * 2), minutes: m });
+        persistMind([{ id: log.id, type: t, minutes: m, note }, ...mind]);
         toast.success(`Sesja zapisana · +30 XP`);
         setOpenMind(false);
       }} />}
+      {active && (
+        <ActiveMindSession
+          type={active.type}
+          targetMin={active.targetMin}
+          onCancel={() => setActive(null)}
+          onFinish={(mins) => finishSession(mins)}
+        />
+      )}
+      {editing && (
+        <EditMindSheet entry={editing} onClose={() => setEditing(null)} onSave={saveEdit} />
+      )}
     </main>
   );
 }
 
-function addQuick(setMind: React.Dispatch<React.SetStateAction<MindEntry[]>>, type: MindType, min: number) {
-  setMind((prev) => [{ id: String(Date.now()), type, minutes: min, note: "Szybka sesja" }, ...prev]);
+function quickAdd(type: MindType, min: number, mind: MindEntry[], persist: (n: MindEntry[]) => void) {
+  const log = addLog({ kind: "mind", title: type, kcal: Math.round(min * 2), minutes: min });
+  persist([{ id: log.id, type, minutes: min, note: "Szybka sesja" }, ...mind]);
   toast.success(`+${min} min ${type} · +20 XP`);
 }
 
-function SessionTile({ icon, label, desc, min, onClick, startable }: { icon: React.ReactNode; label: string; desc: string; min: number; onClick: () => void; startable?: boolean }) {
+function SessionTile({ icon, label, desc, min, onQuick, onStart }: { icon: React.ReactNode; label: string; desc: string; min: number; onQuick: () => void; onStart?: () => void }) {
   return (
     <div className="rounded-2xl glass p-4">
       <div className="flex items-start gap-3">
@@ -206,14 +257,90 @@ function SessionTile({ icon, label, desc, min, onClick, startable }: { icon: Rea
         </div>
       </div>
       <div className="mt-3 flex gap-2">
-        <button onClick={onClick} className="flex-1 rounded-xl bg-white/5 px-3 py-2 text-[11px] font-medium">
+        <button onClick={onQuick} className="flex-1 rounded-xl bg-white/5 px-3 py-2 text-[11px] font-medium">
           + {min} min
         </button>
-        {startable && (
-          <button onClick={onClick} className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-[var(--lime)] to-[var(--orange)] px-3 py-2 text-[11px] font-semibold text-background">
+        {onStart && (
+          <button onClick={onStart} className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-[var(--lime)] to-[var(--orange)] px-3 py-2 text-[11px] font-semibold text-background">
             <Play className="h-3 w-3" /> Start
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ActiveMindSession({ type, targetMin, onFinish, onCancel }: { type: MindType; targetMin: number; onFinish: (mins: number) => void; onCancel: () => void }) {
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(true);
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+  const targetSec = targetMin * 60;
+  const pct = Math.min(100, (seconds / targetSec) * 100);
+  return (
+    <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center bg-gradient-to-b from-[#1a0a3a] via-background to-background p-6">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Sesja w toku</p>
+      <h2 className="mt-1 font-display text-3xl capitalize">{type}</h2>
+      <div className="relative mt-8">
+        <Ring value={pct} size={220} stroke={14} color="var(--violet)">
+          <span className="font-display text-5xl tabular-nums">{mm}:{ss}</span>
+          <span className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">cel {targetMin} min</span>
+        </Ring>
+      </div>
+      <div className="mt-10 flex items-center gap-3">
+        <button onClick={() => setRunning((r) => !r)} className="grid h-14 w-14 place-items-center rounded-full bg-white/10">
+          {running ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </button>
+        <button
+          onClick={() => {
+            const mins = Math.max(1, Math.round(seconds / 60));
+            onFinish(mins);
+          }}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] px-6 py-3.5 text-sm font-semibold text-background glow-primary"
+        >
+          <Square className="h-4 w-4" /> Zakończ i zapisz
+        </button>
+        <button onClick={onCancel} className="grid h-14 w-14 place-items-center rounded-full bg-white/5 text-muted-foreground">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+      <p className="mt-6 text-[11px] text-muted-foreground">Pauza / Zakończ · sesja zapisuje się w historii</p>
+    </div>
+  );
+}
+
+function EditMindSheet({ entry, onClose, onSave }: { entry: MindEntry; onClose: () => void; onSave: (e: MindEntry) => void }) {
+  const [minutes, setMinutes] = useState(entry.minutes);
+  const [note, setNote] = useState(entry.note ?? "");
+  const [type, setType] = useState<MindType>(entry.type);
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Edytuj sesję</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {(["medytacja","oddech","journal","afirmacja","spacer","kapiel"] as const).map((t) => (
+            <button key={t} onClick={() => setType(t)} className={`rounded-2xl p-3 text-xs font-medium capitalize ${type === t ? "bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] text-white" : "bg-white/5 text-muted-foreground"}`}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4">
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Czas · {minutes} min</p>
+          <input type="range" min={1} max={60} value={minutes} onChange={(e) => setMinutes(parseInt(e.target.value))} className="w-full accent-[var(--lime)]" />
+        </div>
+        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notatka" className="mt-4 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none" />
+        <button onClick={() => onSave({ ...entry, minutes, note, type })} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] via-[var(--magenta)] to-[var(--violet)] py-3.5 text-sm font-semibold text-background glow-primary">
+          Zapisz zmiany
+        </button>
       </div>
     </div>
   );

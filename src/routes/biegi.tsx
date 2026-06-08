@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ChevronLeft, MapPin, Clock, Flame, Plus, Trophy, X, Calendar, Activity, Mountain } from "lucide-react";
+import { addLog, removeLog, updateLog } from "@/lib/training-log";
+import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/biegi")({
   head: () => ({ meta: [{ title: "Maraton — GymWrld" }, { name: "description", content: "Loguj swoje biegi, trasy i nadchodzące zawody." }] }),
@@ -22,6 +24,16 @@ function Biegi() {
   const [km, setKm] = useState<number | "">("");
   const [min, setMin] = useState<number | "">("");
   const [route, setRoute] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { const raw = localStorage.getItem("gw_runs"); if (raw) setRuns(JSON.parse(raw)); } catch {}
+  }, []);
+  const persist = (next: Run[]) => {
+    setRuns(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_runs", JSON.stringify(next));
+  };
 
   const save = () => {
     if (!km || !min) { toast.error("Podaj dystans i czas"); return; }
@@ -29,19 +41,36 @@ function Biegi() {
     const paceMin = minN / kmN;
     const m = Math.floor(paceMin);
     const s = Math.round((paceMin - m) * 60);
-    const r: Run = {
-      id: String(Date.now()),
-      km: kmN,
-      min: minN,
-      pace: `${m}:${String(s).padStart(2, "0")} /km`,
-      kcal: Math.round(kmN * 65),
-      date: new Date().toLocaleDateString("pl"),
-      route: route || "Trasa bez nazwy",
-    };
-    setRuns((p) => [r, ...p]);
+    const kcal = Math.round(kmN * 65);
+    const title = route || "Trasa bez nazwy";
+    if (editingId) {
+      persist(runs.map((r) => r.id === editingId ? { ...r, km: kmN, min: minN, pace: `${m}:${String(s).padStart(2,"0")} /km`, kcal, route: title } : r));
+      updateLog(editingId, { kcal, minutes: minN, title: `Bieg ${kmN} km`, meta: { route: title } });
+      toast.success("Bieg zaktualizowany");
+    } else {
+      const log = addLog({ kind: "bieg", title: `Bieg ${kmN} km`, kcal, minutes: minN, meta: { route: title } });
+      const r: Run = {
+        id: log.id, km: kmN, min: minN,
+        pace: `${m}:${String(s).padStart(2, "0")} /km`,
+        kcal, date: new Date(log.ts).toLocaleDateString("pl"), route: title,
+      };
+      persist([r, ...runs]);
+      toast.success(`Bieg ${kmN} km zapisany`);
+    }
     setKm(""); setMin(""); setRoute("");
+    setEditingId(null);
     setOpen(false);
-    toast.success(`Bieg ${kmN} km zapisany`);
+  };
+
+  const startEdit = (r: Run) => {
+    setKm(r.km); setMin(r.min); setRoute(r.route);
+    setEditingId(r.id);
+    setOpen(true);
+  };
+  const remove = (id: string) => {
+    persist(runs.filter((r) => r.id !== id));
+    removeLog(id);
+    toast.success("Bieg usunięty");
   };
 
   const total = runs.reduce((s, r) => s + r.km, 0);
@@ -116,6 +145,7 @@ function Biegi() {
                 <p className="text-[11px] text-muted-foreground">{r.km} km · {r.min} min · {r.pace} · {r.kcal} kcal</p>
               </div>
               <p className="text-[10px] text-muted-foreground">{r.date}</p>
+              <EntryActions onEdit={() => startEdit(r)} onDelete={() => remove(r.id)} />
             </div>
           ))}
         </div>
