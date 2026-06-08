@@ -79,57 +79,44 @@ function Index() {
         </div>
       </header>
 
-      {/* Sanctuary Hero */}
+      {/* Sanctuary Hero — clean stage so avatar feet anchor cleanly to the floor */}
       <section className="relative mt-5 overflow-hidden rounded-3xl">
-        <div className="relative aspect-[4/5] w-full">
-          <img
-            src={sanctuary}
-            alt="Twoje Sanktuarium"
-            className="absolute inset-0 h-full w-full object-cover"
-            width={1024}
-            height={1280}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-secondary/10" />
+        <div
+          className="relative aspect-[4/5] w-full"
+          style={{
+            background:
+              "radial-gradient(110% 70% at 50% 20%, rgba(167,139,250,0.20) 0%, transparent 60%), radial-gradient(120% 70% at 50% 100%, rgba(34,211,238,0.18) 0%, transparent 60%), linear-gradient(180deg,#0d0f1a 0%, #060810 75%, #000 100%)",
+          }}
+        >
+          {/* room ambience */}
+          <div aria-hidden className="absolute inset-x-6 top-6 h-40 rounded-2xl border border-white/5 bg-gradient-to-b from-white/[0.04] to-transparent" />
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black to-transparent" />
+          <div aria-hidden className="absolute inset-x-10 bottom-2 h-px bg-white/15" />
 
+          {/* GIANT logo — above level badge */}
+          <div className="pointer-events-none absolute inset-x-0 top-6 grid place-items-center">
+            <img
+              src={logoAsset.url}
+              alt="GymWrld"
+              className="h-24 w-auto"
+              style={{ filter: "brightness(0) invert(1) drop-shadow(0 6px 24px rgba(255,255,255,0.18))" }}
+            />
+          </div>
+
+          {/* Avatar — full-body SVG, feet anchored to floor line */}
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="absolute bottom-0 left-1/2 h-[112%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="absolute inset-x-0 bottom-0 mx-auto grid place-items-end cursor-pointer select-none transition-transform active:scale-[0.98]"
+            style={{ height: "82%" }}
           >
-            <img
-              src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
-              alt="Twój avatar"
-              className="pointer-events-none h-full object-contain"
-              style={{ filter: `${skinFilter(avatarCfg.skinTone)} drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
-              width={768}
-              height={1280}
-            />
-          </button>
-          {/* 360° hint — pinned to top-right, away from the avatar */}
-          <span className="pointer-events-none absolute right-4 top-20 inline-flex items-center gap-1 rounded-full glass px-2.5 py-1 text-[9px] uppercase tracking-widest text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
-            Dotknij · 360°
-          </span>
-
-          {/* Top overlay: branding + tagline */}
-          <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <img
-                src={logoAsset.url}
-                alt="GymWrld"
-                className="h-9 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]"
-                style={{ filter: "brightness(0) invert(1) drop-shadow(0 2px 12px rgba(0,0,0,0.7))" }}
-              />
-              <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1 text-[10px]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
-                Sanktuarium
-              </span>
+            <div
+              className="pointer-events-none"
+              style={{ filter: `drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
+            >
+              <AvatarSvg cfg={avatarCfg} />
             </div>
-            <h2 className="font-display text-[28px] leading-[1.05]">
-              Buduj <span className="text-gradient">swoją</span><br />najlepszą wersję.
-            </h2>
-          </div>
+          </button>
 
           {/* Bottom overlay: level + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
