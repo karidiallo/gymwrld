@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ChevronLeft, MapPin, Clock, Flame, Plus, Trophy, X, Calendar, Activity, Mountain } from "lucide-react";
 
 export const Route = createFileRoute("/biegi")({
-  head: () => ({ meta: [{ title: "Maraton & biegi — GymWrld" }, { name: "description", content: "Loguj swoje biegi, trasy i nadchodzące zawody." }] }),
+  head: () => ({ meta: [{ title: "Maraton — GymWrld" }, { name: "description", content: "Loguj swoje biegi, trasy i nadchodzące zawody." }] }),
   component: Biegi,
 });
 
@@ -52,7 +52,7 @@ function Biegi() {
         <Link to="/trening" className="grid h-9 w-9 place-items-center rounded-full glass">
           <ChevronLeft className="h-4 w-4" />
         </Link>
-        <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Maraton & biegi</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Maraton</span>
         <div className="h-9 w-9" />
       </header>
 
