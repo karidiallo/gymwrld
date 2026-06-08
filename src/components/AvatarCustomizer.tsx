@@ -278,6 +278,10 @@ function BigChip({ active, onClick, children }: { active: boolean; onClick: () =
   );
 }
 
+function Pill({ children }: { children: React.ReactNode }) {
+  return <span className="rounded-full bg-black/40 px-2.5 py-1 text-[10px] uppercase tracking-wider backdrop-blur">{children}</span>;
+}
+
 function BodyTile({ body, gender, nbBase, active, skinFilterCss, onClick }: { body: BodyType; gender: Gender; nbBase: "m" | "k"; active: boolean; skinFilterCss: string; onClick: () => void }) {
   const src = getAvatarImageFor(gender, body, nbBase);
   return (
