@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import { Moon, Brain, Wind, Heart, Plus, Sparkles, X } from "lucide-react";
+import { Moon, Brain, Wind, Heart, Plus, Sparkles, X, BookOpen, Sun, Music, Leaf } from "lucide-react";
 
 export const Route = createFileRoute("/regeneracja")({
   head: () => ({ meta: [{ title: "Regeneracja — GymWrld" }, { name: "description", content: "Sen, medytacja i mind health." }] }),
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/regeneracja")({
 });
 
 type SleepEntry = { date: string; hours: number; quality: number };
-type MindEntry = { id: string; type: "medytacja" | "oddech" | "journal"; minutes: number; note?: string };
+type MindEntry = { id: string; type: "medytacja" | "oddech" | "journal" | "wdziecznosc" | "natura" | "muzyka"; minutes: number; note?: string };
 
 function Regeneracja() {
   const [sleep, setSleep] = useState<SleepEntry[]>([
@@ -100,14 +100,24 @@ function Regeneracja() {
       <div className="grid grid-cols-3 gap-2">
         <SessionPill icon={<Brain className="h-4 w-4" />} label="Medytacja" min={10} onClick={() => addQuick(setMind, "medytacja", 10)} />
         <SessionPill icon={<Wind className="h-4 w-4" />} label="Oddech 4-7-8" min={5} onClick={() => addQuick(setMind, "oddech", 5)} />
-        <SessionPill icon={<Sparkles className="h-4 w-4" />} label="Journal" min={5} onClick={() => addQuick(setMind, "journal", 5)} />
+        <SessionPill icon={<BookOpen className="h-4 w-4" />} label="Journal" min={5} onClick={() => addQuick(setMind, "journal", 5)} />
+      </div>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <SessionPill icon={<Sun className="h-4 w-4" />} label="Wdzięczność" min={3} onClick={() => addQuick(setMind, "wdziecznosc", 3)} />
+        <SessionPill icon={<Leaf className="h-4 w-4" />} label="Spacer w naturze" min={15} onClick={() => addQuick(setMind, "natura", 15)} />
+        <SessionPill icon={<Music className="h-4 w-4" />} label="Muzykoterapia" min={10} onClick={() => addQuick(setMind, "muzyka", 10)} />
       </div>
 
       <div className="mt-4 space-y-2.5">
         {mind.map((m) => (
           <div key={m.id} className="flex items-center gap-3 rounded-2xl glass p-3.5">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--lime)]/15 text-[var(--lime)]">
-              {m.type === "medytacja" ? <Brain className="h-4 w-4" /> : m.type === "oddech" ? <Wind className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+              {m.type === "medytacja" ? <Brain className="h-4 w-4" />
+                : m.type === "oddech" ? <Wind className="h-4 w-4" />
+                : m.type === "journal" ? <BookOpen className="h-4 w-4" />
+                : m.type === "wdziecznosc" ? <Sun className="h-4 w-4" />
+                : m.type === "natura" ? <Leaf className="h-4 w-4" />
+                : <Music className="h-4 w-4" />}
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium capitalize">{m.type}</p>
