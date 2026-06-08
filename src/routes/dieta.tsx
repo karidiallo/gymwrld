@@ -10,30 +10,32 @@ export const Route = createFileRoute("/dieta")({
   component: Dieta,
 });
 
+type Meal = { id: string; icon: string; name: string; items: string; kcal: number; p?: number; c?: number; f?: number };
+
 function Dieta() {
   const [open, setOpen] = useState(false);
-  const [meals, setMeals] = useState([
-    { id: "m1", icon: "coffee", name: "Śniadanie", items: "Owsianka, jagody, masło orzechowe", kcal: 520 },
-    { id: "m2", icon: "lunch", name: "Obiad", items: "Kurczak, ryż basmati, brokuły", kcal: 680 },
+  const [meals, setMeals] = useState<Meal[]>([
+    { id: "m1", icon: "coffee", name: "Śniadanie", items: "Owsianka, jagody, masło orzechowe", kcal: 520, p: 22, c: 68, f: 18 },
+    { id: "m2", icon: "lunch", name: "Obiad", items: "Kurczak, ryż basmati, brokuły", kcal: 680, p: 52, c: 78, f: 14 },
     { id: "m3", icon: "soup", name: "Kolacja", items: "", kcal: 0 },
-    { id: "m4", icon: "snack", name: "Przekąski", items: "Jogurt grecki, banan", kcal: 420 },
+    { id: "m4", icon: "snack", name: "Przekąski", items: "Jogurt grecki, banan", kcal: 420, p: 28, c: 48, f: 10 },
   ]);
   const eaten = meals.reduce((s, m) => s + m.kcal, 0);
   const goal = 2400;
   const remaining = goal - eaten;
 
-  const addMeal = (data: { name: string; items: string; kcal: number; slot: string }) => {
+  const addMeal = (data: { name: string; items: string; kcal: number; slot: string; p?: number; c?: number; f?: number }) => {
     setMeals((prev) => {
       // try to fill an empty matching slot
       const idx = prev.findIndex((m) => m.name.toLowerCase() === data.slot.toLowerCase() && m.kcal === 0);
       if (idx >= 0) {
         const next = [...prev];
-        next[idx] = { ...next[idx], items: data.items || data.name, kcal: data.kcal };
+        next[idx] = { ...next[idx], items: data.items || data.name, kcal: data.kcal, p: data.p, c: data.c, f: data.f };
         return next;
       }
       return [
         ...prev,
-        { id: `m${Date.now()}`, icon: "snack", name: data.name || data.slot, items: data.items, kcal: data.kcal },
+        { id: `m${Date.now()}`, icon: "snack", name: data.name || data.slot, items: data.items, kcal: data.kcal, p: data.p, c: data.c, f: data.f },
       ];
     });
     toast.success(`Dodano posiłek · +${data.kcal} kcal`);
@@ -97,7 +99,7 @@ function Dieta() {
             m.icon === "soup" ? <Soup className="h-4 w-4" /> :
             <Cookie className="h-4 w-4" />;
           return (
-            <Meal key={m.id} icon={icon} name={m.name} items={m.items} kcal={m.kcal} empty={m.kcal === 0} onClick={() => setOpen(true)} />
+            <MealRow key={m.id} icon={icon} name={m.name} items={m.items} kcal={m.kcal} p={m.p} c={m.c} f={m.f} empty={m.kcal === 0} onClick={() => setOpen(true)} />
           );
         })}
       </div>
@@ -147,13 +149,18 @@ function Macro({ label, value, goal, color, unit }: { label: string; value: numb
   );
 }
 
-function Meal({ icon, name, items, kcal, empty, onClick }: { icon: React.ReactNode; name: string; items: string; kcal: number; empty?: boolean; onClick?: () => void }) {
+function MealRow({ icon, name, items, kcal, p, c, f, empty, onClick }: { icon: React.ReactNode; name: string; items: string; kcal: number; p?: number; c?: number; f?: number; empty?: boolean; onClick?: () => void }) {
   return (
     <button onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition-colors hover:bg-white/[0.04]">
       <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">{icon}</div>
       <div className="flex-1">
         <p className="text-sm font-medium">{name}</p>
         <p className={`text-xs ${empty ? "text-muted-foreground/70" : "text-muted-foreground"}`}>{empty ? "Dodaj posiłek" : items}</p>
+        {!empty && (p || c || f) && (
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground/80">
+            <span className="text-[var(--magenta)]">B:</span> {p ?? 0}g · <span className="text-[var(--orange)]">W:</span> {c ?? 0}g · <span className="text-[var(--lime)]">T:</span> {f ?? 0}g
+          </p>
+        )}
       </div>
       <div className="text-right">
         <p className="text-sm font-semibold">{empty ? "+" : `${kcal}`}</p>
@@ -164,22 +171,25 @@ function Meal({ icon, name, items, kcal, empty, onClick }: { icon: React.ReactNo
 }
 
 const SUGGESTIONS = [
-  { name: "Owsianka z owocami", kcal: 380, tag: "Śniadanie" },
-  { name: "Omlet z warzywami", kcal: 420, tag: "Śniadanie" },
-  { name: "Kurczak z ryżem", kcal: 620, tag: "Obiad" },
-  { name: "Łosoś z batatem", kcal: 580, tag: "Obiad" },
-  { name: "Sałatka z tuńczykiem", kcal: 340, tag: "Kolacja" },
-  { name: "Twaróg z miodem", kcal: 280, tag: "Kolacja" },
-  { name: "Shake białkowy", kcal: 220, tag: "Przekąska" },
-  { name: "Jogurt grecki + orzechy", kcal: 260, tag: "Przekąska" },
-  { name: "Banan + masło orzechowe", kcal: 240, tag: "Przekąska" },
-  { name: "Power Bowl", kcal: 540, tag: "Obiad" },
+  { name: "Owsianka z owocami", kcal: 380, tag: "Śniadanie", p: 14, c: 58, f: 9 },
+  { name: "Omlet z warzywami", kcal: 420, tag: "Śniadanie", p: 28, c: 12, f: 28 },
+  { name: "Kurczak z ryżem", kcal: 620, tag: "Obiad", p: 52, c: 72, f: 12 },
+  { name: "Łosoś z batatem", kcal: 580, tag: "Obiad", p: 42, c: 56, f: 18 },
+  { name: "Sałatka z tuńczykiem", kcal: 340, tag: "Kolacja", p: 32, c: 18, f: 16 },
+  { name: "Twaróg z miodem", kcal: 280, tag: "Kolacja", p: 28, c: 24, f: 6 },
+  { name: "Shake białkowy", kcal: 220, tag: "Przekąska", p: 30, c: 12, f: 4 },
+  { name: "Jogurt grecki + orzechy", kcal: 260, tag: "Przekąska", p: 18, c: 14, f: 14 },
+  { name: "Banan + masło orzechowe", kcal: 240, tag: "Przekąska", p: 6, c: 32, f: 10 },
+  { name: "Power Bowl", kcal: 540, tag: "Obiad", p: 38, c: 58, f: 16 },
 ];
 
-function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { name: string; items: string; kcal: number; slot: string }) => void }) {
+function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { name: string; items: string; kcal: number; slot: string; p?: number; c?: number; f?: number }) => void }) {
   const [slot, setSlot] = useState("Śniadanie");
   const [name, setName] = useState("");
   const [kcal, setKcal] = useState<number | "">("");
+  const [p, setP] = useState<number | "">("");
+  const [c, setC] = useState<number | "">("");
+  const [f, setF] = useState<number | "">("");
   const [query, setQuery] = useState("");
   const filtered = SUGGESTIONS.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()));
 
@@ -226,12 +236,12 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
           {filtered.map((s) => (
             <button
               key={s.name}
-              onClick={() => onAdd({ name: s.tag, items: s.name, kcal: s.kcal, slot })}
+              onClick={() => onAdd({ name: s.tag, items: s.name, kcal: s.kcal, slot, p: s.p, c: s.c, f: s.f })}
               className="flex w-full items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2.5 text-left transition hover:bg-white/[0.06]"
             >
               <div>
                 <p className="text-sm font-medium">{s.name}</p>
-                <p className="text-[10px] text-muted-foreground">{s.tag}</p>
+                <p className="text-[10px] text-muted-foreground">{s.tag} · B:{s.p}g · W:{s.c}g · T:{s.f}g</p>
               </div>
               <span className="text-xs font-semibold text-[var(--orange)]">+{s.kcal} kcal</span>
             </button>
@@ -257,10 +267,38 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
             placeholder="Kalorie (kcal)"
             className="w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground"
           />
+          <div className="grid grid-cols-3 gap-2">
+            <input
+              type="number"
+              value={p}
+              onChange={(e) => setP(e.target.value ? parseInt(e.target.value) : "")}
+              placeholder="B (g)"
+              className="rounded-2xl bg-white/5 px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
+            />
+            <input
+              type="number"
+              value={c}
+              onChange={(e) => setC(e.target.value ? parseInt(e.target.value) : "")}
+              placeholder="W (g)"
+              className="rounded-2xl bg-white/5 px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
+            />
+            <input
+              type="number"
+              value={f}
+              onChange={(e) => setF(e.target.value ? parseInt(e.target.value) : "")}
+              placeholder="T (g)"
+              className="rounded-2xl bg-white/5 px-3 py-3 text-sm outline-none placeholder:text-muted-foreground"
+            />
+          </div>
           <button
             onClick={() => {
               if (!name || !kcal) return;
-              onAdd({ name: slot, items: name, kcal: Number(kcal), slot });
+              onAdd({
+                name: slot, items: name, kcal: Number(kcal), slot,
+                p: p ? Number(p) : undefined,
+                c: c ? Number(c) : undefined,
+                f: f ? Number(f) : undefined,
+              });
             }}
             disabled={!name || !kcal}
             className="mt-2 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
