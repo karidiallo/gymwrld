@@ -318,6 +318,14 @@ function TreadmillLog() {
   const [time, setTime] = useState<number | "">("");
   const [entries, setEntries] = useState<{ km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_treadmill");
+      if (raw) setEntries(JSON.parse(raw));
+    } catch {}
+  }, []);
+
   const save = () => {
     if (!km || !time) {
       toast.error("Podaj dystans i czas");
@@ -330,7 +338,9 @@ function TreadmillLog() {
       time: Number(time),
       ts: Date.now(),
     };
-    setEntries((p) => [entry, ...p]);
+    const next = [entry, ...entries];
+    setEntries(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_treadmill", JSON.stringify(next));
     setKm(""); setKcal(""); setIncline(""); setTime("");
     setOpen(false);
     toast.success(`Bieżnia · ${entry.km} km zapisane`);
