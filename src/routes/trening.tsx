@@ -216,7 +216,7 @@ function Trening() {
               </Link>
             ))}
           </div>
-          <Link to="/cwiczenia" className="mt-2.5 flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/15 p-3 text-xs text-muted-foreground hover:bg-white/[0.03]">
+          <Link to="/workouts" className="mt-2.5 flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/15 p-3 text-xs text-muted-foreground hover:bg-white/[0.03]">
             Więcej zestawów ćwiczeń <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </>
