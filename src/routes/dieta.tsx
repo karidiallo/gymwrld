@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import foodHero from "@/assets/food-hero.jpg";
-import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, Sparkles } from "lucide-react";
+import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/dieta")({
   head: () => ({ meta: [{ title: "Dieta — GymWrld" }, { name: "description", content: "Twój dzienny plan żywieniowy." }] }),
@@ -74,23 +74,30 @@ function Dieta() {
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Dzisiaj</p>
           <h1 className="mt-1 font-display text-3xl">Dieta</h1>
         </div>
-        <button onClick={() => setOpen(true)} className="rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-4 py-2 text-xs font-medium text-white glow-primary">
-          <Plus className="inline h-3.5 w-3.5" /> Dodaj posiłek
-        </button>
+        <div className="flex items-center gap-2">
+          <Link to="/przepisy" className="rounded-full bg-white/5 px-3 py-2 text-xs font-medium ring-1 ring-white/10 hover:bg-white/10">
+            <BookOpen className="inline h-3.5 w-3.5" /> Przepisy
+          </Link>
+          <button onClick={() => setOpen(true)} className="rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-3 py-2 text-xs font-medium text-white glow-primary">
+            <Plus className="inline h-3.5 w-3.5" /> Posiłek
+          </button>
+        </div>
       </header>
 
-      {/* Food hero */}
-      <section className="relative mt-5 overflow-hidden rounded-3xl">
-        <img src={foodHero} alt="Zdrowy posiłek" className="h-44 w-full object-cover" width={1280} height={896} loading="lazy" />
+      {/* Food hero — links to recipe detail */}
+      <Link to="/przepisy" search={{ id: "power-bowl" }} className="relative mt-5 block overflow-hidden rounded-3xl transition-transform active:scale-[0.99]">
+        <img src={foodHero} alt="Power Bowl — przepis dnia" className="h-44 w-full object-cover" width={1280} height={896} loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-x-4 bottom-3 flex items-end justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Polecane dziś</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Polecane dziś · Przepis</p>
             <p className="font-display text-lg text-white">Power Bowl · 540 kcal</p>
           </div>
-          <span className="rounded-full bg-[var(--lime)]/90 px-3 py-1 text-[10px] font-semibold text-background">+45g białka</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/90 px-3 py-1 text-[10px] font-semibold text-background">
+            +45g białka <ChevronRight className="h-3 w-3" />
+          </span>
         </div>
-      </section>
+      </Link>
 
       {/* Summary */}
       <section className="mt-5 rounded-3xl glass p-5">
@@ -115,7 +122,12 @@ function Dieta() {
       </section>
 
       {/* Meals */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Posiłki</h3>
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Posiłki</h3>
+        <Link to="/przepisy" className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[var(--lime)]/20 to-[var(--orange)]/20 px-3 py-1.5 text-[11px] font-medium ring-1 ring-[var(--lime)]/30">
+          <BookOpen className="h-3.5 w-3.5" /> Przepisy <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
       <div className="space-y-2.5">
         {meals.map((m) => {
           const icon =

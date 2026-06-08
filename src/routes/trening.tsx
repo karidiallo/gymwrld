@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import gymHero from "@/assets/gym-hero.jpg";
@@ -7,7 +7,7 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, BookOpen, Library } from "lucide-react";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -152,6 +152,22 @@ function Trening() {
         <CatBtn active={cat === "kalistenika"} onClick={() => setCat("kalistenika")} icon={<Activity className="h-4 w-4" />} label="Kalistenika" />
         <CatBtn active={cat === "outdoor"} onClick={() => setCat("outdoor")} icon={<Mountain className="h-4 w-4" />} label="Outdoor" />
       </div>
+
+      {/* Exercise library banner */}
+      <Link
+        to="/cwiczenia"
+        className="mt-5 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[var(--magenta)]/20 via-[var(--orange)]/15 to-[var(--lime)]/20 p-4 transition-transform active:scale-[0.99]"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-background/40">
+          <Library className="h-6 w-6 text-[var(--lime)]" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Biblioteka</p>
+          <p className="font-display text-lg leading-tight">Baza ćwiczeń</p>
+          <p className="text-[11px] text-muted-foreground">Maszyny · Hantle · Kettle · Sztanga · Technika i typowe błędy</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </Link>
 
       <div className="mt-4 space-y-2.5">
         {plans[cat].map((p, i) => (

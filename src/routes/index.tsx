@@ -7,7 +7,7 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarViewer } from "@/components/AvatarViewer";
-import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
+import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,6 +24,7 @@ function Index() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
+  const [profile, setProfile] = useState<{ name?: string; level?: number; xp?: number; streak?: number }>({});
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
       navigate({ to: "/onboarding" });
@@ -33,6 +34,13 @@ function Index() {
       try {
         const raw = localStorage.getItem("gw_avatar");
         if (raw) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(raw) });
+      } catch {}
+      try {
+        const raw = localStorage.getItem("gw_profile");
+        if (raw) {
+          const p = JSON.parse(raw);
+          setProfile({ name: p.name, level: p.level, xp: p.xp, streak: p.streak });
+        }
       } catch {}
     }
   }, [navigate]);
@@ -57,15 +65,17 @@ function Index() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <Link to="/profil" className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] font-display text-background">A</div>
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] font-display text-background">
+            {(profile.name?.[0] ?? "?").toUpperCase()}
+          </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Witaj ponownie</p>
-            <h1 className="text-xl font-display">Aleks</h1>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Witaj{profile.name ? " ponownie" : ""}</p>
+            <h1 className="text-xl font-display">{profile.name || "Nowa postać"}</h1>
           </div>
         </Link>
         <div className="flex items-center gap-2">
-          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label="Lvl 14" />
-          <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label="12 dni" />
+          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.level ?? 1}`} />
+          <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label={`${profile.streak ?? 0} dni`} />
         </div>
       </header>
 
@@ -85,20 +95,22 @@ function Index() {
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="animate-float absolute -bottom-2 left-1/2 h-[92%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="animate-float absolute -bottom-2 left-1/2 h-[96%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
             <img
-              src={getAvatarImage(avatarCfg.gender, avatarCfg.body)}
+              src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
               alt="Twój avatar"
               className="pointer-events-none h-full object-contain"
-              style={{ filter: `drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
+              style={{ filter: `${skinFilter(avatarCfg.skinTone)} drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
               width={768}
               height={1280}
             />
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-widest text-muted-foreground">
-              Dotknij · 360°
-            </span>
           </button>
+          {/* 360° hint — pinned to top-right, away from the avatar */}
+          <span className="pointer-events-none absolute right-4 top-20 inline-flex items-center gap-1 rounded-full glass px-2.5 py-1 text-[9px] uppercase tracking-widest text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
+            Dotknij · 360°
+          </span>
 
           {/* Top overlay: branding + tagline */}
           <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
@@ -117,10 +129,10 @@ function Index() {
           {/* Bottom overlay: level + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom 14</p>
-              <p className="text-xs font-medium">1 240 / 2 000 XP</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom {profile.level ?? 1}</p>
+              <p className="text-xs font-medium">{profile.xp ?? 0} / {2000} XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
+                <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
               </div>
             </div>
             <button

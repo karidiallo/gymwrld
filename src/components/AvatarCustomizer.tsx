@@ -5,10 +5,18 @@ import {
   BODY_LABELS,
   GENDER_LABELS,
   OUTFIT_TINTS,
-  getAvatarImage,
+  SKIN_TONES,
+  HAIR_COLORS,
+  EYE_COLORS,
+  getAvatarImageFor,
+  skinFilter,
+  HeadPortrait,
   type AvatarConfig,
   type BodyType,
   type Gender,
+  type HairStyle,
+  type FacialHair,
+  type EyeShape,
 } from "./AvatarSvg";
 
 const BODY_BY_GENDER: Record<Gender, BodyType[]> = {
@@ -16,6 +24,30 @@ const BODY_BY_GENDER: Record<Gender, BodyType[]> = {
   k: ["slim", "athletic", "medium", "muscular", "curvy"],
   nb: ["slim", "athletic", "medium", "muscular", "curvy"],
 };
+
+const HAIR_STYLES: { id: HairStyle; label: string }[] = [
+  { id: "short", label: "Krótkie" },
+  { id: "buzz", label: "Na jeża" },
+  { id: "fade", label: "Fade" },
+  { id: "long", label: "Długie" },
+  { id: "ponytail", label: "Kucyk" },
+  { id: "bun", label: "Kok" },
+  { id: "curly", label: "Kręcone" },
+  { id: "bald", label: "Łysina" },
+];
+
+const FACIAL_HAIR: { id: FacialHair; label: string }[] = [
+  { id: "none", label: "Bez" },
+  { id: "stubble", label: "Zarost" },
+  { id: "moustache", label: "Wąsy" },
+  { id: "beard", label: "Broda" },
+];
+
+const EYE_SHAPES: { id: EyeShape; label: string }[] = [
+  { id: "almond", label: "Migdał" },
+  { id: "round", label: "Okrągłe" },
+  { id: "narrow", label: "Wąskie" },
+];
 
 export function AvatarCustomizer({
   initial, onClose, onSave, embedded = false,
@@ -27,7 +59,8 @@ export function AvatarCustomizer({
 }) {
   const [cfg, setCfg] = useState<AvatarConfig>({ ...DEFAULT_AVATAR, ...(initial ?? {}) });
   const set = <K extends keyof AvatarConfig>(k: K, v: AvatarConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
-  const img = getAvatarImage(cfg.gender, cfg.body);
+  const isFem = cfg.gender === "k" || (cfg.gender === "nb" && cfg.nbBase === "k");
+  const img = getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m");
 
   const content = (
     <>
@@ -43,26 +76,30 @@ export function AvatarCustomizer({
         </div>
       )}
 
-      {/* Realistic preview */}
+      {/* Preview: body + head close-up */}
       <div
-        className="relative mt-4 overflow-hidden rounded-3xl border border-white/10"
+        className="relative mt-4 grid grid-cols-[1fr_140px] gap-3 overflow-hidden rounded-3xl border border-white/10 p-3"
         style={{
           background: `radial-gradient(120% 80% at 50% 0%, ${cfg.outfitTint}33 0%, transparent 60%), linear-gradient(180deg,#0f1726 0%,#070a13 100%)`,
         }}
       >
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="relative grid h-[340px] place-items-end">
+        <div className="relative grid h-[320px] place-items-end overflow-hidden rounded-2xl">
           <img
             src={img}
-            alt="Podgląd postaci"
+            alt="Podgląd sylwetki"
             className="h-full w-auto object-contain"
-            style={{ filter: `drop-shadow(0 24px 28px ${cfg.outfitTint}55)` }}
+            style={{ filter: `${skinFilter(cfg.skinTone)} drop-shadow(0 24px 28px ${cfg.outfitTint}55)` }}
           />
+          <div className="absolute left-2 top-2 rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-wider">Sylwetka</div>
         </div>
-        <div className="absolute left-3 top-3 rounded-full glass px-2.5 py-1 text-[10px] uppercase tracking-wider">
-          {GENDER_LABELS[cfg.gender]} · {BODY_LABELS[cfg.body]}
+        <div className="relative grid place-items-center rounded-2xl bg-black/20">
+          <HeadPortrait cfg={cfg} size={130} />
+          <div className="absolute left-2 top-2 rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-wider">Twarz</div>
         </div>
       </div>
+      <p className="mt-2 text-center text-[10px] text-muted-foreground">
+        {GENDER_LABELS[cfg.gender]}{cfg.gender === "nb" ? ` (${cfg.nbBase === "k" ? "♀" : "♂"})` : ""} · {BODY_LABELS[cfg.body]}
+      </p>
 
       <div className="mt-5 space-y-5">
         <Section title="Płeć">
@@ -74,15 +111,105 @@ export function AvatarCustomizer({
               </BigChip>
             ))}
           </div>
+          {cfg.gender === "nb" && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <BigChip active={cfg.nbBase === "m"} onClick={() => set("nbBase", "m")}><span>Baza ♂</span></BigChip>
+              <BigChip active={cfg.nbBase === "k"} onClick={() => set("nbBase", "k")}><span>Baza ♀</span></BigChip>
+            </div>
+          )}
         </Section>
 
         <Section title="Typ sylwetki">
           <div className="grid grid-cols-5 gap-1.5">
             {BODY_BY_GENDER[cfg.gender].map((b) => (
-              <BodyTile key={b} body={b} gender={cfg.gender} active={cfg.body === b} onClick={() => set("body", b)} />
+              <BodyTile key={b} body={b} gender={cfg.gender} nbBase={cfg.nbBase ?? "m"} skinFilterCss={skinFilter(cfg.skinTone)} active={cfg.body === b} onClick={() => set("body", b)} />
             ))}
           </div>
         </Section>
+
+        <Section title="Kolor skóry">
+          <div className="flex flex-wrap gap-2">
+            {SKIN_TONES.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => set("skinTone", s.id)}
+                title={s.label}
+                aria-label={s.label}
+                style={{ background: s.hex, boxShadow: cfg.skinTone === s.id ? `0 0 0 2px #fff` : undefined }}
+                className={`h-10 w-10 rounded-full ring-1 ring-white/10 transition ${cfg.skinTone === s.id ? "scale-110" : ""}`}
+              />
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Fryzura">
+          <div className="grid grid-cols-4 gap-2">
+            {HAIR_STYLES.map((h) => (
+              <button
+                key={h.id}
+                onClick={() => set("hairStyle", h.id)}
+                className={`flex flex-col items-center gap-1 rounded-xl p-1.5 text-[10px] transition ${
+                  cfg.hairStyle === h.id ? "bg-primary/15 ring-1 ring-primary" : "bg-white/[0.04] hover:bg-white/[0.08]"
+                }`}
+              >
+                <span className="grid h-14 w-full place-items-center overflow-hidden rounded-lg bg-black/30">
+                  <HeadPortrait cfg={{ ...cfg, hairStyle: h.id }} size={56} />
+                </span>
+                <span className="text-muted-foreground">{h.label}</span>
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Kolor włosów">
+          <div className="flex flex-wrap gap-2">
+            {HAIR_COLORS.map((c) => (
+              <button
+                key={c}
+                onClick={() => set("hairColor", c)}
+                aria-label={c}
+                style={{ background: c, boxShadow: cfg.hairColor === c ? `0 0 0 2px #fff` : undefined }}
+                className={`h-8 w-8 rounded-full ring-1 ring-white/10 ${cfg.hairColor === c ? "scale-110" : ""}`}
+              />
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Kształt oczu">
+          <div className="grid grid-cols-3 gap-2">
+            {EYE_SHAPES.map((e) => (
+              <BigChip key={e.id} active={cfg.eyeShape === e.id} onClick={() => set("eyeShape", e.id)}>
+                <span>{e.label}</span>
+              </BigChip>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Kolor oczu">
+          <div className="flex flex-wrap gap-2">
+            {EYE_COLORS.map((c) => (
+              <button
+                key={c}
+                onClick={() => set("eyeColor", c)}
+                aria-label={c}
+                style={{ background: c, boxShadow: cfg.eyeColor === c ? `0 0 0 2px #fff` : undefined }}
+                className={`h-8 w-8 rounded-full ring-1 ring-white/10 ${cfg.eyeColor === c ? "scale-110" : ""}`}
+              />
+            ))}
+          </div>
+        </Section>
+
+        {!isFem && (
+          <Section title="Zarost">
+            <div className="grid grid-cols-4 gap-2">
+              {FACIAL_HAIR.map((f) => (
+                <BigChip key={f.id} active={cfg.facialHair === f.id} onClick={() => set("facialHair", f.id)}>
+                  <span>{f.label}</span>
+                </BigChip>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Akcent stroju">
           <div className="flex flex-wrap gap-2">
@@ -90,9 +217,9 @@ export function AvatarCustomizer({
               <button
                 key={c}
                 onClick={() => set("outfitTint", c)}
+                aria-label={c}
                 style={{ background: c, boxShadow: cfg.outfitTint === c ? `0 0 0 2px #fff, 0 0 16px ${c}` : undefined }}
                 className={`h-9 w-9 rounded-full transition ${cfg.outfitTint === c ? "scale-110" : "ring-1 ring-white/10"}`}
-                aria-label={c}
               />
             ))}
           </div>
@@ -161,8 +288,8 @@ function BigChip({ active, onClick, children }: { active: boolean; onClick: () =
   );
 }
 
-function BodyTile({ body, gender, active, onClick }: { body: BodyType; gender: Gender; active: boolean; onClick: () => void }) {
-  const src = getAvatarImage(gender, body);
+function BodyTile({ body, gender, nbBase, active, skinFilterCss, onClick }: { body: BodyType; gender: Gender; nbBase: "m" | "k"; active: boolean; skinFilterCss: string; onClick: () => void }) {
+  const src = getAvatarImageFor(gender, body, nbBase);
   return (
     <button
       onClick={onClick}
@@ -171,7 +298,7 @@ function BodyTile({ body, gender, active, onClick }: { body: BodyType; gender: G
       }`}
     >
       <div className="grid h-20 place-items-end bg-gradient-to-b from-transparent to-black/40">
-        <img src={src} alt={BODY_LABELS[body]} className="h-full w-auto object-contain" loading="lazy" />
+        <img src={src} alt={BODY_LABELS[body]} className="h-full w-auto object-contain" loading="lazy" style={{ filter: skinFilterCss }} />
       </div>
       <p className="px-1 py-1 text-center text-[9px] font-medium leading-tight">{BODY_LABELS[body]}</p>
     </button>

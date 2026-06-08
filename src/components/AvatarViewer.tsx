@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { X, Lock } from "lucide-react";
-import { getAvatarImage, type AvatarConfig } from "./AvatarSvg";
+import { getAvatarImageFor, skinFilter, type AvatarConfig } from "./AvatarSvg";
 
 const ROOMS = [
   { id: "starter", name: "Pokój startowy", bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
@@ -57,7 +57,12 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
             transition: "transform 80ms linear",
           }}
         >
-          <img src={getAvatarImage(cfg.gender, cfg.body)} alt="Avatar" className="h-full w-auto object-contain" />
+          <img
+            src={getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m")}
+            alt="Avatar"
+            className="h-full w-auto object-contain"
+            style={{ filter: skinFilter(cfg.skinTone) }}
+          />
         </div>
       </div>
 
