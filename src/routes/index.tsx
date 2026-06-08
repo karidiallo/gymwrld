@@ -7,6 +7,7 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
+import { awardXp } from "@/lib/training-log";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,7 +23,7 @@ function Index() {
   const navigate = useNavigate();
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [profile, setProfile] = useState<{ name?: string; level?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
+  const [profile, setProfile] = useState<{ name?: string; lvl?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
       navigate({ to: "/onboarding" });
@@ -33,7 +34,7 @@ function Index() {
         const raw = localStorage.getItem("gw_profile");
         if (raw) {
           const p = JSON.parse(raw);
-          setProfile({ name: p.name, level: p.level, xp: p.xp, streak: p.streak, stats: p.stats });
+          setProfile({ name: p.name, lvl: p.lvl, xp: p.xp, streak: p.streak, stats: p.stats });
         }
       } catch {}
     };
@@ -57,7 +58,11 @@ function Index() {
       qs.map((q) => {
         if (q.id !== id) return q;
         const done = !q.done;
-        if (done) toast.success(`Zadanie ukończone · ${q.reward}`);
+        if (done) {
+          const xp = parseInt(q.reward.replace(/[^\d]/g, "")) || 60;
+          awardXp(xp, q.title);
+          toast.success(`Zadanie ukończone · ${q.reward}`);
+        }
         return { ...q, done, progress: done ? 1 : q.progress };
       }),
     );
@@ -76,7 +81,7 @@ function Index() {
           />
         </Link>
         <div className="flex items-center gap-2">
-          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.level ?? 1}`} />
+          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.lvl ?? 1}`} />
           <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label={`${profile.streak ?? 0} dni`} />
         </div>
       </header>
@@ -116,8 +121,8 @@ function Index() {
             </p>
           </div>
 
-          {/* Headline at waist height */}
-          <div className="pointer-events-none absolute inset-x-5 top-[58%] z-10">
+          {/* Headline above level box */}
+          <div className="pointer-events-none absolute inset-x-5 top-[42%] z-10">
             <h2 className="font-display text-[34px] leading-[1.02] drop-shadow-[0_4px_18px_rgba(0,0,0,0.6)]">
               Buduj <span className="text-gradient">swoją</span><br/>najlepszą wersję
             </h2>
@@ -126,7 +131,7 @@ function Index() {
           {/* Bottom overlay: level badge */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Początkujący · Lvl {profile.level ?? 1}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Początkujący · Lvl {profile.lvl ?? 1}</p>
               <p className="text-xs font-medium">{profile.xp ?? 0} / 2000 XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
