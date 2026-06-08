@@ -71,11 +71,6 @@ function Trening() {
       { title: "Push Day · Klatka, barki", meta: "5 ćwiczeń · 55 min" },
       { title: "Pull Day · Plecy, biceps", meta: "6 ćwiczeń · 60 min" },
       { title: "Leg Day · Hipertrofia", meta: "5 ćwiczeń · 70 min" },
-      { title: "Klatka focus · Hipertrofia", meta: "6 ćwiczeń · 50 min" },
-      { title: "Plecy szerokie · V-taper", meta: "6 ćwiczeń · 55 min" },
-      { title: "Ramiona delty 3D", meta: "5 ćwiczeń · 40 min" },
-      { title: "Biceps & triceps · Arms day", meta: "8 ćwiczeń · 45 min" },
-      { title: "Brzuch & core", meta: "6 ćwiczeń · 25 min" },
       { title: "Full Body siła", meta: "7 ćwiczeń · 65 min" },
       { title: "Upper / Lower · Split A", meta: "6 ćwiczeń · 60 min" },
     ],
@@ -204,24 +199,17 @@ function Trening() {
       {cat === "silownia" && (
         <>
           <h3 className="mb-2 mt-6 text-sm font-semibold text-muted-foreground">Trenuj po partii ciała</h3>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             {[
-              { label: "Klatka", emoji: "💪", grad: "from-[#e94560] to-[#7a1a1a]" },
-              { label: "Plecy", emoji: "🦅", grad: "from-[#1e3a8a] to-[#0c1a3a]" },
-              { label: "Nogi", emoji: "🦵", grad: "from-[#15803d] to-[#052e16]" },
-              { label: "Ramiona", emoji: "🪖", grad: "from-[#a16207] to-[#3a2306]" },
-              { label: "Biceps", emoji: "💥", grad: "from-[#c026d3] to-[#3a0a40]" },
-              { label: "Triceps", emoji: "🔥", grad: "from-[#ea580c] to-[#3a1a06]" },
-              { label: "Brzuch", emoji: "🔲", grad: "from-[#0891b2] to-[#062e3a]" },
-              { label: "Full Body", emoji: "⚡", grad: "from-[#7c3aed] to-[#1a0a3a]" },
-            ].map((p) => (
+              "Klatka","Plecy","Nogi","Ramiona","Biceps","Triceps","Brzuch","Full Body",
+            ].map((label) => (
               <Link
-                key={p.label}
+                key={label}
                 to="/cwiczenia"
-                className={`flex items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${p.grad} p-3 transition active:scale-[0.98]`}
+                className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-white/8 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent px-4 py-3 transition active:scale-[0.98] hover:border-white/15"
               >
-                <span className="text-2xl">{p.emoji}</span>
-                <span className="font-display text-base text-white">{p.label}</span>
+                <span className="font-display text-sm tracking-tight text-foreground/90">{label}</span>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition group-hover:translate-x-0.5" />
               </Link>
             ))}
           </div>
@@ -519,23 +507,44 @@ function CatBtn({ active, onClick, icon, label }: { active: boolean; onClick: ()
 }
 
 function WeekView() {
-  const days = ["Pon","Wt","Śr","Czw","Pt","Sb","Nd"];
-  const states = ["done","done","rest","done","planned","planned","rest"];
+  const days = ["Pn","Wt","Śr","Cz","Pt","Sb","Nd"];
+  const today = new Date();
+  const dow = (today.getDay() + 6) % 7;
+  const [logs, setLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    const refresh = () => setLogs(readLogs());
+    refresh();
+    if (typeof window !== "undefined") {
+      window.addEventListener("gw_training_log_update", refresh);
+      return () => window.removeEventListener("gw_training_log_update", refresh);
+    }
+  }, []);
+  const start = new Date(today); start.setDate(today.getDate() - dow); start.setHours(0,0,0,0);
+  const byDay = new Map<number, Set<string>>();
+  logs.forEach((l) => {
+    const t = new Date(l.ts);
+    const diff = Math.floor((t.getTime() - start.getTime()) / 86400000);
+    if (diff >= 0 && diff < 7) {
+      const s = byDay.get(diff) ?? new Set();
+      s.add(l.kind);
+      byDay.set(diff, s);
+    }
+  });
   return (
     <div className="grid grid-cols-7 gap-2">
       {days.map((d, i) => {
-        const s = states[i];
+        const date = new Date(start); date.setDate(start.getDate() + i);
+        const kinds = byDay.get(i);
+        const isToday = i === dow;
         return (
-          <div key={d} className="rounded-2xl glass p-2 text-center">
+          <div key={d} className={`rounded-2xl p-2 text-center ${isToday ? "ring-1 ring-[var(--magenta)] bg-[var(--magenta)]/10" : "glass"}`}>
             <p className="text-[10px] text-muted-foreground">{d}</p>
-            <p className="mt-0.5 text-sm font-semibold">{i + 8}</p>
-            <span
-              className={`mx-auto mt-2 block h-7 w-7 rounded-full ${
-                s === "done" ? "bg-gradient-to-br from-primary to-secondary" :
-                s === "planned" ? "border-2 border-dashed border-primary/50" :
-                "bg-white/5"
-              }`}
-            />
+            <p className="mt-0.5 text-sm font-semibold">{date.getDate()}</p>
+            <div className="mx-auto mt-2 flex h-7 items-center justify-center gap-0.5">
+              {kinds ? [...kinds].slice(0,3).map((k) => (
+                <span key={k} className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[k as keyof typeof KIND_COLOR] }} />
+              )) : <span className="h-1 w-1 rounded-full bg-white/10" />}
+            </div>
           </div>
         );
       })}
