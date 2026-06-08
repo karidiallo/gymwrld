@@ -14,6 +14,7 @@ function Profil() {
   const [open, setOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [body, setBody] = useState({
     weight: 78.4, height: 182, chest: 102, waist: 84, hips: 98, biceps: 38, thigh: 58,
   });
@@ -25,6 +26,13 @@ function Profil() {
     try {
       const ra = localStorage.getItem("gw_avatar");
       if (ra) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(ra) });
+    } catch {}
+    try {
+      const rp = localStorage.getItem("gw_profile");
+      if (rp) {
+        const p = JSON.parse(rp);
+        setIdentity({ name: p.name, nickname: p.nickname });
+      }
     } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,7 +62,9 @@ function Profil() {
             <img src={getAvatarImage(avatarCfg.gender, avatarCfg.body)} alt="Avatar" className="h-full w-full object-contain" loading="lazy" style={{ filter: `drop-shadow(0 8px 16px ${avatarCfg.outfitTint}66)` }} />
           </button>
           <div className="flex-1">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Aleks · @aleks</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              {identity.name || "Bez imienia"}{identity.nickname ? ` · @${identity.nickname}` : ""}
+            </p>
             <h2 className="mt-1 text-xl font-semibold">Poziom 14 — Eksplorator</h2>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
               <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-primary to-secondary" />
