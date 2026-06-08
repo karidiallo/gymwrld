@@ -9,6 +9,8 @@ import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
+import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
+import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -69,6 +71,13 @@ function Trening() {
       { title: "Push Day · Klatka, barki", meta: "5 ćwiczeń · 55 min" },
       { title: "Pull Day · Plecy, biceps", meta: "6 ćwiczeń · 60 min" },
       { title: "Leg Day · Hipertrofia", meta: "5 ćwiczeń · 70 min" },
+      { title: "Klatka focus · Hipertrofia", meta: "6 ćwiczeń · 50 min" },
+      { title: "Plecy szerokie · V-taper", meta: "6 ćwiczeń · 55 min" },
+      { title: "Ramiona delty 3D", meta: "5 ćwiczeń · 40 min" },
+      { title: "Biceps & triceps · Arms day", meta: "8 ćwiczeń · 45 min" },
+      { title: "Brzuch & core", meta: "6 ćwiczeń · 25 min" },
+      { title: "Full Body siła", meta: "7 ćwiczeń · 65 min" },
+      { title: "Upper / Lower · Split A", meta: "6 ćwiczeń · 60 min" },
     ],
     kobiety: [
       { title: "Glute Builder · Pośladki & nogi", meta: "6 ćwiczeń · 45 min" },
@@ -190,6 +199,37 @@ function Trening() {
         </div>
         <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </Link>
+
+      {/* Body-part banners */}
+      {cat === "silownia" && (
+        <>
+          <h3 className="mb-2 mt-6 text-sm font-semibold text-muted-foreground">Trenuj po partii ciała</h3>
+          <div className="grid grid-cols-2 gap-2.5">
+            {[
+              { label: "Klatka", emoji: "💪", grad: "from-[#e94560] to-[#7a1a1a]" },
+              { label: "Plecy", emoji: "🦅", grad: "from-[#1e3a8a] to-[#0c1a3a]" },
+              { label: "Nogi", emoji: "🦵", grad: "from-[#15803d] to-[#052e16]" },
+              { label: "Ramiona", emoji: "🪖", grad: "from-[#a16207] to-[#3a2306]" },
+              { label: "Biceps", emoji: "💥", grad: "from-[#c026d3] to-[#3a0a40]" },
+              { label: "Triceps", emoji: "🔥", grad: "from-[#ea580c] to-[#3a1a06]" },
+              { label: "Brzuch", emoji: "🔲", grad: "from-[#0891b2] to-[#062e3a]" },
+              { label: "Full Body", emoji: "⚡", grad: "from-[#7c3aed] to-[#1a0a3a]" },
+            ].map((p) => (
+              <Link
+                key={p.label}
+                to="/cwiczenia"
+                className={`flex items-center gap-2 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${p.grad} p-3 transition active:scale-[0.98]`}
+              >
+                <span className="text-2xl">{p.emoji}</span>
+                <span className="font-display text-base text-white">{p.label}</span>
+              </Link>
+            ))}
+          </div>
+          <Link to="/cwiczenia" className="mt-2.5 flex items-center justify-center gap-1.5 rounded-2xl border border-dashed border-white/15 p-3 text-xs text-muted-foreground hover:bg-white/[0.03]">
+            Więcej zestawów ćwiczeń <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      )}
 
       <div className="mt-4 space-y-2.5">
         {plans[cat].map((p, i) => (
