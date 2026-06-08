@@ -104,13 +104,17 @@ function Index() {
             />
           </button>
 
-          {/* Headline - left aligned, original layout */}
-          <div className="pointer-events-none absolute inset-x-5 top-5 z-10">
+          {/* Top tag */}
+          <div className="pointer-events-none absolute inset-x-5 top-4 z-10">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/70">
               Witaj{profile.name ? ` ponownie, ${profile.name}` : ""}
             </p>
-            <h2 className="mt-1 font-display text-[32px] leading-[1.02]">
-              Buduj swoją<br/><span className="text-gradient">najlepszą</span><br/>wersję siebie
+          </div>
+
+          {/* Headline at waist height */}
+          <div className="pointer-events-none absolute inset-x-5 top-[42%] z-10">
+            <h2 className="font-display text-[34px] leading-[1.02] drop-shadow-[0_4px_18px_rgba(0,0,0,0.6)]">
+              Buduj <span className="text-gradient">swoją</span><br/>najlepszą wersję
             </h2>
           </div>
 
@@ -134,35 +138,35 @@ function Index() {
       </section>
 
       {/* Today's progress */}
-      <SectionTitle title="Dzisiejszy progres" action="Zobacz szczegóły" />
+      <SectionTitle title="Dzisiejszy progres" actionTo="/profil" action="Zobacz szczegóły" />
       <div className="grid grid-cols-3 gap-3">
-        <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={68} />
-        <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={82} />
-        <StatCard to="/regeneracja" icon={<Moon className="h-4 w-4" />} title="Sen" value={74} />
+        <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={0} />
+        <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={0} />
+        <StatCard to="/regeneracja" icon={<Moon className="h-4 w-4" />} title="Sen" value={0} />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={55} />
-        <StatCard to="/profil" icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={40} />
+        <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={0} />
+        <StatCard to="/profil" icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={0} />
       </div>
 
       {/* Steps card */}
-      <SectionTitle title="Dzisiejsze kroki" action="Historia" />
+      <SectionTitle title="Dzisiejsze kroki" actionTo="/trening" action="Historia" />
       <Link to="/trening" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel 10 000</p>
-            <p className="mt-1 text-4xl font-semibold tracking-tight">7 842</p>
-            <p className="mt-1 text-xs text-muted-foreground">78% celu · +12% vs wczoraj</p>
+            <p className="mt-1 text-4xl font-semibold tracking-tight">0</p>
+            <p className="mt-1 text-xs text-muted-foreground">0% celu · zacznij dziś</p>
           </div>
-          <Ring value={78} size={92} stroke={8}>
+          <Ring value={0} size={92} stroke={8}>
             <Footprints className="h-5 w-5 text-primary" />
-            <span className="mt-1 text-xs font-medium">78%</span>
+            <span className="mt-1 text-xs font-medium">0%</span>
           </Ring>
         </div>
         <div className="mt-4 flex items-end gap-1.5">
-          {[40, 60, 45, 80, 55, 70, 78].map((v, i) => (
+          {[0, 0, 0, 0, 0, 0, 0].map((v, i) => (
             <div key={i} className="flex-1">
-              <div className="rounded-full bg-gradient-to-t from-primary/40 to-secondary" style={{ height: `${v / 2}px` }} />
+              <div className="rounded-full bg-white/5" style={{ height: `4px` }} />
               <p className="mt-1 text-center text-[10px] text-muted-foreground">{["P","W","Ś","C","P","S","N"][i]}</p>
             </div>
           ))}
@@ -170,7 +174,7 @@ function Index() {
       </Link>
 
       {/* Quests */}
-      <SectionTitle title="Dzisiejsze zadania" action="Wszystkie" />
+      <SectionTitle title="Dzisiejsze zadania" actionTo="/trening" action="Wszystkie" />
       <div className="space-y-2.5">
         {quests.map((q) => (
           <Quest key={q.id} {...q} onToggle={() => toggleQuest(q.id)} />
@@ -197,14 +201,14 @@ function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-function SectionTitle({ title, action }: { title: string; action?: string }) {
+function SectionTitle({ title, action, actionTo }: { title: string; action?: string; actionTo?: string }) {
   return (
     <div className="mb-3 mt-7 flex items-end justify-between">
       <h3 className="text-lg font-semibold">{title}</h3>
-      {action && (
-        <button className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground">
+      {action && actionTo && (
+        <Link to={actionTo} className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground">
           {action} <ChevronRight className="h-3.5 w-3.5" />
-        </button>
+        </Link>
       )}
     </div>
   );
