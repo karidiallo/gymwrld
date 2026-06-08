@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
+import sanctuary from "@/assets/sanctuary.jpg";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarViewer } from "@/components/AvatarViewer";
-import { FullBodyAvatar } from "@/components/FullBodyAvatar";
-import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
+import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -79,48 +79,43 @@ function Index() {
         </div>
       </header>
 
-      {/* Sanctuary Hero — clean stage so avatar feet anchor cleanly to the floor */}
+      {/* Sanctuary Hero */}
       <section className="relative mt-5 overflow-hidden rounded-3xl">
-        <div
-          className="relative aspect-[4/5] w-full"
-          style={{
-            background:
-              "radial-gradient(110% 70% at 50% 20%, rgba(167,139,250,0.20) 0%, transparent 60%), radial-gradient(120% 70% at 50% 100%, rgba(34,211,238,0.18) 0%, transparent 60%), linear-gradient(180deg,#0d0f1a 0%, #060810 75%, #000 100%)",
-          }}
-        >
-          {/* room ambience */}
-          <div aria-hidden className="absolute inset-x-6 top-6 h-40 rounded-2xl border border-white/5 bg-gradient-to-b from-white/[0.04] to-transparent" />
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black to-transparent" />
-          <div aria-hidden className="absolute inset-x-10 bottom-2 h-px bg-white/15" />
+        <div className="relative aspect-[4/5] w-full">
+          <img
+            src={sanctuary}
+            alt="Twoje Sanktuarium"
+            className="absolute inset-0 h-full w-full object-cover"
+            width={1024}
+            height={1280}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-secondary/10" />
 
-          {/* GIANT logo — above level badge */}
-          <div className="pointer-events-none absolute inset-x-0 top-6 grid place-items-center">
-            <img
-              src={logoAsset.url}
-              alt="GymWrld"
-              className="h-24 w-auto"
-              style={{ filter: "brightness(0) invert(1) drop-shadow(0 6px 24px rgba(255,255,255,0.18))" }}
-            />
-          </div>
-
-          {/* Avatar — full-body SVG, feet anchored to floor line */}
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="absolute inset-x-0 bottom-0 mx-auto grid place-items-end cursor-pointer select-none transition-transform active:scale-[0.98]"
-            style={{ height: "82%" }}
+            className="absolute bottom-0 left-1/2 h-[112%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
-            <div
-              className="pointer-events-none"
-              style={{ filter: `drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
-            >
-              <FullBodyAvatar cfg={avatarCfg} height={520} />
-            </div>
+            <img
+              src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
+              alt="Twój avatar"
+              className="pointer-events-none h-full object-contain"
+              style={{ filter: `${skinFilter(avatarCfg.skinTone)} drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
+              width={768}
+              height={1280}
+            />
           </button>
 
-          {/* Bottom overlay: level + CTA */}
+          {/* Bottom overlay: GIANT logo directly above level badge + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-            <div className="rounded-2xl glass px-3 py-2">
+            <div className="rounded-2xl glass px-3 py-2.5">
+              <img
+                src={logoAsset.url}
+                alt="GymWrld"
+                className="mb-2 h-12 w-auto"
+                style={{ filter: "brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0,0,0,0.7))" }}
+              />
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom {profile.level ?? 1}</p>
               <p className="text-xs font-medium">{profile.xp ?? 0} / {2000} XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
