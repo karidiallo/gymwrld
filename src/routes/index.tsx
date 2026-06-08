@@ -71,7 +71,7 @@ function Index() {
           />
         </Link>
         <div className="flex items-center gap-2">
-          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.level ?? 1}`} />
+          <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label="Lvl 1" />
           <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label={`${profile.streak ?? 0} dni`} />
         </div>
       </header>
@@ -104,21 +104,21 @@ function Index() {
             />
           </button>
 
-          {/* Headline - centered, above face area on mobile */}
-          <div className="pointer-events-none absolute inset-x-0 top-4 z-10 px-5 text-center">
+          {/* Headline - left aligned, original layout */}
+          <div className="pointer-events-none absolute inset-x-5 top-5 z-10">
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/70">
               Witaj{profile.name ? ` ponownie, ${profile.name}` : ""}
             </p>
-            <h2 className="mt-1 font-display text-[28px] leading-[1.05]">
-              Buduj <span className="text-gradient">najlepszą wersję</span><br/>siebie
+            <h2 className="mt-1 font-display text-[32px] leading-[1.02]">
+              Buduj swoją<br/><span className="text-gradient">najlepszą</span><br/>wersję siebie
             </h2>
           </div>
 
           {/* Bottom overlay: level badge */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
             <div className="rounded-2xl glass px-3 py-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom średni · Lvl {profile.level ?? 1}</p>
-              <p className="text-xs font-medium">{profile.xp ?? 0} / {2000} XP</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Początkujący · Lvl 1</p>
+              <p className="text-xs font-medium">{profile.xp ?? 0} / 2000 XP</p>
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
               </div>
@@ -127,7 +127,7 @@ function Index() {
               onClick={() => setViewerOpen(true)}
               className="glass shrink-0 rounded-full px-4 py-2.5 text-xs font-medium glow-primary"
             >
-              Twoje pokoje
+              Sanktuarium
             </button>
           </div>
         </div>
