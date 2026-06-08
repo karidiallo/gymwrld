@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
 import avatar from "@/assets/avatar.png";
 import logo from "@/assets/logo.png";
-import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple } from "lucide-react";
+import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,17 +18,33 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [quests, setQuests] = useState([
+    { id: "q1", title: "Zrealizuj trening siłowy", reward: "+120 XP", progress: 0.5, done: false },
+    { id: "q2", title: "Wypij 2.5 L wody", reward: "+60 XP", progress: 0.7, done: false },
+    { id: "q3", title: "Osiągnij 10 000 kroków", reward: "+80 XP", progress: 0.78, done: false },
+  ]);
+  const toggleQuest = (id: string) => {
+    setQuests((qs) =>
+      qs.map((q) => {
+        if (q.id !== id) return q;
+        const done = !q.done;
+        if (done) toast.success(`Zadanie ukończone · ${q.reward}`);
+        return { ...q, done, progress: done ? 1 : q.progress };
+      }),
+    );
+  };
+
   return (
     <main className="px-5 pt-6">
       {/* Header */}
       <header className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="GymWrld" className="h-9 w-auto opacity-90 invert" />
+        <Link to="/profil" className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] font-display text-background">A</div>
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Witaj ponownie</p>
             <h1 className="text-xl font-display">Aleks</h1>
           </div>
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label="Lvl 14" />
           <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label="12 dni" />
@@ -43,7 +61,7 @@ function Index() {
             width={1024}
             height={1280}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/30 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/10 to-background" />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-secondary/10" />
 
           <img
@@ -54,22 +72,33 @@ function Index() {
             height={1280}
           />
 
-          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-glow" />
-            Twoje Sanktuarium · Apartament
+          {/* Top overlay: branding + tagline */}
+          <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <img src={logo} alt="GymWrld" className="h-7 w-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]" />
+              <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1 text-[10px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
+                Sanktuarium
+              </span>
+            </div>
+            <h2 className="font-display text-[28px] leading-[1.05]">
+              Buduj <span className="text-gradient">swoją</span><br />najlepszą wersję.
+            </h2>
           </div>
 
+          {/* Bottom overlay: level + CTA */}
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-3xl font-semibold leading-tight">
-                Twoja cyfrowa<br/>wersja <span className="text-gradient">siebie</span>
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">Poziom 14 · 1 240 / 2 000 XP</p>
-              <div className="mt-2 h-1.5 w-44 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-primary to-secondary" />
+            <div className="rounded-2xl glass px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Poziom 14</p>
+              <p className="text-xs font-medium">1 240 / 2 000 XP</p>
+              <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
               </div>
             </div>
-            <button className="glass shrink-0 rounded-full px-4 py-2.5 text-xs font-medium glow-primary">
+            <button
+              onClick={() => toast("Edytor postaci wkrótce ✨", { description: "Pracujemy nad customizacją avatara." })}
+              className="glass shrink-0 rounded-full px-4 py-2.5 text-xs font-medium glow-primary"
+            >
               Dostosuj postać
             </button>
           </div>
@@ -79,18 +108,18 @@ function Index() {
       {/* Today's progress */}
       <SectionTitle title="Dzisiejszy progres" action="Zobacz szczegóły" />
       <div className="grid grid-cols-3 gap-3">
-        <StatCard icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={68} />
-        <StatCard icon={<Apple className="h-4 w-4" />} title="Dieta" value={82} />
-        <StatCard icon={<Moon className="h-4 w-4" />} title="Sen" value={74} />
+        <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={68} />
+        <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={82} />
+        <StatCard to="/profil" icon={<Moon className="h-4 w-4" />} title="Sen" value={74} />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <StatCard icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={55} />
-        <StatCard icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={40} />
+        <StatCard to="/trening" icon={<Footprints className="h-4 w-4" />} title="Kondycja" value={55} />
+        <StatCard to="/profil" icon={<Sparkles className="h-4 w-4" />} title="Rozwój" value={40} />
       </div>
 
       {/* Steps card */}
       <SectionTitle title="Dzisiejsze kroki" action="Historia" />
-      <button className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
+      <Link to="/trening" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel 10 000</p>
@@ -110,22 +139,22 @@ function Index() {
             </div>
           ))}
         </div>
-      </button>
+      </Link>
 
       {/* Quests */}
       <SectionTitle title="Dzisiejsze zadania" action="Wszystkie" />
       <div className="space-y-2.5">
-        <Quest title="Zrealizuj trening siłowy" reward="+120 XP" progress={0.5} />
-        <Quest title="Wypij 2.5 L wody" reward="+60 XP" progress={0.7} />
-        <Quest title="Osiągnij 10 000 kroków" reward="+80 XP" progress={0.78} />
+        {quests.map((q) => (
+          <Quest key={q.id} {...q} onToggle={() => toggleQuest(q.id)} />
+        ))}
       </div>
 
       {/* Last activity */}
       <SectionTitle title="Ostatnia aktywność" />
       <div className="space-y-2.5">
-        <Activity icon={<Dumbbell className="h-4 w-4" />} title="Push Day · Klatka, barki" meta="Wczoraj · 58 min · 412 kcal" />
-        <Activity icon={<Footprints className="h-4 w-4" />} title="Spacer poranny" meta="Wczoraj · 32 min · 2 410 kroków" />
-        <Activity icon={<Trophy className="h-4 w-4" />} title="Nowy rekord: Wyciskanie 80 kg × 6" meta="2 dni temu" />
+        <Activity to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Push Day · Klatka, barki" meta="Wczoraj · 58 min · 412 kcal" />
+        <Activity to="/trening" icon={<Footprints className="h-4 w-4" />} title="Spacer poranny" meta="Wczoraj · 32 min · 2 410 kroków" />
+        <Activity to="/profil" icon={<Trophy className="h-4 w-4" />} title="Nowy rekord: Wyciskanie 80 kg × 6" meta="2 dni temu" />
       </div>
     </main>
   );
@@ -153,9 +182,9 @@ function SectionTitle({ title, action }: { title: string; action?: string }) {
   );
 }
 
-function StatCard({ icon, title, value }: { icon: React.ReactNode; title: string; value: number }) {
+function StatCard({ icon, title, value, to }: { icon: React.ReactNode; title: string; value: number; to: string }) {
   return (
-    <div className="rounded-2xl glass p-3.5">
+    <Link to={to} className="block rounded-2xl glass p-3.5 transition-transform active:scale-[0.98]">
       <div className="flex items-center gap-2 text-muted-foreground">
         <span className="rounded-lg bg-primary/10 p-1.5 text-primary">{icon}</span>
         <span className="text-xs">{title}</span>
@@ -167,38 +196,38 @@ function StatCard({ icon, title, value }: { icon: React.ReactNode; title: string
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
         <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${value}%` }} />
       </div>
-    </div>
+    </Link>
   );
 }
 
-function Quest({ title, reward, progress }: { title: string; reward: string; progress: number }) {
+function Quest({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl glass p-3.5">
-      <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
-        <Sparkles className="h-4 w-4" />
+    <button onClick={onToggle} className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition-transform active:scale-[0.99]">
+      <div className={`grid h-10 w-10 place-items-center rounded-xl transition-colors ${done ? "bg-[var(--lime)] text-background" : "bg-primary/10 text-primary"}`}>
+        {done ? <Check className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
       </div>
       <div className="flex-1">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">{title}</p>
+          <p className={`text-sm font-medium ${done ? "line-through opacity-60" : ""}`}>{title}</p>
           <span className="text-[11px] font-medium text-primary">{reward}</span>
         </div>
         <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
-          <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${progress * 100}%` }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] transition-all" style={{ width: `${progress * 100}%` }} />
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
-function Activity({ icon, title, meta }: { icon: React.ReactNode; title: string; meta: string }) {
+function Activity({ icon, title, meta, to }: { icon: React.ReactNode; title: string; meta: string; to: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl glass p-3.5">
+    <Link to={to} className="flex items-center gap-3 rounded-2xl glass p-3.5 transition-transform active:scale-[0.99]">
       <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary/10 text-secondary">{icon}</div>
       <div className="flex-1">
         <p className="text-sm font-medium">{title}</p>
         <p className="text-xs text-muted-foreground">{meta}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground" />
-    </div>
+    </Link>
   );
 }
