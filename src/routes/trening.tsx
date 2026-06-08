@@ -254,8 +254,24 @@ function Trening() {
         </div>
         <div className="flex-1">
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Dla biegaczy</p>
-          <p className="font-display text-lg leading-tight text-white">Maraton & biegi</p>
+          <p className="font-display text-lg leading-tight text-white">Maraton</p>
           <p className="text-[11px] text-white/70">Trasy na mapie · dystans · pace · nadchodzące zawody</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-white/70" />
+      </Link>
+
+      {/* Street Workout banner */}
+      <Link
+        to="/street"
+        className="mt-3 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[#0a3b1a] via-[#0f5a2a] to-[#1a7a3a] p-4 transition-transform active:scale-[0.99]"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-black/40 text-[var(--lime)]">
+          <Activity className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Outdoor & kalistenika</p>
+          <p className="font-display text-lg leading-tight text-white">Street Workout</p>
+          <p className="text-[11px] text-white/70">Mapa lokalnych siłek · baza ćwiczeń · technika</p>
         </div>
         <ChevronRight className="h-5 w-5 text-white/70" />
       </Link>
