@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TreningRouteImport } from './routes/trening'
+import { Route as PromoRouteImport } from './routes/promo'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TreningRoute = TreningRouteImport.update({
+  id: '/trening',
+  path: '/trening',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PromoRoute = PromoRouteImport.update({
+  id: '/promo',
+  path: '/promo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DietaRoute = DietaRouteImport.update({
+  id: '/dieta',
+  path: '/dieta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dieta': typeof DietaRoute
+  '/profil': typeof ProfilRoute
+  '/promo': typeof PromoRoute
+  '/trening': typeof TreningRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dieta': typeof DietaRoute
+  '/profil': typeof ProfilRoute
+  '/promo': typeof PromoRoute
+  '/trening': typeof TreningRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dieta': typeof DietaRoute
+  '/profil': typeof ProfilRoute
+  '/promo': typeof PromoRoute
+  '/trening': typeof TreningRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/dieta' | '/profil' | '/promo' | '/trening'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/dieta' | '/profil' | '/promo' | '/trening'
+  id: '__root__' | '/' | '/dieta' | '/profil' | '/promo' | '/trening'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DietaRoute: typeof DietaRoute
+  ProfilRoute: typeof ProfilRoute
+  PromoRoute: typeof PromoRoute
+  TreningRoute: typeof TreningRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trening': {
+      id: '/trening'
+      path: '/trening'
+      fullPath: '/trening'
+      preLoaderRoute: typeof TreningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/promo': {
+      id: '/promo'
+      path: '/promo'
+      fullPath: '/promo'
+      preLoaderRoute: typeof PromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dieta': {
+      id: '/dieta'
+      path: '/dieta'
+      fullPath: '/dieta'
+      preLoaderRoute: typeof DietaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +121,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DietaRoute: DietaRoute,
+  ProfilRoute: ProfilRoute,
+  PromoRoute: PromoRoute,
+  TreningRoute: TreningRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
