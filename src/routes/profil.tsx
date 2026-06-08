@@ -48,9 +48,9 @@ function Profil() {
     <main className="px-5 pt-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Profil</h1>
-        <button className="grid h-9 w-9 place-items-center rounded-full glass">
+        <Link to="/ustawienia" className="grid h-9 w-9 place-items-center rounded-full glass">
           <Settings className="h-4 w-4" />
-        </button>
+        </Link>
       </header>
 
       {/* Avatar card */}
