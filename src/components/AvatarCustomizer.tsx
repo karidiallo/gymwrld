@@ -8,6 +8,9 @@ import {
   SKIN_TONES,
   HAIR_COLORS,
   EYE_COLORS,
+  HeadPortrait,
+  getAvatarImageFor,
+  skinFilter,
   type AvatarConfig,
   type BodyType,
   type Gender,
@@ -15,7 +18,6 @@ import {
   type FacialHair,
   type EyeShape,
 } from "./AvatarSvg";
-import { AvatarModel } from "./AvatarModel";
 
 const BODY_BY_GENDER: Record<Gender, BodyType[]> = {
   m: ["slim", "athletic", "medium", "muscular", "curvy"],
@@ -81,13 +83,22 @@ export function AvatarCustomizer({
           background: `radial-gradient(90% 55% at 50% 28%, ${cfg.outfitTint}35 0%, transparent 58%), linear-gradient(180deg,#18131f 0%,#09070e 68%,#020203 100%)`,
         }}
       >
-        <div className="absolute left-8 top-8 h-28 w-20 rounded-2xl border border-white/10 bg-white/[0.05]" />
-        <div className="absolute right-8 top-12 h-20 w-16 rounded-xl border border-white/10 bg-white/[0.04]" />
-        <div className="absolute inset-x-0 bottom-16 h-px bg-white/10" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
-        <div className="relative grid h-[470px] place-items-end overflow-hidden pt-4">
-          <AvatarModel cfg={cfg} height="108%" />
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-3">
+        <div className="relative grid h-[460px] grid-cols-[auto_1fr] items-end gap-3 overflow-hidden p-4">
+          {/* Head portrait — fully driven by all customization params */}
+          <div className="self-center">
+            <HeadPortrait cfg={cfg} size={220} />
+          </div>
+          {/* Body silhouette — reflects body type + skin tone + outfit */}
+          <div className="relative grid h-full place-items-end">
+            <img
+              src={getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m")}
+              alt="Sylwetka"
+              className="h-[92%] object-contain"
+              style={{ filter: `${skinFilter(cfg.skinTone)} drop-shadow(0 18px 28px ${cfg.outfitTint}55)` }}
+            />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 col-span-2 flex flex-wrap items-center justify-center gap-1.5 p-3">
             <Pill>{GENDER_LABELS[cfg.gender]}{cfg.gender === "nb" ? ` · ${cfg.nbBase === "k" ? "♀" : "♂"}` : ""}</Pill>
             <Pill>{BODY_LABELS[cfg.body]}</Pill>
             {hairBadge && <Pill>{hairBadge}</Pill>}
@@ -288,7 +299,12 @@ function BodyTile({ cfg, active, onClick, label }: { cfg: AvatarConfig; active: 
       }`}
     >
       <div className="grid h-20 place-items-end overflow-hidden bg-gradient-to-b from-transparent to-black/40">
-        <AvatarModel cfg={cfg} height={94} />
+        <img
+          src={getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m")}
+          alt={label}
+          className="h-[94%] object-contain"
+          style={{ filter: skinFilter(cfg.skinTone) }}
+        />
       </div>
       <p className="px-1 py-1 text-center text-[9px] font-medium leading-tight">{label}</p>
     </button>
