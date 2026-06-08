@@ -59,7 +59,7 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
           className="h-[86%]"
           style={{
             filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)`,
-            transform: `scaleX(${rot > 90 && rot < 270 ? -1 : 1}) translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
+            transform: `translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
             transition: "transform 80ms linear",
           }}
         >
