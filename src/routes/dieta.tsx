@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import foodHero from "@/assets/food-hero.jpg";
 import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight } from "lucide-react";
+import { readLogs } from "@/lib/training-log";
 
 export const Route = createFileRoute("/dieta")({
   head: () => ({ meta: [{ title: "Dieta — GymWrld" }, { name: "description", content: "Twój dzienny plan żywieniowy." }] }),
@@ -23,6 +24,18 @@ function Dieta() {
     { id: "m3", icon: "soup", name: "Kolacja", items: "", kcal: 0 },
     { id: "m4", icon: "snack", name: "Przekąski", items: "", kcal: 0 },
   ]);
+  const [burned, setBurned] = useState(0);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const calc = () => {
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const sum = readLogs().filter((l) => l.ts >= start.getTime()).reduce((s, l) => s + (l.kcal || 0), 0);
+      setBurned(sum);
+    };
+    calc();
+    window.addEventListener("gw_training_log_update", calc);
+    return () => window.removeEventListener("gw_training_log_update", calc);
+  }, []);
   const eaten = meals.reduce((s, m) => s + m.kcal, 0);
   const goal = 2400;
   const remaining = goal - eaten;
@@ -109,7 +122,7 @@ function Dieta() {
           <div className="flex-1 space-y-2 text-sm">
             <Row label="Zjedzone" value={`${eaten} kcal`} />
             <Row label="Cel" value={`${goal} kcal`} />
-            <Row label="Spalone" value="412 kcal" muted />
+            <Row label="Spalone" value={`${burned} kcal`} muted />
           </div>
         </div>
 
