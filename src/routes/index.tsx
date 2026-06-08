@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
-import avatarImg from "@/assets/avatar.png";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarViewer } from "@/components/AvatarViewer";
-import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
+import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -86,12 +85,13 @@ function Index() {
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="animate-float absolute bottom-0 left-1/2 h-[78%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="animate-float absolute -bottom-2 left-1/2 h-[92%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
             <img
-              src={avatarImg}
+              src={getAvatarImage(avatarCfg.gender, avatarCfg.body)}
               alt="Twój avatar"
-              className="pointer-events-none h-full object-contain drop-shadow-[0_20px_40px_rgba(79,140,255,0.35)]"
+              className="pointer-events-none h-full object-contain"
+              style={{ filter: `drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
               width={768}
               height={1280}
             />

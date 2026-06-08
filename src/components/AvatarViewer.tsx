@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { X, Lock } from "lucide-react";
-import { AvatarSvg, type AvatarConfig } from "./AvatarSvg";
+import { getAvatarImage, type AvatarConfig } from "./AvatarSvg";
 
 const ROOMS = [
   { id: "starter", name: "Pokój startowy", bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", floor: "#2a1f3d", locked: false },
@@ -49,8 +49,15 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
         onTouchMove={(e) => move(e.touches[0].clientX)}
         onTouchEnd={end}
       >
-        <div style={{ filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.6))" }}>
-          <AvatarSvg cfg={cfg} size={260} rotation={rot} />
+        <div
+          className="h-full"
+          style={{
+            filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)`,
+            transform: `scaleX(${rot > 90 && rot < 270 ? -1 : 1}) translateX(${Math.sin((rot * Math.PI) / 180) * 18}px)`,
+            transition: "transform 80ms linear",
+          }}
+        >
+          <img src={getAvatarImage(cfg.gender, cfg.body)} alt="Avatar" className="h-full w-auto object-contain" />
         </div>
       </div>
 

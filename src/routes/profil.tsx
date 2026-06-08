@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import avatar from "@/assets/avatar.png";
 import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Target, Scale, Ruler, Pencil, TrendingDown, X } from "lucide-react";
+import { AvatarCustomizer } from "@/components/AvatarCustomizer";
+import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Profil — GymWrld" }] }),
@@ -11,6 +12,8 @@ export const Route = createFileRoute("/profil")({
 
 function Profil() {
   const [open, setOpen] = useState(false);
+  const [customOpen, setCustomOpen] = useState(false);
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [body, setBody] = useState({
     weight: 78.4, height: 182, chest: 102, waist: 84, hips: 98, biceps: 38, thigh: 58,
   });
@@ -19,6 +22,10 @@ function Profil() {
     if (typeof window === "undefined") return;
     const raw = localStorage.getItem("gw_body");
     if (raw) try { setBody({ ...body, ...JSON.parse(raw) }); } catch {}
+    try {
+      const ra = localStorage.getItem("gw_avatar");
+      if (ra) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(ra) });
+    } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -43,9 +50,9 @@ function Profil() {
         <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-primary/25 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-secondary/20 blur-3xl" />
         <div className="relative flex items-center gap-4">
-          <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
-            <img src={avatar} alt="Avatar" className="h-full w-full object-contain" loading="lazy" />
-          </div>
+          <button onClick={() => setCustomOpen(true)} className="relative h-36 w-28 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
+            <img src={getAvatarImage(avatarCfg.gender, avatarCfg.body)} alt="Avatar" className="h-full w-full object-contain" loading="lazy" style={{ filter: `drop-shadow(0 8px 16px ${avatarCfg.outfitTint}66)` }} />
+          </button>
           <div className="flex-1">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Aleks · @aleks</p>
             <h2 className="mt-1 text-xl font-semibold">Poziom 14 — Eksplorator</h2>
@@ -53,7 +60,7 @@ function Profil() {
               <div className="h-full w-[62%] rounded-full bg-gradient-to-r from-primary to-secondary" />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">1 240 / 2 000 XP do Lvl 15</p>
-            <button className="mt-3 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground glow-primary">
+            <button onClick={() => setCustomOpen(true)} className="mt-3 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground glow-primary">
               Dostosuj postać
             </button>
           </div>
@@ -61,18 +68,18 @@ function Profil() {
       </section>
 
       {/* Premium banner */}
-      <section className="mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-primary/25 via-secondary/15 to-transparent p-[1px]">
+      <Link to="/premium" className="mt-4 block overflow-hidden rounded-3xl bg-gradient-to-br from-primary/25 via-secondary/15 to-transparent p-[1px]">
         <div className="rounded-3xl bg-card/60 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <p className="text-sm font-medium">GymWrld Premium</p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Stwórz swoją cyfrową wersję siebie. AI Coach, ekskluzywne skiny, Premium Deals.</p>
-          <button className="mt-3 w-full rounded-full bg-gradient-to-r from-primary to-secondary py-2.5 text-sm font-medium text-primary-foreground glow-primary">
+          <div className="mt-3 w-full rounded-full bg-gradient-to-r from-primary to-secondary py-2.5 text-center text-sm font-medium text-primary-foreground glow-primary">
             Odblokuj Premium
-          </button>
+          </div>
         </div>
-      </section>
+      </Link>
 
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
@@ -147,6 +154,18 @@ function Profil() {
       </div>
 
       {open && <BodySheet body={body} onSave={saveBody} onClose={() => setOpen(false)} />}
+      {customOpen && (
+        <AvatarCustomizer
+          initial={avatarCfg}
+          onClose={() => setCustomOpen(false)}
+          onSave={(cfg) => {
+            setAvatarCfg(cfg);
+            if (typeof window !== "undefined") localStorage.setItem("gw_avatar", JSON.stringify(cfg));
+            toast.success("Wygląd zaktualizowany ✨");
+            setCustomOpen(false);
+          }}
+        />
+      )}
     </main>
   );
 }

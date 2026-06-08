@@ -13,6 +13,7 @@ import { Route as TreningRouteImport } from './routes/trening'
 import { Route as RegeneracjaRouteImport } from './routes/regeneracja'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/regeneracja': typeof RegeneracjaRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/regeneracja': typeof RegeneracjaRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dieta': typeof DietaRoute
   '/onboarding': typeof OnboardingRoute
+  '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/regeneracja': typeof RegeneracjaRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dieta'
     | '/onboarding'
+    | '/premium'
     | '/profil'
     | '/promo'
     | '/regeneracja'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dieta'
     | '/onboarding'
+    | '/premium'
     | '/profil'
     | '/promo'
     | '/regeneracja'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dieta'
     | '/onboarding'
+    | '/premium'
     | '/profil'
     | '/promo'
     | '/regeneracja'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DietaRoute: typeof DietaRoute
   OnboardingRoute: typeof OnboardingRoute
+  PremiumRoute: typeof PremiumRoute
   ProfilRoute: typeof ProfilRoute
   PromoRoute: typeof PromoRoute
   RegeneracjaRoute: typeof RegeneracjaRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DietaRoute: DietaRoute,
   OnboardingRoute: OnboardingRoute,
+  PremiumRoute: PremiumRoute,
   ProfilRoute: ProfilRoute,
   PromoRoute: PromoRoute,
   RegeneracjaRoute: RegeneracjaRoute,
