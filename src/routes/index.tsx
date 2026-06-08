@@ -7,7 +7,8 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Trophy, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { AvatarViewer } from "@/components/AvatarViewer";
-import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
+import { FullBodyAvatar } from "@/components/FullBodyAvatar";
+import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -114,7 +115,7 @@ function Index() {
               className="pointer-events-none"
               style={{ filter: `drop-shadow(0 20px 40px ${avatarCfg.outfitTint}55)` }}
             >
-              <AvatarSvg cfg={avatarCfg} />
+              <FullBodyAvatar cfg={avatarCfg} height={520} />
             </div>
           </button>
 
