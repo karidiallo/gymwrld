@@ -294,6 +294,114 @@ function Sparkle() {
   return <Dumbbell className="h-4 w-4" />;
 }
 
+function TreadmillLog() {
+  const [open, setOpen] = useState(false);
+  const [km, setKm] = useState<number | "">("");
+  const [kcal, setKcal] = useState<number | "">("");
+  const [incline, setIncline] = useState<number | "">("");
+  const [time, setTime] = useState<number | "">("");
+  const [entries, setEntries] = useState<{ km: number; kcal: number; incline: number; time: number; ts: number }[]>([]);
+
+  const save = () => {
+    if (!km || !time) {
+      toast.error("Podaj dystans i czas");
+      return;
+    }
+    const entry = {
+      km: Number(km),
+      kcal: Number(kcal) || 0,
+      incline: Number(incline) || 0,
+      time: Number(time),
+      ts: Date.now(),
+    };
+    setEntries((p) => [entry, ...p]);
+    setKm(""); setKcal(""); setIncline(""); setTime("");
+    setOpen(false);
+    toast.success(`Bieżnia · ${entry.km} km zapisane`);
+  };
+
+  return (
+    <div className="mt-7">
+      <div className="mb-3 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Bieżnia</h3>
+        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+          <Plus className="h-3 w-3" /> Dodaj wpis
+        </button>
+      </div>
+      <div className="rounded-3xl glass p-4">
+        {entries.length === 0 ? (
+          <button onClick={() => setOpen(true)} className="flex w-full items-center gap-3 text-left">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[var(--lime)]/25 to-[var(--orange)]/15 text-[var(--lime)]">
+              <Activity className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Zaloguj sesję na bieżni</p>
+              <p className="text-[11px] text-muted-foreground">Dystans · czas · nachylenie · kalorie</p>
+            </div>
+            <Plus className="h-4 w-4 text-muted-foreground" />
+          </button>
+        ) : (
+          <div className="space-y-2.5">
+            {entries.map((e) => (
+              <div key={e.ts} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--lime)]/15 text-[var(--lime)]">
+                  <Activity className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{e.km} km · {e.time} min</p>
+                  <p className="text-[11px] text-muted-foreground">Nachylenie {e.incline}% · {e.kcal} kcal</p>
+                </div>
+                <p className="text-[10px] text-muted-foreground">{new Date(e.ts).toLocaleDateString("pl")}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+            <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Cardio</p>
+                <h3 className="font-display text-2xl">Bieżnia</h3>
+              </div>
+              <button onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <NumField label="Dystans (km)" value={km} onChange={setKm} placeholder="5.0" step="0.1" />
+              <NumField label="Czas (min)" value={time} onChange={setTime} placeholder="30" />
+              <NumField label="Nachylenie (%)" value={incline} onChange={setIncline} placeholder="2" />
+              <NumField label="Kalorie (kcal)" value={kcal} onChange={setKcal} placeholder="320" />
+            </div>
+            <button onClick={save} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] py-3.5 text-sm font-semibold text-background glow-primary">
+              Zapisz bieżnię
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NumField({ label, value, onChange, placeholder, step }: { label: string; value: number | ""; onChange: (v: number | "") => void; placeholder?: string; step?: string }) {
+  return (
+    <label className="block rounded-2xl bg-white/[0.04] p-3">
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        step={step ?? "1"}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value === "" ? "" : parseFloat(e.target.value))}
+        className="mt-1 w-full bg-transparent font-display text-xl outline-none placeholder:text-muted-foreground/40"
+      />
+    </label>
+  );
+}
+
 function CatBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button onClick={onClick} className={`flex flex-col items-center gap-1 rounded-2xl p-3 text-xs font-medium transition ${active ? "bg-primary text-primary-foreground glow-primary" : "glass text-muted-foreground"}`}>
