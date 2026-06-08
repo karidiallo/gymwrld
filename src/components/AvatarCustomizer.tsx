@@ -10,7 +10,6 @@ import {
   EYE_COLORS,
   getAvatarImageFor,
   skinFilter,
-  HeadPortrait,
   type AvatarConfig,
   type BodyType,
   type Gender,
@@ -61,6 +60,7 @@ export function AvatarCustomizer({
   const set = <K extends keyof AvatarConfig>(k: K, v: AvatarConfig[K]) => setCfg((c) => ({ ...c, [k]: v }));
   const isFem = cfg.gender === "k" || (cfg.gender === "nb" && cfg.nbBase === "k");
   const img = getAvatarImageFor(cfg.gender, cfg.body, cfg.nbBase ?? "m");
+  const hairBadge = HAIR_STYLES.find((h) => h.id === cfg.hairStyle)?.label ?? "";
 
   const content = (
     <>
@@ -76,30 +76,29 @@ export function AvatarCustomizer({
         </div>
       )}
 
-      {/* Preview: body + head close-up */}
+      {/* Preview: full-body realistic avatar (same render as homepage) */}
       <div
-        className="relative mt-4 grid grid-cols-[1fr_140px] gap-3 overflow-hidden rounded-3xl border border-white/10 p-3"
+        className="relative mt-4 overflow-hidden rounded-3xl border border-white/10"
         style={{
-          background: `radial-gradient(120% 80% at 50% 0%, ${cfg.outfitTint}33 0%, transparent 60%), linear-gradient(180deg,#0f1726 0%,#070a13 100%)`,
+          background: `radial-gradient(120% 80% at 50% 0%, ${cfg.outfitTint}3d 0%, transparent 60%), linear-gradient(180deg,#0f1726 0%,#070a13 100%)`,
         }}
       >
-        <div className="relative grid h-[320px] place-items-end overflow-hidden rounded-2xl">
+        <div className="relative grid h-[360px] place-items-end overflow-hidden">
           <img
             src={img}
-            alt="Podgląd sylwetki"
-            className="h-full w-auto object-contain"
-            style={{ filter: `${skinFilter(cfg.skinTone)} drop-shadow(0 24px 28px ${cfg.outfitTint}55)` }}
+            alt="Podgląd postaci"
+            className="h-[110%] w-auto object-contain"
+            style={{ filter: `${skinFilter(cfg.skinTone)} drop-shadow(0 24px 32px ${cfg.outfitTint}66)` }}
           />
-          <div className="absolute left-2 top-2 rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-wider">Sylwetka</div>
-        </div>
-        <div className="relative grid place-items-center rounded-2xl bg-black/20">
-          <HeadPortrait cfg={cfg} size={130} />
-          <div className="absolute left-2 top-2 rounded-full glass px-2 py-0.5 text-[9px] uppercase tracking-wider">Twarz</div>
+          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <Pill>{GENDER_LABELS[cfg.gender]}{cfg.gender === "nb" ? ` · ${cfg.nbBase === "k" ? "♀" : "♂"}` : ""}</Pill>
+            <Pill>{BODY_LABELS[cfg.body]}</Pill>
+            {hairBadge && <Pill>{hairBadge}</Pill>}
+            <span className="inline-block h-3 w-3 rounded-full ring-1 ring-white/20" style={{ background: cfg.hairColor }} title="Włosy" />
+            <span className="inline-block h-3 w-3 rounded-full ring-1 ring-white/20" style={{ background: cfg.eyeColor }} title="Oczy" />
+          </div>
         </div>
       </div>
-      <p className="mt-2 text-center text-[10px] text-muted-foreground">
-        {GENDER_LABELS[cfg.gender]}{cfg.gender === "nb" ? ` (${cfg.nbBase === "k" ? "♀" : "♂"})` : ""} · {BODY_LABELS[cfg.body]}
-      </p>
 
       <div className="mt-5 space-y-5">
         <Section title="Płeć">
@@ -145,18 +144,9 @@ export function AvatarCustomizer({
         <Section title="Fryzura">
           <div className="grid grid-cols-4 gap-2">
             {HAIR_STYLES.map((h) => (
-              <button
-                key={h.id}
-                onClick={() => set("hairStyle", h.id)}
-                className={`flex flex-col items-center gap-1 rounded-xl p-1.5 text-[10px] transition ${
-                  cfg.hairStyle === h.id ? "bg-primary/15 ring-1 ring-primary" : "bg-white/[0.04] hover:bg-white/[0.08]"
-                }`}
-              >
-                <span className="grid h-14 w-full place-items-center overflow-hidden rounded-lg bg-black/30">
-                  <HeadPortrait cfg={{ ...cfg, hairStyle: h.id }} size={56} />
-                </span>
-                <span className="text-muted-foreground">{h.label}</span>
-              </button>
+              <BigChip key={h.id} active={cfg.hairStyle === h.id} onClick={() => set("hairStyle", h.id)}>
+                <span>{h.label}</span>
+              </BigChip>
             ))}
           </div>
         </Section>
@@ -286,6 +276,10 @@ function BigChip({ active, onClick, children }: { active: boolean; onClick: () =
       {children}
     </button>
   );
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return <span className="rounded-full bg-black/40 px-2.5 py-1 text-[10px] uppercase tracking-wider backdrop-blur">{children}</span>;
 }
 
 function BodyTile({ body, gender, nbBase, active, skinFilterCss, onClick }: { body: BodyType; gender: Gender; nbBase: "m" | "k"; active: boolean; skinFilterCss: string; onClick: () => void }) {

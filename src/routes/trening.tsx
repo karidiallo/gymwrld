@@ -7,7 +7,8 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, BookOpen, Library } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
+import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -16,7 +17,19 @@ export const Route = createFileRoute("/trening")({
 
 type Cat = "silownia" | "kobiety" | "redukcja" | "dom" | "kalistenika" | "outdoor";
 
-type Exercise = { id: string; name: string; sets: number; reps: number; weight?: number; done?: boolean };
+type SetKind = "normal" | "superset" | "dropset";
+type Exercise = {
+  id: string;
+  name: string;
+  sets: number;
+  reps: number;
+  weight?: number;
+  done?: boolean;
+  kind?: SetKind;
+  /** Library id for emoji & rest hint. */
+  libId?: string;
+  restSec?: number;
+};
 
 type Profile = { gender?: "m" | "k" | "nb"; weight?: number; level?: "poczatkujacy" | "sredni" | "zaawansowany" };
 
@@ -103,15 +116,24 @@ function Trening() {
   const hero = heroTitles[cat];
 
   const basePushDay = [
-    { name: "Wyciskanie sztangi (klatka)", sets: 4, reps: 8, weight: 70 },
-    { name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40 },
-    { name: "Rozpiętki hantle", sets: 3, reps: 12, weight: 14 },
-    { name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10 },
-    { name: "Triceps wyciąg", sets: 3, reps: 12, weight: 30 },
+    { libId: "bp", name: "Wyciskanie sztangi leżąc", sets: 4, reps: 8, weight: 70, restSec: 150 },
+    { libId: "ohp", name: "Wyciskanie żołnierskie", sets: 4, reps: 8, weight: 40, restSec: 120 },
+    { libId: "dbp", name: "Wyciskanie hantli", sets: 3, reps: 12, weight: 24, restSec: 90 },
+    { libId: "lat", name: "Wznosy bokiem", sets: 3, reps: 15, weight: 10, restSec: 60 },
+    { libId: "bic", name: "Uginanie hantli (biceps)", sets: 3, reps: 12, weight: 14, restSec: 60 },
   ];
   const defaultPushDay: Exercise[] = basePushDay.map((b, i) => {
     const r = recommendForUser(b.weight, b.sets, b.reps, profile);
-    return { id: `e${i + 1}`, name: b.name, sets: r.sets, reps: r.reps, weight: r.weight };
+    return {
+      id: `e${i + 1}`,
+      libId: b.libId,
+      name: b.name,
+      sets: r.sets,
+      reps: r.reps,
+      weight: r.weight,
+      kind: "normal",
+      restSec: recommendRest(b.restSec, profile.level),
+    };
   });
 
   const startMain = () => {
@@ -236,13 +258,7 @@ function Trening() {
       {view === "dzien" && <DayView />}
 
       {/* Records */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Rekordy & PR-y</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <PR title="Wyciskanie sztangi" value="80 kg × 6" />
-        <PR title="Martwy ciąg" value="140 kg × 3" />
-        <PR title="Przysiad" value="120 kg × 5" />
-        <PR title="5 km bieg" value="22:18" />
-      </div>
+      <PRSection />
 
       {session && (
         <WorkoutSession
@@ -373,14 +389,128 @@ function DayView() {
   );
 }
 
-function PR({ title, value }: { title: string; value: string }) {
+/* ============ PR Section (user-pickable & editable) ============ */
+type PRRecord = { id: string; name: string; value: string; emoji?: string };
+const DEFAULT_PRS: PRRecord[] = [
+  { id: "bp", name: "Wyciskanie sztangi", value: "80 kg × 6", emoji: "🏋️" },
+  { id: "dl", name: "Martwy ciąg", value: "140 kg × 3", emoji: "💪" },
+  { id: "sq", name: "Przysiad", value: "120 kg × 5", emoji: "🦵" },
+  { id: "run5", name: "5 km bieg", value: "22:18", emoji: "🏃" },
+];
+
+function PRSection() {
+  const [prs, setPRs] = useState<PRRecord[]>(DEFAULT_PRS);
+  const [editing, setEditing] = useState<number | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_prs");
+      if (raw) setPRs(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const save = (next: PRRecord[]) => {
+    setPRs(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_prs", JSON.stringify(next));
+  };
   return (
-    <div className="rounded-2xl glass p-4">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Trophy className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs">{title}</span>
+    <>
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Rekordy & PR-y</h3>
+        <span className="text-[10px] text-muted-foreground">Kliknij, by edytować</span>
       </div>
-      <p className="mt-2 text-lg font-semibold">{value}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {prs.map((pr, i) => (
+          <button
+            key={i}
+            onClick={() => setEditing(i)}
+            className="rounded-2xl glass p-4 text-left transition active:scale-[0.98] hover:bg-white/[0.04]"
+          >
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-base">{pr.emoji ?? "🏆"}</span>
+              <span className="line-clamp-1 text-xs">{pr.name}</span>
+              <Pencil className="ml-auto h-3 w-3 opacity-60" />
+            </div>
+            <p className="mt-2 text-lg font-semibold">{pr.value || "—"}</p>
+          </button>
+        ))}
+      </div>
+      {editing !== null && (
+        <PREditor
+          pr={prs[editing]}
+          onClose={() => setEditing(null)}
+          onSave={(next) => {
+            const copy = [...prs];
+            copy[editing] = next;
+            save(copy);
+            setEditing(null);
+            toast.success("PR zaktualizowany 🏆");
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function PREditor({ pr, onClose, onSave }: { pr: PRRecord; onClose: () => void; onSave: (pr: PRRecord) => void }) {
+  const [name, setName] = useState(pr.name);
+  const [value, setValue] = useState(pr.value);
+  const [emoji, setEmoji] = useState(pr.emoji ?? "🏆");
+  const [q, setQ] = useState("");
+  const list = EXERCISES.filter((e) => e.name.toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+  const OTHER = [
+    { name: "5 km bieg", emoji: "🏃" }, { name: "10 km bieg", emoji: "🏃" },
+    { name: "Plank", emoji: "🧘" }, { name: "Wytrzymałość", emoji: "⏱️" },
+  ];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Edytuj rekord</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Nazwa rekordu</p>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Wartość (np. 100 kg × 5, 22:18)</p>
+            <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="120 kg × 3" className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Wybierz z biblioteki</p>
+            <div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+              <Search className="h-3.5 w-3.5 text-muted-foreground" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj ćwiczenia..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {list.map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => { setName(e.name); setEmoji(e.emoji); }}
+                  className="flex items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left hover:bg-white/[0.08]"
+                >
+                  <span className="text-lg">{e.emoji}</span>
+                  <span className="line-clamp-1 text-[11px]">{e.name}</span>
+                </button>
+              ))}
+              {OTHER.map((o) => (
+                <button key={o.name} onClick={() => { setName(o.name); setEmoji(o.emoji); }} className="flex items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left hover:bg-white/[0.08]">
+                  <span className="text-lg">{o.emoji}</span>
+                  <span className="text-[11px]">{o.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => onSave({ id: pr.id, name, value, emoji })}
+          className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"
+        >
+          Zapisz rekord
+        </button>
+      </div>
     </div>
   );
 }
@@ -397,6 +527,7 @@ function WorkoutSession({
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [restTimer, setRestTimer] = useState<{ exId: string; remaining: number } | null>(null);
 
   useEffect(() => {
     if (!running) return;
@@ -404,10 +535,33 @@ function WorkoutSession({
     return () => clearInterval(id);
   }, [running]);
 
+  useEffect(() => {
+    if (!restTimer) return;
+    if (restTimer.remaining <= 0) {
+      toast.success("Koniec przerwy 💥 Następna seria!");
+      setRestTimer(null);
+      return;
+    }
+    const id = setTimeout(() => setRestTimer((r) => (r ? { ...r, remaining: r.remaining - 1 } : r)), 1000);
+    return () => clearTimeout(id);
+  }, [restTimer]);
+
   const doneCount = items.filter((i) => i.done).length;
   const pct = Math.round((doneCount / items.length) * 100);
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
   const ss = String(seconds % 60).padStart(2, "0");
+
+  const cycleKind = (id: string) => setItems((arr) => arr.map((e) => {
+    if (e.id !== id) return e;
+    const next: SetKind = e.kind === "normal" || !e.kind ? "superset" : e.kind === "superset" ? "dropset" : "normal";
+    return { ...e, kind: next };
+  }));
+
+  const startRest = (ex: Exercise) => {
+    const sec = ex.restSec ?? 90;
+    setRestTimer({ exId: ex.id, remaining: sec });
+    toast(`Przerwa ${sec}s · AI sugeruje dla ${ex.name}`, { icon: "⏱️" });
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
@@ -440,14 +594,31 @@ function WorkoutSession({
       {/* Exercises */}
       <div className="space-y-3 px-5 py-5">
         {items.map((ex, idx) => (
-          <div key={ex.id} className={`rounded-3xl glass p-4 ${ex.done ? "opacity-60" : ""}`}>
+          <div key={ex.id} className={`rounded-3xl glass p-4 ${ex.done ? "opacity-60" : ""} ${ex.kind === "superset" ? "ring-1 ring-[var(--magenta)]/50" : ex.kind === "dropset" ? "ring-1 ring-[var(--orange)]/50" : ""}`}>
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
-                <p className="mt-1 font-display text-lg leading-tight">{ex.name}</p>
-                <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
-                  <Sparkles className="h-3 w-3" /> Sugerowane AI dla Ciebie
-                </p>
+              <div className="flex items-start gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/5 text-3xl animate-pulse-glow">
+                  {EXERCISES.find((e) => e.id === ex.libId)?.emoji ?? "💪"}
+                </span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
+                  <p className="mt-0.5 font-display text-lg leading-tight">{ex.name}</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
+                      <Sparkles className="h-3 w-3" /> AI dla Ciebie
+                    </span>
+                    {ex.kind === "superset" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/20 px-2 py-0.5 text-[10px] text-[var(--magenta)]">
+                        <Layers className="h-3 w-3" /> Superseria
+                      </span>
+                    )}
+                    {ex.kind === "dropset" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--orange)]/20 px-2 py-0.5 text-[10px] text-[var(--orange)]">
+                        <ArrowDown className="h-3 w-3" /> Dropset
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setItems((arr) => arr.map((e, i) => i === idx ? { ...e, done: !e.done } : e))}
@@ -474,15 +645,20 @@ function WorkoutSession({
                 <SetStat label="Ciężar" value={ex.weight ? `${ex.weight} kg` : "—"} />
               </button>
             )}
-            <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px]">
               {editingId === ex.id ? (
-                <button onClick={() => setEditingId(null)} className="rounded-full bg-[var(--lime)]/20 px-3 py-1 text-[var(--lime)]">Gotowe</button>
+                <button onClick={() => setEditingId(null)} className="rounded-full bg-[var(--lime)]/20 px-3 py-1 font-medium text-[var(--lime)]">Gotowe</button>
               ) : (
-                <button onClick={() => setEditingId(ex.id)} className="underline-offset-2 hover:underline">Edytuj serie / powt. / ciężar</button>
+                <button onClick={() => setEditingId(ex.id)} className="rounded-full bg-white/5 px-3 py-1 text-muted-foreground hover:bg-white/10">
+                  <Pencil className="mr-1 inline h-2.5 w-2.5" /> Edytuj
+                </button>
               )}
-              {profile.gender && (
-                <span>Dostosowane do: {profile.gender === "k" ? "♀" : profile.gender === "nb" ? "⚧" : "♂"} {profile.level ?? ""}</span>
-              )}
+              <button onClick={() => cycleKind(ex.id)} className="rounded-full bg-white/5 px-3 py-1 text-muted-foreground hover:bg-white/10">
+                <Layers className="mr-1 inline h-2.5 w-2.5" /> {ex.kind === "superset" ? "Superseria" : ex.kind === "dropset" ? "Dropset" : "Zwykła"}
+              </button>
+              <button onClick={() => startRest(ex)} className="rounded-full bg-[var(--orange)]/15 px-3 py-1 font-medium text-[var(--orange)] hover:bg-[var(--orange)]/25">
+                <Timer className="mr-1 inline h-2.5 w-2.5" /> Przerwa {ex.restSec ?? 90}s
+              </button>
             </div>
             <div className="mt-3 flex gap-1.5">
               {Array.from({ length: ex.sets }).map((_, i) => (
@@ -492,6 +668,25 @@ function WorkoutSession({
           </div>
         ))}
       </div>
+
+      {/* Floating AI rest timer */}
+      {restTimer && (
+        <div className="fixed inset-x-0 bottom-24 z-20 flex justify-center px-4">
+          <div className="flex w-full max-w-md items-center gap-3 rounded-2xl border border-[var(--orange)]/40 bg-background/95 p-3 backdrop-blur-xl glow-primary">
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-[var(--orange)]/15 text-[var(--orange)]">
+              <Timer className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">AI Rest Timer</p>
+              <p className="font-display text-2xl tabular-nums">
+                {String(Math.floor(restTimer.remaining / 60)).padStart(2, "0")}:
+                {String(restTimer.remaining % 60).padStart(2, "0")}
+              </p>
+            </div>
+            <button onClick={() => setRestTimer(null)} className="rounded-full bg-white/5 px-3 py-1.5 text-xs">Pomiń</button>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="sticky bottom-0 border-t border-white/5 bg-background/90 px-5 py-4 backdrop-blur-xl">
@@ -543,21 +738,42 @@ function NumField({ label, value, onChange, step, min }: { label: string; value:
 function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: { title: string; exercises: Exercise[] }) => void }) {
   const [title, setTitle] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [name, setName] = useState("");
-  const [sets, setSets] = useState<number | "">(4);
-  const [reps, setReps] = useState<number | "">(8);
-  const [weight, setWeight] = useState<number | "">("");
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<EquipCat | "all">("all");
 
-  const add = () => {
-    if (!name) return;
+  const list = EXERCISES.filter((e) => {
+    if (cat !== "all" && e.cat !== cat) return false;
+    if (q && !(e.name.toLowerCase().includes(q.toLowerCase()) || e.muscles.join(" ").toLowerCase().includes(q.toLowerCase()))) return false;
+    return true;
+  });
+
+  const addFromLib = (lib: ExerciseInfo) => {
+    const b = lib.base ?? { sets: 3, reps: 10, weight: 0 };
     setExercises((prev) => [
       ...prev,
-      { id: `e${Date.now()}`, name, sets: Number(sets) || 3, reps: Number(reps) || 10, weight: weight ? Number(weight) : undefined },
+      {
+        id: `e${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        libId: lib.id,
+        name: lib.name,
+        sets: b.sets,
+        reps: b.reps,
+        weight: b.weight || undefined,
+        restSec: lib.rest,
+        kind: "normal",
+      },
     ]);
-    setName(""); setWeight("");
+    toast.success(`${lib.name} dodane`);
   };
 
-  const SUGGEST = ["Wyciskanie sztangi","Przysiad","Martwy ciąg","Wiosłowanie","Podciąganie","Pompki","Wykroki","Plank","Pajacyki","Hip thrust"];
+  const CATS: { id: EquipCat | "all"; label: string }[] = [
+    { id: "all", label: "Wszystkie" },
+    { id: "sztanga", label: "Sztanga" },
+    { id: "hantle", label: "Hantle" },
+    { id: "maszyny", label: "Maszyny" },
+    { id: "kettle", label: "Kettle" },
+    { id: "bodyweight", label: "Masa ciała" },
+    { id: "guma", label: "Gumy" },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
@@ -575,14 +791,16 @@ function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: 
           className="mt-4 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground"
         />
 
-        {/* Exercise list */}
+        {/* Selected list */}
         <div className="mt-4 space-y-2">
           {exercises.map((ex, i) => (
-            <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] p-3">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--magenta)]/15 text-[var(--magenta)] text-xs font-semibold">{i + 1}</div>
+            <div key={ex.id} className="flex items-center gap-3 rounded-2xl bg-white/[0.04] p-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 text-xl">
+                {EXERCISES.find((e) => e.id === ex.libId)?.emoji ?? "💪"}
+              </span>
               <div className="flex-1">
                 <p className="text-sm font-medium">{ex.name}</p>
-                <p className="text-[11px] text-muted-foreground">{ex.sets} × {ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ""}</p>
+                <p className="text-[11px] text-muted-foreground">{ex.sets} × {ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ""} · ⏱️ {ex.restSec}s</p>
               </div>
               <button
                 onClick={() => setExercises((prev) => prev.filter((_, idx) => idx !== i))}
@@ -593,34 +811,50 @@ function WorkoutBuilder({ onClose, onSave }: { onClose: () => void; onSave: (p: 
             </div>
           ))}
           {exercises.length === 0 && (
-            <p className="rounded-2xl bg-white/[0.02] p-4 text-center text-xs text-muted-foreground">Dodaj pierwsze ćwiczenie poniżej</p>
+            <p className="rounded-2xl bg-white/[0.02] p-4 text-center text-xs text-muted-foreground">Wybierz ćwiczenia z biblioteki poniżej</p>
           )}
         </div>
 
-        {/* Add form */}
-        <div className="mt-4 space-y-2 rounded-2xl bg-white/[0.03] p-3">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Dodaj ćwiczenie</p>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nazwa ćwiczenia"
-            className="w-full rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <div className="flex flex-wrap gap-1.5">
-            {SUGGEST.map((s) => (
-              <button key={s} onClick={() => setName(s)} className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] text-muted-foreground hover:bg-white/10">
-                {s}
+        {/* Library picker */}
+        <div className="mt-5 rounded-2xl bg-white/[0.03] p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground"><Library className="mr-1 inline h-3 w-3" /> Biblioteka ćwiczeń</p>
+            <span className="text-[10px] text-muted-foreground">{list.length} pozycji</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj ćwiczenia lub mięśnia..." className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+          </div>
+          <div className="mt-2 -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            {CATS.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setCat(c.id)}
+                className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-medium transition ${
+                  cat === c.id ? "bg-primary text-primary-foreground" : "bg-white/5 text-muted-foreground"
+                }`}
+              >
+                {c.label}
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <input type="number" value={sets} onChange={(e) => setSets(e.target.value ? parseInt(e.target.value) : "")} placeholder="Serie" className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
-            <input type="number" value={reps} onChange={(e) => setReps(e.target.value ? parseInt(e.target.value) : "")} placeholder="Powt." className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
-            <input type="number" value={weight} onChange={(e) => setWeight(e.target.value ? parseInt(e.target.value) : "")} placeholder="kg" className="rounded-xl bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+          <div className="mt-2 max-h-[260px] space-y-1.5 overflow-y-auto pr-1">
+            {list.map((e) => (
+              <button
+                key={e.id}
+                onClick={() => addFromLib(e)}
+                className="flex w-full items-center gap-2 rounded-xl bg-white/[0.04] p-2 text-left transition hover:bg-white/[0.08]"
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-lg">{e.emoji}</span>
+                <div className="flex-1">
+                  <p className="text-xs font-medium">{e.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{e.muscles.join(" · ")} · {EQUIP_LABEL[e.cat]}</p>
+                </div>
+                <Plus className="h-4 w-4 text-[var(--lime)]" />
+              </button>
+            ))}
+            {list.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">Brak wyników.</p>}
           </div>
-          <button onClick={add} disabled={!name} className="w-full rounded-xl bg-white/10 py-2 text-xs font-medium disabled:opacity-40">
-            <Plus className="inline h-3.5 w-3.5" /> Dodaj
-          </button>
         </div>
 
         <button

@@ -95,7 +95,7 @@ function Index() {
           <button
             onClick={() => setViewerOpen(true)}
             aria-label="Otwórz widok 360°"
-            className="animate-float absolute -bottom-2 left-1/2 h-[96%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
+            className="absolute bottom-0 left-1/2 h-[112%] -translate-x-1/2 cursor-pointer select-none transition-transform active:scale-[0.98]"
           >
             <img
               src={getAvatarImageFor(avatarCfg.gender, avatarCfg.body, avatarCfg.nbBase ?? "m")}
@@ -115,7 +115,12 @@ function Index() {
           {/* Top overlay: branding + tagline */}
           <div className="absolute inset-x-4 top-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <img src={logoAsset.url} alt="GymWrld" className="h-8 w-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]" />
+              <img
+                src={logoAsset.url}
+                alt="GymWrld"
+                className="h-9 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]"
+                style={{ filter: "brightness(0) invert(1) drop-shadow(0 2px 12px rgba(0,0,0,0.7))" }}
+              />
               <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1 text-[10px]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse-glow" />
                 Sanktuarium

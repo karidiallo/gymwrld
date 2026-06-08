@@ -52,7 +52,12 @@ function Onboarding() {
       <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-[var(--lime)]/15 blur-3xl" />
 
       <header className="relative flex flex-col items-center">
-        <img src={logoAsset.url} alt="GymWrld" className="h-24 w-auto invert drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]" />
+        <img
+          src={logoAsset.url}
+          alt="GymWrld"
+          className="h-24 w-auto"
+          style={{ filter: "brightness(0) invert(1) drop-shadow(0 4px 28px rgba(255,255,255,0.15))" }}
+        />
         <span className="mt-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{step + 1} / {total}</span>
       </header>
 

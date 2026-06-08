@@ -166,8 +166,8 @@ function ExerciseSheet({ ex, onClose }: { ex: Exercise; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] pb-10">
-        <div className="grid aspect-[16/9] place-items-center bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--lime)]/30 text-7xl">
-          {ex.emoji}
+        <div className="grid aspect-[16/9] place-items-center bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--lime)]/30">
+          <span className="text-7xl animate-bounce" style={{ animationDuration: "1.6s" }}>{ex.emoji}</span>
         </div>
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between gap-3">
