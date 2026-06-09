@@ -89,7 +89,7 @@ function AuthPage() {
         <ArrowLeft className="h-4 w-4" />
       </Link>
       <div className="mx-auto flex max-w-[420px] flex-col items-center pt-6">
-        <img src={logoAsset.url} alt="GymWrld" className="w-[48%] max-w-[220px]" style={{ filter: "brightness(0) invert(1)" }} />
+        <img src={logoAsset.url} alt="GymWrld" className="w-[48%] max-w-[220px]" />
         <h1 className="mt-8 font-display text-2xl">
           {mode === "signin" ? "Witaj z powrotem" : mode === "signup" ? "Utwórz konto" : "Reset hasła"}
         </h1>
