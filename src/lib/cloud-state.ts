@@ -2,8 +2,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MODULE_KEYS = [
   ["training", "gw_training_log"],
+  ["achievements", "gw_achievements"],
+  ["treadmill", "gw_treadmill"],
   ["diet", "gw_diet"],
   ["steps", "gw_steps"],
+  ["mind", "gw_mind"],
+  ["journal", "gw_journal"],
   ["tasks", "gw_tasks"],
   ["profile", "gw_profile"],
   ["cycle", "gw_cycle"],

@@ -330,7 +330,8 @@ function Trening() {
           profile={profile}
           onClose={() => setSession(null)}
           onFinish={() => {
-            toast.success("Trening zapisany · +120 XP");
+            addLog({ kind: "silownia", title: session.title, kcal: 412, minutes: 55 });
+            toast.success("Trening zapisany · statystyki i XP zaktualizowane");
             setSession(null);
           }}
         />
