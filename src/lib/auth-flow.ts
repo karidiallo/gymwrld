@@ -14,7 +14,6 @@ type ProfileRow = {
   goals?: string[] | null;
   level?: string | null;
   freq?: number | null;
-  flo_linked?: boolean | null;
   subscription?: string | null;
   lvl?: number | null;
   xp?: number | null;
@@ -44,7 +43,6 @@ export function syncProfileToLocal(profile: ProfileRow) {
     goals: profile.goals ?? current.goals,
     level: profile.level ?? current.level,
     freq: profile.freq ?? current.freq,
-    floLinked: profile.flo_linked ?? current.floLinked,
     subscription: profile.subscription ?? current.subscription ?? "free",
     lvl: profile.lvl ?? current.lvl ?? 1,
     xp: profile.xp ?? current.xp ?? 0,

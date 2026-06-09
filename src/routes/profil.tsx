@@ -16,7 +16,6 @@ function Profil() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [gender, setGender] = useState<string | null>(null);
-  const [floLinked, setFloLinked] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -40,7 +39,6 @@ function Profil() {
         const p = JSON.parse(rp);
         setIdentity({ name: p.name, nickname: p.nickname });
         setGender(p.gender ?? null);
-        setFloLinked(!!p.floLinked);
         // Sync avatar gender with profile gender if mismatched (fix non-binary/female default)
         if (p.gender && typeof window !== "undefined") {
           try {
@@ -142,15 +140,7 @@ function Profil() {
         </div>
       </Link>
 
-      {gender === "k" && <CycleSection floLinked={floLinked} onFloLink={() => {
-        try {
-          const rp = localStorage.getItem("gw_profile");
-          const p = rp ? JSON.parse(rp) : {};
-          localStorage.setItem("gw_profile", JSON.stringify({ ...p, floLinked: true }));
-          setFloLinked(true);
-          toast.success("Połączono z FLO 🌸");
-        } catch {}
-      }} />}
+      {gender === "k" && <CycleSection />}
 
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
@@ -301,7 +291,7 @@ function BodyStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink: () => void }) {
+function CycleSection() {
   const [start, setStart] = useState<string>("");
   const [length, setLength] = useState<number>(28);
   const [period, setPeriod] = useState<number>(5);
@@ -366,11 +356,6 @@ function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink:
             <button onClick={() => setOpen(true)} className="mt-4 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-4 py-2 text-xs font-semibold text-white glow-primary">
               Ustaw cykl
             </button>
-            {!floLinked && (
-              <button onClick={onFloLink} className="mt-2 block w-full rounded-full bg-white/5 px-4 py-2 text-xs text-muted-foreground">
-                lub połącz z aplikacją FLO
-              </button>
-            )}
           </div>
         ) : (
           <>
@@ -388,7 +373,6 @@ function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink:
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">Energia: <span className="text-foreground font-medium">{ph.energy}</span></p>
                 <p className="mt-1 text-xs text-muted-foreground">Następna miesiączka za <span className="text-foreground font-medium">{nextPeriodIn} dni</span></p>
-                {floLinked && <p className="mt-1 text-[10px] text-[var(--lime)]">✓ Połączono z FLO</p>}
               </div>
             </div>
 

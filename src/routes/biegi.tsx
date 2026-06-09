@@ -132,8 +132,8 @@ function Biegi() {
       <div className={`mt-5 flex items-center gap-3 rounded-2xl p-3.5 ${healthConnected ? "bg-[var(--lime)]/10 ring-1 ring-[var(--lime)]/30" : "glass"}`}>
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/5"><Watch className="h-4 w-4" /></div>
         <div className="flex-1">
-          <p className="text-sm font-medium">{healthConnected ? "Health & GPS połączone" : "Połącz Apple Health / GPS"}</p>
-          <p className="text-[11px] text-muted-foreground">{healthConnected ? "Twoje biegi będą logować się automatycznie" : "Włącz nagrywanie tras i tętna w czasie biegu"}</p>
+          <p className="text-sm font-medium">{healthConnected ? "GPS połączony" : "Włącz GPS"}</p>
+          <p className="text-[11px] text-muted-foreground">{healthConnected ? "Możesz zapisywać trasy z lokalizacji" : "System poprosi o udostępnienie położenia"}</p>
         </div>
         {!healthConnected && (
           <button onClick={connectHealth} className="rounded-full bg-white text-black px-3 py-1.5 text-[11px] font-semibold">Połącz</button>

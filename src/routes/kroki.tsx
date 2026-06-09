@@ -33,11 +33,21 @@ function Steps() {
   }, []);
   const persist = (next: any) => { localStorage.setItem("gw_steps", JSON.stringify(next)); };
   const connect = () => {
-    setConnected(true);
-    const w = ["P","W","Ś","C","P","S","N"].map((d) => ({ d, steps: 0 }));
-    setWeek(w);
-    persist({ connected: true, today: 0, week: w, claimed });
-    toast.success("Połączono z Apple Health / Google Fit (demo)");
+    if (!navigator.geolocation) {
+      toast.error("To urządzenie nie wspiera udostępniania położenia");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setConnected(true);
+        const w = ["P","W","Ś","C","P","S","N"].map((d) => ({ d, steps: 0 }));
+        setWeek(w);
+        persist({ connected: true, source: "gps", today: 0, week: w, claimed });
+        toast.success("Lokalizacja włączona", { description: "GPS gotowy do zapisu spacerów i tras." });
+      },
+      () => toast.error("Nie udzielono dostępu do lokalizacji"),
+      { enableHighAccuracy: true, timeout: 12000 },
+    );
   };
 
   const goal = 10000;
@@ -58,14 +68,12 @@ function Steps() {
           <div className="flex items-start gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10"><Smartphone className="h-5 w-5" /></div>
             <div className="flex-1">
-              <p className="font-semibold">Połącz źródło kroków</p>
-              <p className="text-[11px] text-muted-foreground">Apple Health, Google Fit lub GPS w tle. Bez tego liczenie nie działa.</p>
+              <p className="font-semibold">Włącz zapis ruchu GPS</p>
+              <p className="text-[11px] text-muted-foreground">Aplikacja poprosi system o udostępnienie położenia i będzie mogła zapisywać trasy.</p>
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <button onClick={connect} className="rounded-2xl bg-white/10 px-3 py-3 text-xs font-semibold">Apple Health</button>
-            <button onClick={connect} className="rounded-2xl bg-white/10 px-3 py-3 text-xs font-semibold">Google Fit</button>
-            <button onClick={connect} className="col-span-2 rounded-2xl bg-gradient-to-r from-[var(--lime)] to-[var(--violet)] px-3 py-3 text-xs font-semibold text-background"><MapPin className="mr-1 inline h-3 w-3" /> Użyj GPS (lokalizacja)</button>
+          <div className="mt-4">
+            <button onClick={connect} className="w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] to-[var(--violet)] px-3 py-3 text-xs font-semibold text-background"><MapPin className="mr-1 inline h-3 w-3" /> Udostępnij położenie</button>
           </div>
         </section>
       )}

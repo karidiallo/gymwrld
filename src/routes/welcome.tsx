@@ -4,15 +4,18 @@ import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus,
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
-import gymHero from "@/assets/gym-hero.jpg";
-import foodHero from "@/assets/food-hero.jpg";
-import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
+import moduleStrength from "@/assets/module-strength.jpg";
+import moduleNutrition from "@/assets/module-nutrition.jpg";
+import moduleStreet from "@/assets/module-street.jpg";
+import moduleRunning from "@/assets/module-running.jpg";
+import moduleMindHealth from "@/assets/module-mind-health.jpg";
+import moduleRpg from "@/assets/module-rpg.jpg";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
       { title: "GymWRLD. — Twoja cyfrowa wersja siebie" },
-      { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi i cykl. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
+      { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi, mind health i gra RPG. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
       { property: "og:title", content: "GymWRLD." },
       { property: "og:description", content: "Premium aplikacja treningowa. Trenuj świadomie." },
       { property: "og:type", content: "website" },
@@ -23,25 +26,25 @@ export const Route = createFileRoute("/welcome")({
 
 const FEATURES = [
   { icon: Dumbbell, title: "Trening Siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
-  { icon: Apple, title: "Dieta i Przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
+  { icon: Apple, title: "Dieta i Przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
   { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście. Klikasz pin — przechodzisz do wizytówki Google z opiniami i nawigacją.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
   { icon: Footprints, title: "Biegi i Kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
   { icon: Moon, title: "Sen i Regeneracja", desc: "Tracker snu, strefa reset, oddychanie i mind sesje. Sen wpływa na statystyki — bez regeneracji nie ma progresu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
-  { icon: Heart, title: "Cykl (dla Kobiet)", desc: "Tracker cyklu z integracją FLO, faza dnia widoczna w planie. Intensywność treningu i kalorie dopasowują się do Twojej fazy.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
+  { icon: Heart, title: "Mind Health", desc: "Oddech, medytacja, journal, nastrój i reset po ciężkim dniu. Regeneracja wpływa na energię, sen i Twój długofalowy progres.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
   { icon: Sparkles, title: "Gra RPG", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
   { icon: Activity, title: "Statystyki & Medale", desc: "Pięć atrybutów: Siła, Kondycja, Dieta, Sen, Rozwój. Odblokowuj medale za pierwsze sesje, streaki i kamienie milowe.", tint: "from-[var(--lime)]/40 to-[var(--orange)]/20" },
 ];
 
 const FAQ = [
-  { q: "Czy GymWRLD jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i cykl są w pełni darmowe. Pro i Premium odblokowują plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
+  { q: "Czy GymWRLD jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i mind health są w pełni darmowe. Pro i Premium odblokowują plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
   { q: "Czy mogę zainstalować GymWRLD na telefonie?", a: "Tak — działamy jako PWA. Na iPhone otwórz w Safari i wybierz „Dodaj do ekranu początkowego”. Wersje natywne App Store i Google Play są w drodze." },
   { q: "Czy moje dane są bezpieczne?", a: "Tak. Konto i dane treningowe trzymamy w zaszyfrowanej bazie z polityką dostępu RLS. W każdej chwili wyeksportujesz lub usuniesz konto." },
-  { q: "Czym różnicie się od FLO, Stravy i MyFitnessPal?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i cykl — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
+  { q: "Czym różnicie się od typowych trackerów fitness?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i mind health — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
   { q: "Czy potrzebuję sprzętu?", a: "Nie. Mamy plany na masę ciała, gumy, oraz pełną siłownię — dobieramy ćwiczenia pod Twój sprzęt." },
 ];
 
 const PLANS = [
-  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, cykl", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
+  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, mind health", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
   { name: "Pro", price: "9,99 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Skanowanie produktów", "Plany treningowe premium", "Zaawansowane statystyki i rekordy", "3 dodatkowe pokoje"], cta: "Wybierz Pro", highlight: true, badge: "Najpopularniejsze" },
   { name: "Premium", price: "24,99 zł", tag: "/ miesiąc", features: ["Wszystko z Pro", "AI Coach 24/7", "Premium Deals (zniżki marek)", "Wszystkie pokoje + dekoracje", "Indywidualny plan AI"], cta: "Odblokuj Premium", highlight: false, badge: "VIP" },
 ];
@@ -100,7 +103,7 @@ function WelcomePage() {
       <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-background/70 border-b border-white/5" : ""}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="#top" className="flex items-center gap-2">
-            <img src={logo} alt="GymWRLD" className="h-14 w-auto md:h-16" />
+            <img src={logo} alt="GymWRLD" className="h-20 w-auto md:h-24" />
           </a>
           <nav className="hidden gap-8 text-[13px] text-muted-foreground md:flex">
             <a href="#features" className="hover:text-foreground">Funkcje</a>
@@ -128,7 +131,7 @@ function WelcomePage() {
               Buduj <span className="text-gradient">swoją</span><br />najlepszą wersję.
             </h1>
             <p className="mt-7 max-w-lg text-base text-muted-foreground md:text-lg">
-              Siłownia, dieta, street workout, biegi i cykl — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
+              Siłownia, dieta, street workout, biegi i mind health — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link to="/auth" search={{ mode: "signup" } as any} className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
@@ -251,7 +254,7 @@ function WelcomePage() {
       <section className="border-y border-white/5 bg-background/40 backdrop-blur-sm">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
           {[
-            { v: "5w1", l: "Trening · Dieta · Biegi · Cykl · Gra RPG" },
+            { v: "5w1", l: "Trening · Dieta · Biegi · Mind Health · Gra RPG" },
             { v: "4.9★", l: "Średnia ocena testerów" },
             { v: "AI", l: "Plany dopasowane do Ciebie" },
             { v: "PWA", l: "Instalujesz w 5 sekund" },
@@ -293,15 +296,15 @@ function WelcomePage() {
           {/* magazine row */}
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              {src: gymHero, t: "Siłownia"},
-              {src: foodHero, t: "Dieta"},
-              {src: calisthenicsHero, t: "Street Workout"},
-              {src: gymHero, t: "Biegi"},
-              {src: foodHero, t: "Sen & Regeneracja"},
-              {src: calisthenicsHero, t: "Cykl (dla Kobiet)"},
+              {src: moduleStrength, t: "Siłownia"},
+              {src: moduleNutrition, t: "Dieta i Przepisy"},
+              {src: moduleStreet, t: "Street Workout"},
+              {src: moduleRunning, t: "Biegi i Kroki"},
+              {src: moduleMindHealth, t: "Mind Health"},
+              {src: moduleRpg, t: "Gra RPG"},
             ].map((c) => (
               <div key={c.t} className="group relative aspect-[4/5] overflow-hidden rounded-3xl">
-                <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" width={768} height={960} loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute inset-x-5 bottom-5">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Moduł</p>
@@ -425,8 +428,7 @@ function WelcomePage() {
         <div className="mx-auto max-w-6xl px-6 py-14">
           <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="GymWRLD" className="h-16 w-auto md:h-20" />
-              <span className="font-display text-2xl tracking-tight">GymWRLD<span className="text-gradient">.</span></span>
+              <img src={logo} alt="GymWRLD" className="h-24 w-auto md:h-32" />
             </div>
             <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
               <Link to="/privacy" className="hover:text-foreground">Polityka prywatności</Link>

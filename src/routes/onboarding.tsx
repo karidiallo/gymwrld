@@ -31,8 +31,6 @@ function Onboarding() {
   const [height, setHeight] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [city, setCity] = useState<string>("");
-  const [floLinked, setFloLinked] = useState<boolean | null>(null);
-  const [floPromptOpen, setFloPromptOpen] = useState(false);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [level, setLevel] = useState<Level | null>(null);
@@ -72,7 +70,6 @@ function Onboarding() {
         goals,
         level,
         freq,
-        flo_linked: !!floLinked,
       }, { onConflict: "id" });
       if (profileError) throw profileError;
       saved = true;
@@ -86,7 +83,7 @@ function Onboarding() {
       localStorage.setItem("gw_onboarded", "1");
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
       else localStorage.removeItem("gw_session_persist");
-      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
       localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
       const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
@@ -150,10 +147,7 @@ function Onboarding() {
             height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
             avatar={avatar} setAvatar={setAvatar}
-            onGenderPick={(g) => {
-              setGender(g);
-              if ((g === "k" || g === "nb") && floLinked === null) setFloPromptOpen(true);
-            }}
+            onGenderPick={(g) => setGender(g)}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
         )}
@@ -195,12 +189,6 @@ function Onboarding() {
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
-      {floPromptOpen && (
-        <FloPrompt
-          onSkip={() => { setFloLinked(false); setFloPromptOpen(false); }}
-          onLink={() => { setFloLinked(true); setFloPromptOpen(false); toast.success("Połączono z FLO 🌸"); }}
-        />
-      )}
     </main>
   );
 }
@@ -368,29 +356,6 @@ function NumField({ label, unit, value, onChange, min, max, placeholder, step }:
         className="mt-1 w-full bg-transparent text-center font-display text-2xl outline-none placeholder:text-muted-foreground/40"
       />
     </label>
-  );
-}
-
-function FloPrompt({ onSkip, onLink }: { onSkip: () => void; onLink: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
-        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
-        <div className="mt-5 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-2xl">🌸</div>
-          <h3 className="mt-3 font-display text-2xl">Połącz z aplikacją FLO?</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Synchronizuj cykl miesiączkowy, by GymWrld dopasował trening i regenerację do Twojej fazy.</p>
-        </div>
-        <div className="mt-5 space-y-2">
-          <button onClick={onLink} className="w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary">
-            Połącz z FLO
-          </button>
-          <button onClick={onSkip} className="w-full rounded-2xl bg-white/5 px-5 py-3 text-sm text-muted-foreground">
-            Może później
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 

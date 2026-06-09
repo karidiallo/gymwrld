@@ -2,8 +2,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MODULE_KEYS = [
   ["training", "gw_training_log"],
+  ["achievements", "gw_achievements"],
+  ["treadmill", "gw_treadmill"],
   ["diet", "gw_diet"],
   ["steps", "gw_steps"],
+  ["mind", "gw_mind"],
+  ["journal", "gw_journal"],
   ["tasks", "gw_tasks"],
   ["profile", "gw_profile"],
   ["cycle", "gw_cycle"],
@@ -43,10 +47,12 @@ export async function restoreCloudStateToLocal() {
   if (!data) return;
   for (const [module, key] of MODULE_KEYS) {
     const row = data.find((item) => item.module === module);
-    if (row?.payload != null && !localStorage.getItem(key)) {
+    if (row?.payload != null) {
       localStorage.setItem(key, JSON.stringify(row.payload));
     }
   }
+  window.dispatchEvent(new Event("gw_profile_update"));
+  window.dispatchEvent(new Event("gw_training_log_update"));
 }
 
 export async function syncLocalState() {
