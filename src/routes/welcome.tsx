@@ -4,15 +4,18 @@ import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus,
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
-import gymHero from "@/assets/gym-hero.jpg";
-import foodHero from "@/assets/food-hero.jpg";
-import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
+import moduleStrength from "@/assets/module-strength.jpg";
+import moduleNutrition from "@/assets/module-nutrition.jpg";
+import moduleStreet from "@/assets/module-street.jpg";
+import moduleRunning from "@/assets/module-running.jpg";
+import moduleMindHealth from "@/assets/module-mind-health.jpg";
+import moduleRpg from "@/assets/module-rpg.jpg";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
       { title: "GymWRLD. — Twoja cyfrowa wersja siebie" },
-      { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi i cykl. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
+      { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi, mind health i gra RPG. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
       { property: "og:title", content: "GymWRLD." },
       { property: "og:description", content: "Premium aplikacja treningowa. Trenuj świadomie." },
       { property: "og:type", content: "website" },
@@ -23,25 +26,25 @@ export const Route = createFileRoute("/welcome")({
 
 const FEATURES = [
   { icon: Dumbbell, title: "Trening Siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
-  { icon: Apple, title: "Dieta i Przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
+  { icon: Apple, title: "Dieta i Przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
   { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście. Klikasz pin — przechodzisz do wizytówki Google z opiniami i nawigacją.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
   { icon: Footprints, title: "Biegi i Kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
   { icon: Moon, title: "Sen i Regeneracja", desc: "Tracker snu, strefa reset, oddychanie i mind sesje. Sen wpływa na statystyki — bez regeneracji nie ma progresu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
-  { icon: Heart, title: "Cykl (dla Kobiet)", desc: "Tracker cyklu z integracją FLO, faza dnia widoczna w planie. Intensywność treningu i kalorie dopasowują się do Twojej fazy.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
+  { icon: Heart, title: "Mind Health", desc: "Oddech, medytacja, journal, nastrój i reset po ciężkim dniu. Regeneracja wpływa na energię, sen i Twój długofalowy progres.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
   { icon: Sparkles, title: "Gra RPG", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
   { icon: Activity, title: "Statystyki & Medale", desc: "Pięć atrybutów: Siła, Kondycja, Dieta, Sen, Rozwój. Odblokowuj medale za pierwsze sesje, streaki i kamienie milowe.", tint: "from-[var(--lime)]/40 to-[var(--orange)]/20" },
 ];
 
 const FAQ = [
-  { q: "Czy GymWRLD jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i cykl są w pełni darmowe. Pro i Premium odblokowują plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
+  { q: "Czy GymWRLD jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i mind health są w pełni darmowe. Pro i Premium odblokowują plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
   { q: "Czy mogę zainstalować GymWRLD na telefonie?", a: "Tak — działamy jako PWA. Na iPhone otwórz w Safari i wybierz „Dodaj do ekranu początkowego”. Wersje natywne App Store i Google Play są w drodze." },
   { q: "Czy moje dane są bezpieczne?", a: "Tak. Konto i dane treningowe trzymamy w zaszyfrowanej bazie z polityką dostępu RLS. W każdej chwili wyeksportujesz lub usuniesz konto." },
-  { q: "Czym różnicie się od FLO, Stravy i MyFitnessPal?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i cykl — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
+  { q: "Czym różnicie się od typowych trackerów fitness?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i mind health — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
   { q: "Czy potrzebuję sprzętu?", a: "Nie. Mamy plany na masę ciała, gumy, oraz pełną siłownię — dobieramy ćwiczenia pod Twój sprzęt." },
 ];
 
 const PLANS = [
-  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, cykl", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
+  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, mind health", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
   { name: "Pro", price: "9,99 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Skanowanie produktów", "Plany treningowe premium", "Zaawansowane statystyki i rekordy", "3 dodatkowe pokoje"], cta: "Wybierz Pro", highlight: true, badge: "Najpopularniejsze" },
   { name: "Premium", price: "24,99 zł", tag: "/ miesiąc", features: ["Wszystko z Pro", "AI Coach 24/7", "Premium Deals (zniżki marek)", "Wszystkie pokoje + dekoracje", "Indywidualny plan AI"], cta: "Odblokuj Premium", highlight: false, badge: "VIP" },
 ];
