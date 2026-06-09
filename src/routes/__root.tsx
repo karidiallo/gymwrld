@@ -131,7 +131,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isMarketing = pathname.startsWith("/welcome") || pathname.startsWith("/privacy");
+  const isStandalone =
+    pathname.startsWith("/welcome") ||
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/onboarding");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -156,7 +160,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isMarketing ? (
+      {isStandalone ? (
         <Outlet />
       ) : (
         <div className="mx-auto min-h-screen w-full max-w-[480px] pb-28">

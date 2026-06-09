@@ -15,6 +15,7 @@ export function BottomNav() {
   if (
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/welcome") ||
+    pathname.startsWith("/auth") ||
     pathname.startsWith("/privacy")
   ) return null;
   return (
