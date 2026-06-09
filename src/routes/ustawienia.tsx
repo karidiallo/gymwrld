@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, User, Mail, Crown, LogOut, Bell, Lock, Trash2, Sparkles } from "lucide-react";
+import { ChevronLeft, User, Mail, Crown, LogOut, Bell, Lock, Trash2, Sparkles, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/ustawienia")({
@@ -14,6 +14,7 @@ type Profile = { name?: string; nickname?: string; email?: string; subscription?
 function Ustawienia() {
   const navigate = useNavigate();
   const [p, setP] = useState<Profile>({});
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -22,6 +23,25 @@ function Ustawienia() {
       if (raw) setP(JSON.parse(raw));
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    window.addEventListener("beforeinstallprompt", onPrompt as EventListener);
+    return () => window.removeEventListener("beforeinstallprompt", onPrompt as EventListener);
+  }, []);
+
+  const installApp = async () => {
+    if (!installPrompt) {
+      toast("Jeśli przycisk instalacji się nie pojawi, użyj menu przeglądarki → Dodaj do ekranu głównego.");
+      return;
+    }
+    await installPrompt.prompt();
+    setInstallPrompt(null);
+  };
 
   const save = (next: Profile) => {
     setP(next);
@@ -75,6 +95,7 @@ function Ustawienia() {
       <section className="mt-6">
         <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Preferencje</h3>
         <div className="space-y-2">
+          <Row icon={<Smartphone className="h-4 w-4" />} title="Dodaj do ekranu głównego" desc="Instaluj GymWrld jak normalną aplikację" onClick={installApp} />
           <Row icon={<Bell className="h-4 w-4" />} title="Powiadomienia" desc="Quest, treningi, motywacja" onClick={() => toast("Wkrótce")} />
           <Row icon={<Lock className="h-4 w-4" />} title="Prywatność" desc="Widoczność profilu, dane" onClick={() => toast("Wkrótce")} />
         </div>
