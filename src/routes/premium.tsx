@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Check, Zap, ChevronLeft, Lock } from "lucide-react";
-import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({ meta: [{ title: "Premium — GymWrld" }, { name: "description", content: "Odblokuj pełen potencjał GymWrld." }] }),

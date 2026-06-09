@@ -1,16 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronRight, Dumbbell, Apple, MapPin, Footprints, Heart, Check, Smartphone, Plus, Minus, Sparkles } from "lucide-react";
-import sanctuary from "@/assets/sanctuary.jpg";
-import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check } from "lucide-react";
+import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "GymWrld — Twoja cyfrowa wersja siebie" },
-      { name: "description", content: "Trening, dieta, street workout, biegi i cykl w jednym. Dołącz do GymWrld i zbuduj swoje sanktuarium." },
-      { property: "og:title", content: "GymWrld — Twoja cyfrowa wersja siebie" },
-      { property: "og:description", content: "Trening, dieta, street workout, biegi i cykl w jednym. Dołącz do GymWrld." },
+      { title: "GYMWRLD. — Twoja cyfrowa wersja siebie" },
+      { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi i cykl. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
+      { property: "og:title", content: "GYMWRLD." },
+      { property: "og:description", content: "Premium aplikacja treningowa. Trenuj świadomie." },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -18,25 +17,25 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const FEATURES = [
-  { icon: Dumbbell, title: "Trening siłowy", desc: "Plany, AI-dobrane ciężary, timer odpoczynku, log treningowy.", color: "var(--magenta)" },
-  { icon: Apple, title: "Dieta i przepisy", desc: "Makra, lista posiłków i ~50 przepisów z możliwością dodawania własnych zdjęć.", color: "var(--orange)" },
-  { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście.", color: "var(--lime)" },
-  { icon: Footprints, title: "Biegi & kroki", desc: "Maraton mode, trasy w mieście, dzienne kroki i kalorie.", color: "#60a5fa" },
-  { icon: Heart, title: "Cykl & regeneracja", desc: "Tracker cyklu (FLO), wymiary ciała, sen i regeneracja.", color: "#a78bfa" },
-  { icon: Sparkles, title: "Awatar & poziomy", desc: "Twoja cyfrowa postać rośnie z każdym treningiem.", color: "#bef264" },
+  { icon: Dumbbell, title: "Trening siłowy", desc: "Plany dobrane przez AI, log ciężarów, timer odpoczynku i analiza progresji." },
+  { icon: Apple, title: "Dieta i przepisy", desc: "Makra, lista posiłków i baza przepisów z możliwością dodawania własnych." },
+  { icon: MapPin, title: "Street Workout", desc: "Interaktywna mapa realnych parków kalistenicznych w Twoim mieście." },
+  { icon: Footprints, title: "Biegi & kroki", desc: "Maraton mode, dzienne kroki, kalorie i trasy wokół Ciebie." },
+  { icon: Heart, title: "Cykl & regeneracja", desc: "Pełen tracker cyklu, sen, wymiary ciała i strefa regeneracji." },
+  { icon: Sparkles, title: "Awatar & poziomy", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Odblokuj pokoje sanktuarium." },
 ];
 
 const FAQ = [
-  { q: "Czy GymWrld jest darmowy?", a: "Tak — wszystkie podstawowe funkcje (trening, dieta, mapa, biegi, cykl) są w pełni darmowe. Premium odblokowuje plany AI, dodatkowe pokoje awatara i ekskluzywne promocje." },
-  { q: "Czy mogę zainstalować GymWrld na telefonie?", a: "Tak. GymWrld działa jako PWA — w przeglądarce na telefonie wybierz 'Dodaj do ekranu głównego'. Wersje natywne na App Store i Google Play są w drodze." },
-  { q: "Czy moje dane są bezpieczne?", a: "Tak. Konto i dane treningowe trzymamy w zaszyfrowanej bazie. Możesz w każdej chwili wyeksportować lub usunąć konto." },
-  { q: "Czym GymWrld różni się od FLO / Strava / MyFitnessPal?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i cykl — z gamifikacją i awatarem, który się rozwija." },
-  { q: "Czy potrzebuję sprzętu?", a: "Nie. Masz plany na masę ciała, gumy i pełną siłownię — dobieramy ćwiczenia pod Twój sprzęt." },
+  { q: "Czy GymWrld jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i cykl są w pełni darmowe. Premium odblokowuje plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
+  { q: "Czy mogę zainstalować GymWrld na telefonie?", a: "Tak — działamy jako PWA. Na iPhone otwórz w Safari i wybierz „Dodaj do ekranu początkowego”. Wersje natywne App Store i Google Play są w drodze." },
+  { q: "Czy moje dane są bezpieczne?", a: "Tak. Konto i dane treningowe trzymamy w zaszyfrowanej bazie z polityką dostępu RLS. W każdej chwili wyeksportujesz lub usuniesz konto." },
+  { q: "Czym różnicie się od FLO, Stravy i MyFitnessPal?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i cykl — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
+  { q: "Czy potrzebuję sprzętu?", a: "Nie. Mamy plany na masę ciała, gumy, oraz pełną siłownię — dobieramy ćwiczenia pod Twój sprzęt." },
 ];
 
 const PLANS = [
   { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, cykl", "Mapa Street Workout", "Podstawowy awatar", "Statystyki i poziomy"], cta: "Zacznij za darmo", highlight: false },
-  { name: "Premium", price: "29 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Plany AI dopasowane do Ciebie", "Wszystkie pokoje awatara", "Ekskluzywne promocje lokalne", "Priorytetowe wsparcie"], cta: "Wypróbuj 7 dni gratis", highlight: true },
+  { name: "Premium", price: "29 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Plany AI dopasowane do Ciebie", "Wszystkie pokoje sanktuarium", "Ekskluzywne promocje lokalne", "Priorytetowe wsparcie"], cta: "Wypróbuj 7 dni gratis", highlight: true },
 ];
 
 function WelcomePage() {
@@ -51,163 +50,202 @@ function WelcomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
       {/* nav */}
-      <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-background/70 border-b border-white/5" : ""}`}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <a href="#top" className="flex items-center gap-2">
-            <img src={logo} alt="GymWrld" className="h-7 w-7 rounded-lg" />
-            <span className="font-display text-lg tracking-tight">GymWrld</span>
+      <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-black/70 border-b border-white/5" : ""}`}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="#top" className="flex items-center">
+            <img src={logo} alt="GYMWRLD" className="h-6" />
           </a>
-          <nav className="hidden gap-7 text-sm text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground">Funkcje</a>
-            <a href="#pricing" className="hover:text-foreground">Cennik</a>
-            <a href="#faq" className="hover:text-foreground">FAQ</a>
-            <a href="#download" className="hover:text-foreground">Pobierz</a>
+          <nav className="hidden gap-8 text-[13px] text-white/55 md:flex">
+            <a href="#features" className="hover:text-white">Funkcje</a>
+            <a href="#pricing" className="hover:text-white">Cennik</a>
+            <a href="#faq" className="hover:text-white">FAQ</a>
+            <a href="#download" className="hover:text-white">Pobierz</a>
           </nav>
-          <div className="flex items-center gap-2">
-            <Link to="/auth" className="hidden rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground sm:inline-block">Zaloguj</Link>
-            <Link to="/onboarding" className="rounded-full bg-[var(--lime)] px-4 py-2 text-sm font-medium text-black hover:opacity-90">Zacznij</Link>
+          <div className="flex items-center gap-3">
+            <Link to="/auth" className="hidden text-[13px] text-white/55 hover:text-white sm:inline-block">Zaloguj</Link>
+            <Link to="/onboarding" className="rounded-full bg-white px-4 py-2 text-[13px] font-medium text-black hover:bg-white/90">
+              Zacznij
+            </Link>
           </div>
         </div>
       </header>
 
       {/* hero */}
-      <section id="top" className="relative overflow-hidden pt-28 pb-20">
-        <img src={sanctuary} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
-        <div aria-hidden className="pointer-events-none absolute left-1/2 top-32 h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[var(--magenta)]/20 blur-3xl" />
-        <div className="relative mx-auto max-w-6xl px-5 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)]" /> Twoja cyfrowa wersja siebie
-          </span>
-          <h1 className="mx-auto mt-6 max-w-3xl font-display text-5xl leading-[1.05] tracking-tight md:text-7xl">
+      <section id="top" className="relative overflow-hidden pt-40 pb-32">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
+          <div className="absolute left-1/2 top-1/4 h-[80vh] w-[80vh] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+        </div>
+
+        <div className="relative mx-auto max-w-5xl px-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-[11px] uppercase tracking-[0.2em] text-white/60">
+            <span className="h-1 w-1 rounded-full bg-white" /> Twoja cyfrowa wersja siebie
+          </div>
+
+          <h1 className="mx-auto mt-10 max-w-4xl font-display text-[3.5rem] leading-[0.95] tracking-tight md:text-[6.5rem]">
             Buduj formę.<br />
-            <span className="bg-gradient-to-r from-[var(--lime)] via-[var(--orange)] to-[var(--magenta)] bg-clip-text text-transparent">
-              Trenuj świadomie.
-            </span>
+            <span className="text-white/40">Trenuj świadomie.</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground md:text-lg">
-            Siłownia, dieta, kalistenika, biegi i cykl — w jednej aplikacji. Z gamifikacją i awatarem, który się rozwija razem z Tobą.
+
+          <p className="mx-auto mt-8 max-w-lg text-base text-white/55 md:text-lg">
+            Siłownia, dieta, kalistenika, biegi i cykl — w jednej apce. Z gamifikacją i awatarem, który rośnie razem z Tobą.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/onboarding" className="inline-flex items-center gap-2 rounded-full bg-[var(--lime)] px-6 py-3 text-sm font-medium text-black hover:opacity-90">
-              Zacznij za darmo <ChevronRight className="h-4 w-4" />
+
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+            <Link to="/onboarding" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-black transition hover:bg-white/90">
+              Zacznij za darmo
+              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
-            <Link to="/auth" className="inline-flex items-center gap-2 rounded-full glass px-6 py-3 text-sm">
+            <Link to="/auth" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-7 py-3.5 text-sm text-white/80 transition hover:bg-white/[0.05]">
               Mam już konto
             </Link>
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">Bez karty · 7 dni Premium gratis</p>
+          <p className="mt-5 text-xs text-white/35">Bez karty · 7 dni Premium gratis</p>
+        </div>
+
+        {/* large wordmark backdrop */}
+        <div aria-hidden className="relative mt-24 px-6">
+          <img src={logo} alt="" className="mx-auto block w-[88%] max-w-5xl opacity-[0.06]" />
         </div>
       </section>
 
       {/* features */}
-      <section id="features" className="mx-auto max-w-6xl px-5 py-20">
-        <div className="mb-12 text-center">
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Funkcje</p>
-          <h2 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">Wszystko w jednej apce</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Zamiast pięciu aplikacji — jedno spójne miejsce.</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="group relative overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] p-6 transition hover:bg-white/[0.04]">
-              <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl" style={{ background: f.color }} />
-              <div className="relative">
-                <div className="grid h-11 w-11 place-items-center rounded-2xl" style={{ background: `${f.color}22`, color: f.color }}>
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <h3 className="mt-4 text-lg font-medium">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
+      <section id="features" className="border-t border-white/5">
+        <div className="mx-auto max-w-6xl px-6 py-32">
+          <div className="mb-20 max-w-2xl">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">— Funkcje</p>
+            <h2 className="mt-4 font-display text-4xl leading-tight tracking-tight md:text-6xl">
+              Wszystko w jednej apce.
+            </h2>
+            <p className="mt-5 text-base text-white/55">Zamiast pięciu aplikacji — jedno spójne miejsce, w którym Twoja forma rośnie razem ze statystykami i awatarem.</p>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-3xl bg-white/[0.06] md:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="group relative bg-black p-8 transition hover:bg-white/[0.02]">
+                <f.icon className="h-6 w-6 text-white/80" strokeWidth={1.5} />
+                <h3 className="mt-8 font-display text-2xl tracking-tight">{f.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/55">{f.desc}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* pricing */}
-      <section id="pricing" className="mx-auto max-w-5xl px-5 py-20">
-        <div className="mb-12 text-center">
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Cennik</p>
-          <h2 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">Prosto i uczciwie</h2>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {PLANS.map((p) => (
-            <div key={p.name} className={`relative overflow-hidden rounded-3xl border p-7 ${p.highlight ? "border-[var(--lime)]/40 bg-gradient-to-br from-[var(--lime)]/10 to-transparent" : "border-white/5 bg-white/[0.02]"}`}>
-              {p.highlight && <span className="absolute right-5 top-5 rounded-full bg-[var(--lime)] px-2 py-1 text-[10px] font-medium text-black">Polecane</span>}
-              <h3 className="font-display text-2xl">{p.name}</h3>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="font-display text-4xl">{p.price}</span>
-                <span className="text-sm text-muted-foreground">{p.tag}</span>
+      <section id="pricing" className="border-t border-white/5">
+        <div className="mx-auto max-w-5xl px-6 py-32">
+          <div className="mb-16 text-center">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">— Cennik</p>
+            <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Prosto i uczciwie.</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={`relative overflow-hidden rounded-3xl border p-10 ${
+                  p.highlight
+                    ? "border-white/20 bg-gradient-to-b from-white/[0.06] to-transparent"
+                    : "border-white/5 bg-white/[0.02]"
+                }`}
+              >
+                {p.highlight && (
+                  <span className="absolute right-5 top-5 rounded-full border border-white/20 bg-black px-3 py-1 text-[10px] uppercase tracking-widest text-white/70">
+                    Polecane
+                  </span>
+                )}
+                <h3 className="font-display text-3xl tracking-tight">{p.name}</h3>
+                <div className="mt-6 flex items-baseline gap-2">
+                  <span className="font-display text-5xl tracking-tight">{p.price}</span>
+                  <span className="text-sm text-white/40">{p.tag}</span>
+                </div>
+                <ul className="mt-10 space-y-3.5 text-sm text-white/75">
+                  {p.features.map((feat) => (
+                    <li key={feat} className="flex items-start gap-3">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-white/60" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to="/onboarding"
+                  className={`mt-10 inline-flex w-full items-center justify-center rounded-full px-5 py-3.5 text-sm font-medium transition ${
+                    p.highlight ? "bg-white text-black hover:bg-white/90" : "border border-white/10 text-white hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {p.cta}
+                </Link>
               </div>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lime)]" /> <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link to="/onboarding" className={`mt-7 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium ${p.highlight ? "bg-[var(--lime)] text-black" : "glass"}`}>
-                {p.cta}
-              </Link>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* faq */}
-      <section id="faq" className="mx-auto max-w-3xl px-5 py-20">
-        <div className="mb-10 text-center">
-          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">FAQ</p>
-          <h2 className="mt-2 font-display text-4xl tracking-tight md:text-5xl">Pytania i odpowiedzi</h2>
-        </div>
-        <div className="space-y-2">
-          {FAQ.map((item, i) => {
-            const open = openFaq === i;
-            return (
-              <button
-                key={i}
-                onClick={() => setOpenFaq(open ? null : i)}
-                className="w-full overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] text-left transition hover:bg-white/[0.04]"
-              >
-                <div className="flex items-center justify-between gap-3 p-5">
-                  <span className="font-medium">{item.q}</span>
-                  {open ? <Minus className="h-4 w-4 text-muted-foreground" /> : <Plus className="h-4 w-4 text-muted-foreground" />}
-                </div>
-                {open && <p className="px-5 pb-5 text-sm text-muted-foreground">{item.a}</p>}
-              </button>
-            );
-          })}
+      <section id="faq" className="border-t border-white/5">
+        <div className="mx-auto max-w-3xl px-6 py-32">
+          <div className="mb-14 text-center">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">— FAQ</p>
+            <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Pytania.</h2>
+          </div>
+          <div className="divide-y divide-white/5 border-y border-white/5">
+            {FAQ.map((item, i) => {
+              const open = openFaq === i;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setOpenFaq(open ? null : i)}
+                  className="block w-full text-left transition"
+                >
+                  <div className="flex items-center justify-between gap-6 py-6">
+                    <span className="font-display text-lg md:text-xl">{item.q}</span>
+                    {open ? <Minus className="h-4 w-4 shrink-0 text-white/50" /> : <Plus className="h-4 w-4 shrink-0 text-white/50" />}
+                  </div>
+                  {open && <p className="pb-6 pr-10 text-sm leading-relaxed text-white/55">{item.a}</p>}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* download */}
-      <section id="download" className="mx-auto max-w-4xl px-5 py-20">
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-gradient-to-br from-[var(--magenta)]/15 via-transparent to-[var(--lime)]/10 p-10 text-center">
-          <Smartphone className="mx-auto h-10 w-10 text-[var(--lime)]" />
-          <h2 className="mt-4 font-display text-3xl tracking-tight md:text-4xl">Pobierz GymWrld</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            Dostępne jako PWA na każdym telefonie. Wersje natywne App Store i Google Play wkrótce.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/onboarding" className="rounded-full bg-[var(--lime)] px-6 py-3 text-sm font-medium text-black">Otwórz w przeglądarce</Link>
-            <button disabled className="cursor-not-allowed rounded-full glass px-6 py-3 text-sm opacity-60">App Store · wkrótce</button>
-            <button disabled className="cursor-not-allowed rounded-full glass px-6 py-3 text-sm opacity-60">Google Play · wkrótce</button>
+      <section id="download" className="border-t border-white/5">
+        <div className="mx-auto max-w-5xl px-6 py-32">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent px-8 py-20 text-center">
+            <img src={logo} alt="" aria-hidden className="absolute left-1/2 top-1/2 w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-[0.04]" />
+            <div className="relative">
+              <p className="text-[11px] uppercase tracking-[0.3em] text-white/40">— Pobierz</p>
+              <h2 className="mt-4 font-display text-4xl tracking-tight md:text-5xl">Zainstaluj GymWrld.</h2>
+              <p className="mx-auto mt-5 max-w-md text-sm text-white/55">Dostępne jako PWA na każdym telefonie. Wersje natywne App Store i Google Play wkrótce.</p>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                <Link to="/onboarding" className="rounded-full bg-white px-7 py-3.5 text-sm font-medium text-black hover:bg-white/90">
+                  Otwórz w przeglądarce
+                </Link>
+                <button disabled className="cursor-not-allowed rounded-full border border-white/10 px-7 py-3.5 text-sm text-white/40">App Store · wkrótce</button>
+                <button disabled className="cursor-not-allowed rounded-full border border-white/10 px-7 py-3.5 text-sm text-white/40">Google Play · wkrótce</button>
+              </div>
+              <p className="mt-8 text-xs text-white/35">Na iPhone: otwórz w Safari → Udostępnij → „Do ekranu początkowego”.</p>
+            </div>
           </div>
-          <p className="mt-5 text-xs text-muted-foreground">Na iPhone: otwórz w Safari → Udostępnij → „Do ekranu początkowego”.</p>
         </div>
       </section>
 
       {/* footer */}
-      <footer className="border-t border-white/5 px-5 py-10 text-center text-xs text-muted-foreground">
-        <div className="mx-auto max-w-6xl flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="" className="h-5 w-5 rounded" />
-            <span>© {new Date().getFullYear()} GymWrld</span>
+      <footer className="border-t border-white/5">
+        <div className="mx-auto max-w-6xl px-6 py-14">
+          <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
+            <img src={logo} alt="GYMWRLD" className="h-7" />
+            <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-white/55">
+              <Link to="/privacy" className="hover:text-white">Polityka prywatności</Link>
+              <Link to="/auth" className="hover:text-white">Logowanie</Link>
+              <a href="mailto:hi@gymwrld.com" className="hover:text-white">Kontakt</a>
+            </nav>
           </div>
-          <div className="flex gap-5">
-            <Link to="/auth">Logowanie</Link>
-            <a href="mailto:hi@gymwrld.com">Kontakt</a>
+          <div className="mt-10 border-t border-white/5 pt-6 text-xs text-white/35">
+            © {new Date().getFullYear()} GymWrld. Wszelkie prawa zastrzeżone.
           </div>
         </div>
       </footer>
