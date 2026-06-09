@@ -9,7 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZadaniaRouteImport } from './routes/zadania'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
+import { Route as ZadaniaRouteImport } from './routes/zadania'
+import { Route as StatystykiRouteImport } from './routes/statystyki'
+import { Route as KrokiRouteImport } from './routes/kroki'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
@@ -26,9 +30,29 @@ import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ZadaniaRoute = ZadaniaRouteImport.update({
+  id: '/zadania',
+  path: '/zadania',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZadaniaRoute = ZadaniaRouteImport.update({
+  id: '/zadania',
+  path: '/zadania',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatystykiRoute = StatystykiRouteImport.update({
+  id: '/statystyki',
+  path: '/statystyki',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KrokiRoute = KrokiRouteImport.update({
+  id: '/kroki',
+  path: '/kroki',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
@@ -124,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,6 +167,7 @@ export interface FileRoutesByTo {
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +187,7 @@ export interface FileRoutesById {
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +208,7 @@ export interface FileRouteTypes {
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,6 +227,7 @@ export interface FileRouteTypes {
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   id:
     | '__root__'
     | '/'
@@ -217,6 +246,7 @@ export interface FileRouteTypes {
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,10 +266,18 @@ export interface RootRouteChildren {
   TreningRoute: typeof TreningRoute
   UstawieniaRoute: typeof UstawieniaRoute
   WorkoutsRoute: typeof WorkoutsRoute
+  ZadaniaRoute: typeof ZadaniaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zadania': {
+      id: '/zadania'
+      path: '/zadania'
+      fullPath: '/zadania'
+      preLoaderRoute: typeof ZadaniaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workouts': {
       id: '/workouts'
       path: '/workouts'
@@ -372,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   TreningRoute: TreningRoute,
   UstawieniaRoute: UstawieniaRoute,
   WorkoutsRoute: WorkoutsRoute,
+  ZadaniaRoute: ZadaniaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
