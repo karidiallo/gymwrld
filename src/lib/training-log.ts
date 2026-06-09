@@ -36,21 +36,38 @@ export function awardXp(amount: number, reason?: string) {
 const XP_PER_KIND: Record<TrainingKind, number> = {
   silownia: 120, biezia: 80, bieg: 100, street: 90, mind: 30, sen: 40,
 };
+/** Base bumps per training (applied at minimum) */
 const STAT_BUMP: Record<TrainingKind, Partial<Record<"sila"|"kondycja"|"dieta"|"sen"|"rozwoj", number>>> = {
-  silownia: { sila: 4, rozwoj: 1 },
-  biezia: { kondycja: 3 },
-  bieg: { kondycja: 4 },
-  street: { sila: 2, kondycja: 2 },
-  mind: { rozwoj: 2 },
-  sen: { sen: 5 },
+  silownia: { sila: 5, rozwoj: 1 },
+  biezia: { kondycja: 5 },
+  bieg: { kondycja: 6 },
+  street: { sila: 3, kondycja: 3 },
+  mind: { rozwoj: 3 },
+  sen: { sen: 6 },
 };
-function bumpStats(kind: TrainingKind) {
+
+/** Adaptive scaling: more kcal/minutes → more stat gain. */
+function scaledBump(kind: TrainingKind, kcal: number, minutes: number) {
+  const base = { ...STAT_BUMP[kind] } as Record<string, number>;
+  // intensity factor: ~1.0 at 100 kcal / 20 min, scales up to ~2.5
+  const intensity = Math.min(2.5, Math.max(0.6, (kcal / 100) * 0.5 + (minutes / 20) * 0.5));
+  for (const k of Object.keys(base)) base[k] = Math.round(base[k] * intensity);
+  // cardio specifics: bieżnia/bieg → kondycja gets +1 per 50 kcal beyond 100
+  if (kind === "biezia" || kind === "bieg") {
+    const extra = Math.max(0, Math.floor((kcal - 100) / 50));
+    base.kondycja = (base.kondycja ?? 0) + extra;
+  }
+  return base;
+}
+
+function bumpStats(kind: TrainingKind, kcal = 0, minutes = 0) {
   if (typeof window === "undefined") return;
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
     const p = raw ? JSON.parse(raw) : {};
     const s = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
-    for (const [k, v] of Object.entries(STAT_BUMP[kind])) s[k] = Math.min(100, (s[k] ?? 0) + (v as number));
+    const bump = scaledBump(kind, kcal, minutes);
+    for (const [k, v] of Object.entries(bump)) s[k] = Math.min(100, (s[k] ?? 0) + (v as number));
     localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...p, stats: s }));
     window.dispatchEvent(new Event("gw_profile_update"));
   } catch {}
@@ -82,8 +99,10 @@ export function addLog(log: Omit<TrainingLog, "id" | "ts"> & { ts?: number; id?:
     meta: log.meta,
   };
   writeLogs([next, ...readLogs()]);
-  awardXp(XP_PER_KIND[next.kind] ?? 30);
-  bumpStats(next.kind);
+  // XP also scales with kcal/minutes
+  const xpScale = Math.min(2.5, Math.max(0.6, (next.kcal / 100) * 0.5 + (next.minutes / 20) * 0.5));
+  awardXp(Math.round((XP_PER_KIND[next.kind] ?? 30) * xpScale));
+  bumpStats(next.kind, next.kcal, next.minutes);
   return next;
 }
 
