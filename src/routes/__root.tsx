@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -129,6 +130,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isMarketing = pathname.startsWith("/welcome") || pathname.startsWith("/privacy");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -153,9 +156,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[480px] pb-28">
+      {isMarketing ? (
         <Outlet />
-      </div>
+      ) : (
+        <div className="mx-auto min-h-screen w-full max-w-[480px] pb-28">
+          <Outlet />
+        </div>
+      )}
       <BottomNav />
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>

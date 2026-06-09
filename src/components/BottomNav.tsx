@@ -12,7 +12,11 @@ const items = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  if (pathname.startsWith("/onboarding")) return null;
+  if (
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/welcome") ||
+    pathname.startsWith("/privacy")
+  ) return null;
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-center pb-4 pt-2 pointer-events-none">
       <div className="glass pointer-events-auto flex w-[92%] max-w-[460px] items-center justify-between rounded-full px-2 py-2 shadow-2xl">

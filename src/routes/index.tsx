@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import sanctuary from "@/assets/sanctuary.jpg";
-import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
@@ -93,12 +93,7 @@ function Index() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <Link to="/profil" className="flex items-center gap-2">
-          <img
-            src={logoAsset.url}
-            alt="GymWrld"
-            className="h-8 w-auto"
-            style={{ filter: "brightness(0) invert(1)" }}
-          />
+          <img src={logoAsset.url} alt="GymWrld" className="h-9 w-auto" />
         </Link>
         <div className="flex items-center gap-2">
           <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.lvl ?? 1}`} />
