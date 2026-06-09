@@ -15,7 +15,7 @@ import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
-import { syncLocalState } from "../lib/cloud-state";
+import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
 
 function NotFoundComponent() {
   return (
@@ -129,6 +129,7 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    installLocalStateCloudSync();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
