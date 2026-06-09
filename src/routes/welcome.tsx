@@ -103,7 +103,7 @@ function WelcomePage() {
       <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-background/70 border-b border-white/5" : ""}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="#top" className="flex items-center gap-2">
-            <img src={logo} alt="GymWRLD" className="h-14 w-auto md:h-16" />
+            <img src={logo} alt="GymWRLD" className="h-20 w-auto md:h-24" />
           </a>
           <nav className="hidden gap-8 text-[13px] text-muted-foreground md:flex">
             <a href="#features" className="hover:text-foreground">Funkcje</a>
@@ -131,7 +131,7 @@ function WelcomePage() {
               Buduj <span className="text-gradient">swoją</span><br />najlepszą wersję.
             </h1>
             <p className="mt-7 max-w-lg text-base text-muted-foreground md:text-lg">
-              Siłownia, dieta, street workout, biegi i cykl — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
+              Siłownia, dieta, street workout, biegi i mind health — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link to="/auth" search={{ mode: "signup" } as any} className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
@@ -254,7 +254,7 @@ function WelcomePage() {
       <section className="border-y border-white/5 bg-background/40 backdrop-blur-sm">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
           {[
-            { v: "5w1", l: "Trening · Dieta · Biegi · Cykl · Gra RPG" },
+            { v: "5w1", l: "Trening · Dieta · Biegi · Mind Health · Gra RPG" },
             { v: "4.9★", l: "Średnia ocena testerów" },
             { v: "AI", l: "Plany dopasowane do Ciebie" },
             { v: "PWA", l: "Instalujesz w 5 sekund" },
@@ -296,15 +296,15 @@ function WelcomePage() {
           {/* magazine row */}
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
-              {src: gymHero, t: "Siłownia"},
-              {src: foodHero, t: "Dieta"},
-              {src: calisthenicsHero, t: "Street Workout"},
-              {src: gymHero, t: "Biegi"},
-              {src: foodHero, t: "Sen & Regeneracja"},
-              {src: calisthenicsHero, t: "Cykl (dla Kobiet)"},
+              {src: moduleStrength, t: "Siłownia"},
+              {src: moduleNutrition, t: "Dieta i Przepisy"},
+              {src: moduleStreet, t: "Street Workout"},
+              {src: moduleRunning, t: "Biegi i Kroki"},
+              {src: moduleMindHealth, t: "Mind Health"},
+              {src: moduleRpg, t: "Gra RPG"},
             ].map((c) => (
               <div key={c.t} className="group relative aspect-[4/5] overflow-hidden rounded-3xl">
-                <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" width={768} height={960} loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute inset-x-5 bottom-5">
                   <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Moduł</p>
