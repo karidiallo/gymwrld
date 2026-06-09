@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
+import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
@@ -19,12 +19,15 @@ function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [stayLogged, setStayLogged] = useState(true);
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [weight, setWeight] = useState<number | "">("");
   const [height, setHeight] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
+  const [city, setCity] = useState<string>("");
   const [floLinked, setFloLinked] = useState<boolean | null>(null);
   const [floPromptOpen, setFloPromptOpen] = useState(false);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -41,7 +44,9 @@ function Onboarding() {
   const finish = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, goals, level, freq, age, gender, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
+      if (stayLogged) localStorage.setItem("gw_session_persist", "1");
+      else localStorage.removeItem("gw_session_persist");
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
       localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
       const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
@@ -51,7 +56,7 @@ function Onboarding() {
     navigate({ to: "/" });
   };
 
-  const total = 6;
+  const total = 7;
   const progress = ((step + 1) / total) * 100;
 
   // First screen: pure black, huge logo only.
@@ -67,7 +72,7 @@ function Onboarding() {
           />
         </div>
         <div className="w-full max-w-[480px]">
-          <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
+          <StepAuth email={email} setEmail={setEmail} password={password} setPassword={setPassword} stayLogged={stayLogged} setStayLogged={setStayLogged} onNext={() => setStep(1)} />
         </div>
       </main>
     );
@@ -114,6 +119,9 @@ function Onboarding() {
           />
         )}
         {step === 3 && (
+          <StepCity city={city} setCity={setCity} onNext={() => setStep(4)} />
+        )}
+        {step === 4 && (
           <StepMultiChoice
             title="Jaki masz cel?"
             subtitle="Możesz wybrać kilka — dopasujemy plan."
@@ -125,11 +133,11 @@ function Onboarding() {
             ]}
             values={goals}
             onToggle={(v) => setGoals((gs) => gs.includes(v as Goal) ? gs.filter((x) => x !== v) : [...gs, v as Goal])}
-            onNext={() => setStep(4)}
+            onNext={() => setStep(5)}
             canNext={goals.length > 0}
           />
         )}
-        {step === 4 && (
+        {step === 5 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -140,11 +148,11 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(5)}
+            onNext={() => setStep(6)}
             canNext={!!level}
           />
         )}
-        {step === 5 && (
+        {step === 6 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
