@@ -16,6 +16,9 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
+import logoAsset from "../assets/gymwrld-logo.png.asset.json";
+
+const logoAssetUrl = logoAsset.url;
 
 function NotFoundComponent() {
   return (
