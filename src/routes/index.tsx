@@ -7,7 +7,7 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
-import { awardXp } from "@/lib/training-log";
+import { awardXp, readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
