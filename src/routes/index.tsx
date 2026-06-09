@@ -34,7 +34,7 @@ function Index() {
       if (cancelled) return;
       if (!data.user) {
         const onboarded = localStorage.getItem("gw_onboarded") === "1";
-        navigate({ to: onboarded ? "/auth" : "/onboarding" });
+        navigate({ to: onboarded ? "/auth" : "/welcome" });
       } else {
         const cloudProfile = await ensureCloudProfile(data.user);
         await syncLocalState();
