@@ -257,7 +257,16 @@ function Przepisy() {
             onClick={() => setOpenId(r.id)}
             className="group overflow-hidden rounded-2xl glass text-left transition-transform active:scale-[0.98]"
           >
-            <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+            {recipeImage(r) ? (
+              <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+            ) : (
+              <div className="grid aspect-[4/3] w-full place-items-center bg-gradient-to-br from-white/[0.04] to-white/[0.02] text-muted-foreground/60">
+                <div className="flex flex-col items-center gap-1">
+                  <ImageIcon className="h-6 w-6" />
+                  <span className="text-[9px] uppercase tracking-widest">Brak zdjęcia</span>
+                </div>
+              </div>
+            )}
             <div className="p-3">
               <p className="line-clamp-1 text-sm font-medium">{r.title}</p>
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
