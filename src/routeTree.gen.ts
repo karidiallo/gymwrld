@@ -11,9 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZadaniaRouteImport } from './routes/zadania'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
-import { Route as ZadaniaRouteImport } from './routes/zadania'
-import { Route as StatystykiRouteImport } from './routes/statystyki'
-import { Route as KrokiRouteImport } from './routes/kroki'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
@@ -38,21 +35,6 @@ const ZadaniaRoute = ZadaniaRouteImport.update({
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ZadaniaRoute = ZadaniaRouteImport.update({
-  id: '/zadania',
-  path: '/zadania',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StatystykiRoute = StatystykiRouteImport.update({
-  id: '/statystyki',
-  path: '/statystyki',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KrokiRoute = KrokiRouteImport.update({
-  id: '/kroki',
-  path: '/kroki',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
