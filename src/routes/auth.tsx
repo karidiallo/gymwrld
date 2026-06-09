@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { getPostAuthDestination } from "@/lib/auth-flow";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
@@ -20,17 +21,26 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/" });
+    let cancelled = false;
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (cancelled || !data.user) return;
+      const to = await getPostAuthDestination(data.user);
+      if (!cancelled) navigate({ to });
     });
+    return () => { cancelled = true; };
   }, [navigate]);
 
   const signInGoogle = async () => {
     setBusy(true);
     try {
       const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-      if (r.error) toast.error("Nie udało się zalogować przez Google");
-      // redirect handled by provider
+      if (r.error) {
+        toast.error("Google: " + r.error.message);
+        return;
+      }
+      if (r.redirected) return;
+      const { data } = await supabase.auth.getUser();
+      if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
     } finally { setBusy(false); }
   };
 
@@ -49,21 +59,27 @@ function AuthPage() {
       }
       if (password.length < 8) return toast.error("Hasło musi mieć min. 8 znaków");
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Zalogowano");
-        navigate({ to: "/" });
+        if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Konto utworzone — kontynuuj onboarding");
-        navigate({ to: "/onboarding" });
+        if (data.session?.user) {
+          toast.success("Konto utworzone");
+          navigate({ to: await getPostAuthDestination(data.session.user) });
+        } else {
+          toast.success("Konto utworzone — potwierdź e-mail, potem wróć do logowania");
+          setMode("signin");
+        }
       }
     } catch (e: any) {
-      toast.error(e?.message ?? "Coś poszło nie tak");
+      const msg = e?.message ?? "Coś poszło nie tak";
+      toast.error(msg.includes("Email not confirmed") ? "Najpierw potwierdź e-mail z wiadomości aktywacyjnej." : msg);
     } finally { setBusy(false); }
   };
 

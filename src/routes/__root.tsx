@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
+import { ensureCloudProfile } from "../lib/auth-flow";
+import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
 
 function NotFoundComponent() {
   return (
@@ -127,10 +129,19 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    installLocalStateCloudSync();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") {
+        queryClient.clear();
+        router.invalidate();
+        return;
+      }
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) ensureCloudProfile(data.user).then(() => syncLocalState());
+      });
       router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      queryClient.invalidateQueries();
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
