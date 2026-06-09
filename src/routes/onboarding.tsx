@@ -454,6 +454,7 @@ function StepCity({ city, setCity, onNext }: { city: string; setCity: (v: string
 
 function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayLogged, onNext }: { email: string; setEmail: (v: string) => void; password: string; setPassword: (v: string) => void; stayLogged: boolean; setStayLogged: (v: boolean) => void; onNext: () => void }) {
   const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
   const generate = () => {
     const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$";
     let p = "";
@@ -461,6 +462,20 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     setPassword(p);
     setShow(true);
     toast.success("Wygenerowano silne hasło — zapisz je!");
+  };
+  const google = async () => {
+    setBusy(true);
+    try {
+      const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      if (r.error) toast.error("Google: " + r.error.message);
+      else if (!r.redirected) onNext();
+    } finally { setBusy(false); }
+  };
+  const resetPwd = async () => {
+    if (!email.includes("@")) return toast.error("Podaj e-mail powyżej");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth?recovery=1` });
+    if (error) toast.error(error.message);
+    else toast.success(`Link do resetu wysłany na ${email}`);
   };
   const canNext = email.includes("@") && password.length >= 8;
   return (
@@ -474,13 +489,14 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
 
       <div className="space-y-2.5">
         <button
-          onClick={onNext}
+          onClick={google}
+          disabled={busy}
           className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 py-3.5 text-sm font-semibold text-black transition active:scale-[0.98]"
         >
           <GoogleIcon /> Kontynuuj z Google
         </button>
         <button
-          onClick={onNext}
+          onClick={() => toast("Apple sign-in wkrótce")}
           className="flex w-full items-center justify-center gap-3 rounded-2xl bg-black px-5 py-3.5 text-sm font-semibold text-white ring-1 ring-white/15 transition active:scale-[0.98]"
         >
           <AppleIcon /> Kontynuuj z Apple
@@ -523,7 +539,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
             <input type="checkbox" checked={stayLogged} onChange={(e) => setStayLogged(e.target.checked)} className="accent-[var(--magenta)]" />
             Pozostań zalogowany
           </label>
-          <button type="button" onClick={() => email.includes("@") ? toast.success(`Link do resetu hasła wysłany na ${email}`) : toast.error("Podaj e-mail powyżej")} className="text-[var(--magenta)] hover:underline">
+          <button type="button" onClick={resetPwd} className="text-[var(--magenta)] hover:underline">
             Zapomniałem hasła
           </button>
         </div>
