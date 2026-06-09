@@ -472,7 +472,11 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     try {
       const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
       if (r.error) toast.error("Google: " + r.error.message);
-      else if (!r.redirected) onNext();
+      else if (!r.redirected) {
+        const { data } = await supabase.auth.getUser();
+        if (data.user) await ensureCloudProfile(data.user);
+        onNext();
+      }
     } finally { setBusy(false); }
   };
   const resetPwd = async () => {
