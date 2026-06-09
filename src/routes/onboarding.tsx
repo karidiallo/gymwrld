@@ -463,6 +463,7 @@ function StepCity({ city, setCity, onNext }: { city: string; setCity: (v: string
 function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayLogged, onNext }: { email: string; setEmail: (v: string) => void; password: string; setPassword: (v: string) => void; stayLogged: boolean; setStayLogged: (v: boolean) => void; onNext: () => void }) {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const generate = () => {
     const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$";
     let p = "";
@@ -472,6 +473,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     toast.success("Wygenerowano silne hasło — zapisz je!");
   };
   const google = async () => {
+    if (!acceptedPrivacy) { toast.error("Zaakceptuj Politykę prywatności, aby kontynuować"); return; }
     setBusy(true);
     try {
       const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
@@ -489,7 +491,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     if (error) toast.error(error.message);
     else toast.success(`Link do resetu wysłany na ${email}`);
   };
-  const canNext = email.includes("@") && password.length >= 8;
+  const canNext = email.includes("@") && password.length >= 8 && acceptedPrivacy;
   const continueWithEmail = async () => {
     if (!canNext) return;
     setBusy(true);
@@ -583,6 +585,21 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
             Zapomniałem hasła
           </button>
         </div>
+        <label className="flex items-start gap-2 text-[11px] text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={acceptedPrivacy}
+            onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+            className="mt-0.5 accent-white"
+          />
+          <span>
+            Akceptuję{" "}
+            <a href="/privacy" target="_blank" rel="noreferrer" className="text-white underline-offset-4 hover:underline">
+              Politykę prywatności
+            </a>{" "}
+            i wyrażam zgodę na przetwarzanie moich danych.
+          </span>
+        </label>
         <button
           onClick={continueWithEmail}
           disabled={!canNext || busy}
@@ -593,7 +610,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
       </div>
 
       <p className="text-center text-[10px] text-muted-foreground">
-        Kontynuując akceptujesz Regulamin i Politykę prywatności.
+        Twoje dane chronimy zgodnie z RODO. <a href="/privacy" target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">Zobacz szczegóły</a>.
       </p>
     </div>
   );
