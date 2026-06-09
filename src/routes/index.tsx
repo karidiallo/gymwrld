@@ -9,6 +9,8 @@ import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 import { awardXp } from "@/lib/training-log";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
+import { syncLocalState } from "@/lib/cloud-state";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,11 +30,15 @@ function Index() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (cancelled) return;
-      if (!data.session) {
+      if (!data.user) {
         const onboarded = localStorage.getItem("gw_onboarded") === "1";
         navigate({ to: onboarded ? "/auth" : "/onboarding" });
+      } else {
+        const cloudProfile = await ensureCloudProfile(data.user);
+        await syncLocalState();
+        if (!cancelled && !isProfileComplete(cloudProfile)) navigate({ to: "/onboarding" });
       }
     });
     return () => { cancelled = true; };
