@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
-import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Zaloguj się — GymWrld" }] }),
@@ -89,7 +89,7 @@ function AuthPage() {
         <ArrowLeft className="h-4 w-4" />
       </Link>
       <div className="mx-auto flex max-w-[420px] flex-col items-center pt-6">
-        <img src={logoAsset.url} alt="GymWrld" className="w-[48%] max-w-[220px]" />
+        <img src={logoAsset.url} alt="GymWrld" className="w-[40%] max-w-[180px]" />
         <h1 className="mt-8 font-display text-2xl">
           {mode === "signin" ? "Witaj z powrotem" : mode === "signup" ? "Utwórz konto" : "Reset hasła"}
         </h1>

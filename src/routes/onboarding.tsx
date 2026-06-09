@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
-import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,8 +107,7 @@ function Onboarding() {
           <img
             src={logoAsset.url}
             alt="GymWrld"
-            className="mx-auto block w-[62%] max-w-[360px]"
-            style={{ filter: "brightness(0) invert(1) drop-shadow(0 8px 40px rgba(255,255,255,0.18))" }}
+            className="mx-auto block w-[58%] max-w-[320px] drop-shadow-[0_8px_40px_rgba(255,255,255,0.18)]"
           />
         </div>
         <div className="w-full max-w-[480px]">
@@ -128,8 +127,7 @@ function Onboarding() {
         <img
           src={logoAsset.url}
           alt="GymWrld"
-          className="h-20 w-auto"
-          style={{ filter: "brightness(0) invert(1) drop-shadow(0 4px 28px rgba(255,255,255,0.15))" }}
+          className="h-20 w-auto drop-shadow-[0_4px_28px_rgba(255,255,255,0.15)]"
         />
         <span className="mt-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{step + 1} / {total}</span>
       </header>
