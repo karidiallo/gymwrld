@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -13,13 +13,16 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-black text-white">
-      <header className="border-b border-white/5">
+    <main className="relative min-h-screen text-foreground">
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[var(--magenta)]/20 blur-[120px]" />
+      </div>
+      <header className="border-b border-white/5 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
           <Link to="/welcome" className="flex items-center gap-2">
-            <img src={logoAsset.url} alt="GymWrld" className="h-6" />
+            <img src={logoAsset.url} alt="GymWrld" className="h-8" />
           </Link>
-          <Link to="/welcome" className="text-xs text-white/60 hover:text-white">← Powrót</Link>
+          <Link to="/welcome" className="text-xs text-muted-foreground hover:text-foreground">← Powrót</Link>
         </div>
       </header>
 
