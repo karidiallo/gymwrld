@@ -40,7 +40,7 @@ const PLANS = [
 ];
 
 function WelcomePage() {
-  const logo = logoAsset.url ?? logoAsset.src;
+  const logo = logoAsset.url;
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [scrolled, setScrolled] = useState(false);
 
