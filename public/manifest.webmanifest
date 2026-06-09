@@ -1,0 +1,19 @@
+{
+  "name": "GymWrld",
+  "short_name": "GymWrld",
+  "description": "Trening, dieta, profil i progres w jednej aplikacji.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/9e97d7e7-db69-48ed-85ad-3a6a94a9e3cf/gymwrld-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
