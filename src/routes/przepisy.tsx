@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import foodHero from "@/assets/food-hero.jpg";
-import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2 } from "lucide-react";
+import recipePowerBowl from "@/assets/recipe-power-bowl.jpg";
+import recipeOwsianka from "@/assets/recipe-owsianka.jpg";
+import recipeLosos from "@/assets/recipe-losos.jpg";
+import recipeOmlet from "@/assets/recipe-omlet.jpg";
+import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2, ImageIcon, Camera } from "lucide-react";
 
 type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska";
 
@@ -18,20 +23,17 @@ type Recipe = {
   emoji: string;
 };
 
-const FOOD_IMAGES = [
-  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=80",
-];
+// Tylko zweryfikowane, ręcznie dopasowane zdjęcia. Reszta przepisów ma placeholder
+// i CTA „prześlij swoje zdjęcie" do moderacji.
+const RECIPE_IMAGES: Record<string, string> = {
+  "power-bowl": recipePowerBowl,
+  "owsianka-jagody": recipeOwsianka,
+  "losos-batat": recipeLosos,
+  "omlet-warzywa": recipeOmlet,
+};
 
-function recipeImage(recipe: Pick<Recipe, "id">) {
-  const hash = recipe.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return FOOD_IMAGES[hash % FOOD_IMAGES.length];
+function recipeImage(recipe: Pick<Recipe, "id">): string | undefined {
+  return RECIPE_IMAGES[recipe.id];
 }
 
 const RECIPES: Recipe[] = [
@@ -255,7 +257,16 @@ function Przepisy() {
             onClick={() => setOpenId(r.id)}
             className="group overflow-hidden rounded-2xl glass text-left transition-transform active:scale-[0.98]"
           >
-            <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+            {recipeImage(r) ? (
+              <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+            ) : (
+              <div className="grid aspect-[4/3] w-full place-items-center bg-gradient-to-br from-white/[0.04] to-white/[0.02] text-muted-foreground/60">
+                <div className="flex flex-col items-center gap-1">
+                  <ImageIcon className="h-6 w-6" />
+                  <span className="text-[9px] uppercase tracking-widest">Brak zdjęcia</span>
+                </div>
+              </div>
+            )}
             <div className="p-3">
               <p className="line-clamp-1 text-sm font-medium">{r.title}</p>
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -278,10 +289,26 @@ function Przepisy() {
 }
 
 function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
+  const img = recipeImage(recipe);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] pb-10">
-        <img src={recipeImage(recipe)} alt={recipe.title} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        {img ? (
+          <img src={img} alt={recipe.title} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="relative grid aspect-[16/9] w-full place-items-center bg-gradient-to-br from-[var(--magenta)]/15 via-[var(--orange)]/10 to-transparent">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Brak zdjęcia</p>
+              <button
+                onClick={(e) => { e.stopPropagation(); toast.success("Dzięki! Twoje zdjęcie trafi do moderacji ✨"); }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium"
+              >
+                <Camera className="h-3 w-3" /> Prześlij swoje zdjęcie
+              </button>
+            </div>
+          </div>
+        )}
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between gap-3">
             <div>

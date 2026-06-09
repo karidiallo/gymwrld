@@ -173,14 +173,17 @@ function Street() {
       </div>
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0a1a14]">
         <div className="relative h-72">
-          <iframe key={cityId} title={`Street workout ${city.name}`} src={mapSrc} className="h-full w-full" style={{ filter: "invert(0.92) hue-rotate(180deg) saturate(0.9)" }} loading="lazy" />
+          {/* Non-interactive map so pin overlay stays aligned. Use list / Google Maps link to navigate. */}
+          <iframe key={cityId} title={`Street workout ${city.name}`} src={mapSrc} scrolling="no" tabIndex={-1} className="pointer-events-none h-full w-full select-none" style={{ filter: "invert(0.92) hue-rotate(180deg) saturate(0.9)" }} loading="lazy" />
           <div className="pointer-events-none absolute inset-0">
             {spots.map((s) => {
               const { x, y } = toXY(s.lat, s.lon);
               return (
-                <button
+                <a
                   key={s.name}
-                  onClick={() => toast.success(`${s.name} · ${s.addr}`)}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.addr + " " + city.name)}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="pointer-events-auto absolute -translate-x-1/2 -translate-y-full"
                   style={{ left: `${x}%`, top: `${y}%` }}
                   title={s.name}
@@ -188,7 +191,7 @@ function Street() {
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--lime)] text-background shadow-lg ring-2 ring-black/40">
                     <MapPin className="h-4 w-4" />
                   </span>
-                </button>
+                </a>
               );
             })}
           </div>
@@ -199,7 +202,7 @@ function Street() {
               Brak zmapowanych parków w {city.name}. Dodaj swój przez „Loguj".
             </div>
           ) : spots.map((s) => (
-            <a key={s.name} href={`https://www.openstreetmap.org/?mlat=${s.lat}&mlon=${s.lon}#map=18/${s.lat}/${s.lon}`} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2 text-xs hover:bg-white/[0.06]">
+            <a key={s.name} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + " " + s.addr + " " + city.name)}`} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2 text-xs hover:bg-white/[0.06]">
               <span className="flex items-center gap-2 truncate"><MapPin className="h-3 w-3 shrink-0 text-[var(--lime)]" /> <span className="truncate">{s.name}</span><span className="text-muted-foreground/70 truncate">· {s.addr}</span></span>
               <span className="ml-2 shrink-0 text-muted-foreground">{distKm(s.lat, s.lon)} km</span>
             </a>
