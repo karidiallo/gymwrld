@@ -14,7 +14,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
+  const initialMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<"signin" | "signup" | "reset">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
@@ -85,16 +86,28 @@ function AuthPage() {
 
   return (
     <main className="relative min-h-screen bg-black px-5 pt-10 pb-12 text-white">
-      <Link to="/onboarding" className="absolute left-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10">
+      <Link to="/welcome" className="absolute left-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10">
         <ArrowLeft className="h-4 w-4" />
       </Link>
       <div className="mx-auto flex max-w-[420px] flex-col items-center pt-6">
         <img src={logoAsset.url} alt="GymWrld" className="w-[40%] max-w-[180px]" />
-        <h1 className="mt-8 font-display text-2xl">
+        {mode !== "reset" && (
+          <div className="mt-8 grid w-full grid-cols-2 rounded-2xl bg-white/5 p-1 ring-1 ring-white/10">
+            <button
+              onClick={() => setMode("signin")}
+              className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signin" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
+            >Zaloguj</button>
+            <button
+              onClick={() => setMode("signup")}
+              className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signup" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
+            >Utwórz konto</button>
+          </div>
+        )}
+        <h1 className="mt-6 font-display text-2xl">
           {mode === "signin" ? "Witaj z powrotem" : mode === "signup" ? "Utwórz konto" : "Reset hasła"}
         </h1>
         <p className="mt-1 text-center text-xs text-muted-foreground">
-          {mode === "reset" ? "Wyślemy link na Twój e-mail." : "Zaloguj się, aby kontynuować rozwój."}
+          {mode === "reset" ? "Wyślemy link na Twój e-mail." : mode === "signup" ? "Zarejestruj się i zacznij budować swoją cyfrową wersję." : "Zaloguj się, aby kontynuować rozwój."}
         </p>
 
         <div className="mt-6 w-full space-y-3">
