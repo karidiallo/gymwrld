@@ -77,6 +77,87 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          carbs: number
+          category: string
+          created_at: string
+          fat: number
+          id: string
+          image_alt: string
+          image_url: string
+          ingredients: string[]
+          kcal: number
+          protein: number
+          source_url: string | null
+          steps: string[]
+          tags: string[]
+          time_minutes: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          carbs?: number
+          category: string
+          created_at?: string
+          fat?: number
+          id: string
+          image_alt: string
+          image_url: string
+          ingredients?: string[]
+          kcal: number
+          protein?: number
+          source_url?: string | null
+          steps?: string[]
+          tags?: string[]
+          time_minutes: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          carbs?: number
+          category?: string
+          created_at?: string
+          fat?: number
+          id?: string
+          image_alt?: string
+          image_url?: string
+          ingredients?: string[]
+          kcal?: number
+          protein?: number
+          source_url?: string | null
+          steps?: string[]
+          tags?: string[]
+          time_minutes?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_app_state: {
+        Row: {
+          created_at: string
+          module: string
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          module: string
+          payload?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          module?: string
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
