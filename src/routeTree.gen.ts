@@ -20,6 +20,7 @@ import { Route as RegeneracjaRouteImport } from './routes/regeneracja'
 import { Route as PrzepisyRouteImport } from './routes/przepisy'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as KrokiRouteImport } from './routes/kroki'
@@ -84,6 +85,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/kroki'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/profil'
     | '/promo'
     | '/przepisy'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/kroki'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/profil'
     | '/promo'
     | '/przepisy'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/kroki'
     | '/onboarding'
     | '/premium'
+    | '/privacy'
     | '/profil'
     | '/promo'
     | '/przepisy'
@@ -264,6 +276,7 @@ export interface RootRouteChildren {
   KrokiRoute: typeof KrokiRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfilRoute: typeof ProfilRoute
   PromoRoute: typeof PromoRoute
   PrzepisyRoute: typeof PrzepisyRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/premium': {
       id: '/premium'
       path: '/premium'
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   KrokiRoute: KrokiRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfilRoute: ProfilRoute,
   PromoRoute: PromoRoute,
   PrzepisyRoute: PrzepisyRoute,
@@ -439,3 +460,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
