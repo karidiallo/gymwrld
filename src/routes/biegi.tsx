@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, MapPin, Clock, Flame, Plus, Trophy, X, Calendar, Activity, Mountain } from "lucide-react";
+import { ChevronLeft, MapPin, Flame, Plus, Trophy, X, Calendar, Activity, Mountain, Watch } from "lucide-react";
 import { addLog, removeLog, updateLog } from "@/lib/training-log";
 import { EntryActions } from "@/components/EntryActions";
+import { PL_CITIES } from "@/routes/onboarding";
 
 export const Route = createFileRoute("/biegi")({
   head: () => ({ meta: [{ title: "Maraton — GymWrld" }, { name: "description", content: "Loguj swoje biegi, trasy i nadchodzące zawody." }] }),
@@ -25,11 +26,38 @@ function Biegi() {
   const [min, setMin] = useState<number | "">("");
   const [route, setRoute] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [cityId, setCityId] = useState<string>("warszawa");
+  const [healthConnected, setHealthConnected] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try { const raw = localStorage.getItem("gw_runs"); if (raw) setRuns(JSON.parse(raw)); } catch {}
+    try {
+      const rp = localStorage.getItem("gw_profile");
+      if (rp) { const p = JSON.parse(rp); if (p.city) setCityId(p.city); }
+      setHealthConnected(localStorage.getItem("gw_health_connected") === "1");
+    } catch {}
   }, []);
+
+  const city = PL_CITIES.find((c) => c.id === cityId) ?? PL_CITIES[0];
+  const d = 0.04;
+  const bbox = `${city.lon - d},${city.lat - d / 2},${city.lon + d},${city.lat + d / 2}`;
+  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${city.lat},${city.lon}`;
+
+  const connectHealth = () => {
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          localStorage.setItem("gw_health_connected", "1");
+          setHealthConnected(true);
+          toast.success("GPS / Health połączone — możesz nagrywać biegi");
+        },
+        () => toast.error("Brak dostępu do lokalizacji — włącz GPS w przeglądarce"),
+      );
+    } else {
+      toast.error("Twoje urządzenie nie wspiera GPS");
+    }
+  };
   const persist = (next: Run[]) => {
     setRuns(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_runs", JSON.stringify(next));
@@ -100,33 +128,34 @@ function Biegi() {
         </button>
       </section>
 
-      {/* Map placeholder */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Twoje trasy</h3>
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0a1a14] p-0">
-        <div className="relative h-56">
-          {/* faux map */}
-          <div className="absolute inset-0" style={{
-            background:
-              "radial-gradient(circle at 30% 40%, rgba(74,222,128,0.18), transparent 50%)," +
-              "radial-gradient(circle at 70% 60%, rgba(255,140,60,0.18), transparent 50%)," +
-              "repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 24px)," +
-              "linear-gradient(180deg,#0b1a14,#050a08)",
-          }} />
-          <svg viewBox="0 0 400 220" className="absolute inset-0 h-full w-full">
-            <path d="M20,180 Q80,40 160,120 T380,60" stroke="url(#g)" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="6 6" />
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stopColor="#ff6a3d" />
-                <stop offset="1" stopColor="#bef264" />
-              </linearGradient>
-            </defs>
-            <circle cx="20" cy="180" r="6" fill="#bef264" />
-            <circle cx="380" cy="60" r="6" fill="#ff6a3d" />
-          </svg>
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] text-white/80">
-            <MapPin className="h-3 w-3" /> Park Łazienkowski · 5.2 km
-          </div>
+      {/* Health / GPS connect */}
+      <div className={`mt-5 flex items-center gap-3 rounded-2xl p-3.5 ${healthConnected ? "bg-[var(--lime)]/10 ring-1 ring-[var(--lime)]/30" : "glass"}`}>
+        <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/5"><Watch className="h-4 w-4" /></div>
+        <div className="flex-1">
+          <p className="text-sm font-medium">{healthConnected ? "Health & GPS połączone" : "Połącz Apple Health / GPS"}</p>
+          <p className="text-[11px] text-muted-foreground">{healthConnected ? "Twoje biegi będą logować się automatycznie" : "Włącz nagrywanie tras i tętna w czasie biegu"}</p>
         </div>
+        {!healthConnected && (
+          <button onClick={connectHealth} className="rounded-full bg-white text-black px-3 py-1.5 text-[11px] font-semibold">Połącz</button>
+        )}
+      </div>
+
+      {/* Map */}
+      <div className="mb-3 mt-7 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Mapa · {city.name}</h3>
+        <select value={cityId} onChange={(e) => setCityId(e.target.value)} className="rounded-full bg-white/5 px-3 py-1 text-[11px] outline-none">
+          {PL_CITIES.map((c) => <option key={c.id} value={c.id} className="bg-background">{c.name}</option>)}
+        </select>
+      </div>
+      <div className="relative overflow-hidden rounded-3xl border border-white/10">
+        <iframe
+          key={cityId}
+          title={`Mapa ${city.name}`}
+          src={mapSrc}
+          className="h-72 w-full"
+          style={{ filter: "invert(0.92) hue-rotate(180deg) saturate(0.85)" }}
+          loading="lazy"
+        />
       </div>
 
       {/* List */}
