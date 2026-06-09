@@ -31,7 +31,7 @@ function PrivacyPage() {
         <div className="mt-12 space-y-8 text-[15px] leading-relaxed text-white/75">
           <section>
             <h2 className="font-display text-xl text-white">1. Kim jesteśmy</h2>
-            <p className="mt-2">GymWrld („my", „nas") to aplikacja do śledzenia treningu, diety, biegów, cyklu menstruacyjnego i regeneracji. Niniejszy dokument opisuje, jakie dane zbieramy, w jakim celu i jak je chronimy.</p>
+            <p className="mt-2">GymWrld („my”, „nas”) to aplikacja do śledzenia treningu, diety, biegów, cyklu menstruacyjnego i regeneracji. Niniejszy dokument opisuje, jakie dane zbieramy, w jakim celu i jak je chronimy.</p>
           </section>
 
           <section>

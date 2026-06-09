@@ -227,7 +227,7 @@ function WelcomePage() {
                 <button disabled className="cursor-not-allowed rounded-full border border-white/10 px-7 py-3.5 text-sm text-white/40">App Store · wkrótce</button>
                 <button disabled className="cursor-not-allowed rounded-full border border-white/10 px-7 py-3.5 text-sm text-white/40">Google Play · wkrótce</button>
               </div>
-              <p className="mt-8 text-xs text-white/35">Na iPhone: otwórz w Safari → Udostępnij → „Do ekranu początkowego".</p>
+              <p className="mt-8 text-xs text-white/35">Na iPhone: otwórz w Safari → Udostępnij → „Do ekranu początkowego”.</p>
             </div>
           </div>
         </div>
