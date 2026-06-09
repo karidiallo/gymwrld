@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
+import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -21,9 +22,13 @@ function Onboarding() {
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<number | "">("");
+  const [weight, setWeight] = useState<number | "">("");
+  const [height, setHeight] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
+  const [floLinked, setFloLinked] = useState<boolean | null>(null);
+  const [floPromptOpen, setFloPromptOpen] = useState(false);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
-  const [goal, setGoal] = useState<Goal | null>(null);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
 
@@ -36,10 +41,13 @@ function Onboarding() {
   const finish = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, goal, level, freq, age, gender }));
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, goals, level, freq, age, gender, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
+      localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
+      const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
+      writeNutrition(n);
     }
-    toast.success("Witaj w GymWrld!", { description: "Twoja postać została stworzona ✨" });
+    toast.success("Witaj w GymWrld!", { description: `Twoje dzienne zapotrzebowanie: ~${computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals }).kcal} kcal` });
     navigate({ to: "/" });
   };
 
@@ -95,24 +103,30 @@ function Onboarding() {
         {step === 2 && (
           <StepPersonal
             age={age} setAge={setAge}
+            weight={weight} setWeight={setWeight}
+            height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
+            onGenderPick={(g) => {
+              setGender(g);
+              if (g === "k" && floLinked === null) setFloPromptOpen(true);
+            }}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
         )}
         {step === 3 && (
-          <StepChoice
+          <StepMultiChoice
             title="Jaki masz cel?"
-            subtitle="Dopasujemy plan pod Ciebie."
+            subtitle="Możesz wybrać kilka — dopasujemy plan."
             options={[
               { id: "masa", label: "Budowa masy", emoji: "💪" },
               { id: "redukcja", label: "Redukcja tłuszczu", emoji: "🔥" },
               { id: "kondycja", label: "Lepsza kondycja", emoji: "⚡" },
               { id: "zdrowie", label: "Zdrowy styl życia", emoji: "🌿" },
             ]}
-            value={goal}
-            onChange={(v) => setGoal(v as Goal)}
+            values={goals}
+            onToggle={(v) => setGoals((gs) => gs.includes(v as Goal) ? gs.filter((x) => x !== v) : [...gs, v as Goal])}
             onNext={() => setStep(4)}
-            canNext={!!goal}
+            canNext={goals.length > 0}
           />
         )}
         {step === 4 && (
@@ -134,6 +148,12 @@ function Onboarding() {
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
+      {floPromptOpen && (
+        <FloPrompt
+          onSkip={() => { setFloLinked(false); setFloPromptOpen(false); }}
+          onLink={() => { setFloLinked(true); setFloPromptOpen(false); toast.success("Połączono z FLO 🌸"); }}
+        />
+      )}
     </main>
   );
 }
@@ -191,37 +211,34 @@ function StepName({
 
 
 function StepPersonal({
-  age, setAge, gender, setGender, onNext,
+  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick,
 }: {
   age: number | ""; setAge: (v: number | "") => void;
+  weight: number | ""; setWeight: (v: number | "") => void;
+  height: number | ""; setHeight: (v: number | "") => void;
   gender: Gender | null; setGender: (g: Gender) => void;
   onNext: () => void;
+  onGenderPick: (g: Gender) => void;
 }) {
   const genders: { id: Gender; label: string; emoji: string }[] = [
     { id: "m", label: "Mężczyzna", emoji: "♂" },
     { id: "k", label: "Kobieta", emoji: "♀" },
     { id: "nb", label: "Non-binary", emoji: "⚧" },
   ];
-  const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender;
+  const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender
+    && !!weight && Number(weight) >= 30 && Number(weight) <= 250
+    && !!height && Number(height) >= 120 && Number(height) <= 230;
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl leading-tight">Trochę o <span className="text-gradient">Tobie</span></h1>
-        <p className="mt-2 text-sm text-muted-foreground">Dzięki temu lepiej dopasujemy plan i kalorie.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Obliczymy Twoje dzienne zapotrzebowanie kalorii i makro.</p>
       </div>
 
-      <div>
-        <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Wiek</p>
-        <input
-          type="number"
-          min={13}
-          max={99}
-          inputMode="numeric"
-          value={age}
-          onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : "")}
-          placeholder="np. 24"
-          className="w-full rounded-2xl glass px-4 py-3.5 text-center font-display text-2xl outline-none placeholder:text-muted-foreground/40"
-        />
+      <div className="grid grid-cols-3 gap-2">
+        <NumField label="Wiek" unit="lat" value={age} onChange={setAge} min={13} max={99} placeholder="24" />
+        <NumField label="Wzrost" unit="cm" value={height} onChange={setHeight} min={120} max={230} placeholder="175" />
+        <NumField label="Waga" unit="kg" value={weight} onChange={setWeight} min={30} max={250} placeholder="70" step="0.1" />
       </div>
 
       <div>
@@ -232,7 +249,7 @@ function StepPersonal({
             return (
               <button
                 key={g.id}
-                onClick={() => setGender(g.id)}
+                onClick={() => onGenderPick(g.id)}
                 className={`flex flex-col items-center gap-1 rounded-2xl p-3.5 transition ${
                   active
                     ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60"
@@ -247,6 +264,97 @@ function StepPersonal({
         </div>
       </div>
 
+      <button
+        onClick={onNext}
+        disabled={!canNext}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
+      >
+        Dalej <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function NumField({ label, unit, value, onChange, min, max, placeholder, step }: { label: string; unit: string; value: number | ""; onChange: (v: number | "") => void; min: number; max: number; placeholder: string; step?: string }) {
+  return (
+    <label className="rounded-2xl glass p-3">
+      <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">{label} · {unit}</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        step={step ?? "1"}
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(e.target.value ? parseFloat(e.target.value) : "")}
+        placeholder={placeholder}
+        className="mt-1 w-full bg-transparent text-center font-display text-2xl outline-none placeholder:text-muted-foreground/40"
+      />
+    </label>
+  );
+}
+
+function FloPrompt({ onSkip, onLink }: { onSkip: () => void; onLink: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-5 text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-2xl">🌸</div>
+          <h3 className="mt-3 font-display text-2xl">Połącz z aplikacją FLO?</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Synchronizuj cykl miesiączkowy, by GymWrld dopasował trening i regenerację do Twojej fazy.</p>
+        </div>
+        <div className="mt-5 space-y-2">
+          <button onClick={onLink} className="w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary">
+            Połącz z FLO
+          </button>
+          <button onClick={onSkip} className="w-full rounded-2xl bg-white/5 px-5 py-3 text-sm text-muted-foreground">
+            Może później
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepMultiChoice({
+  title, subtitle, options, values, onToggle, onNext, canNext,
+}: {
+  title: string; subtitle: string;
+  options: { id: string; label: string; emoji: string }[];
+  values: string[]; onToggle: (v: string) => void;
+  onNext: () => void; canNext: boolean;
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl leading-tight">{title}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
+      </div>
+      <div className="space-y-2.5">
+        {options.map((o) => {
+          const active = values.includes(o.id);
+          return (
+            <button
+              key={o.id}
+              onClick={() => onToggle(o.id)}
+              className={`flex w-full items-center gap-3 rounded-2xl p-4 text-left transition ${
+                active
+                  ? "bg-gradient-to-r from-[var(--magenta)]/20 via-[var(--orange)]/15 to-[var(--lime)]/15 ring-1 ring-[var(--orange)]/50"
+                  : "glass"
+              }`}
+            >
+              <span className="text-2xl">{o.emoji}</span>
+              <span className="flex-1 text-sm font-medium">{o.label}</span>
+              {active && (
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--lime)] text-background">
+                  <Check className="h-3.5 w-3.5" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
       <button
         onClick={onNext}
         disabled={!canNext}

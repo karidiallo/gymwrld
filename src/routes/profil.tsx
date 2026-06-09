@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -15,6 +15,8 @@ function Profil() {
   const [customOpen, setCustomOpen] = useState(false);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
+  const [gender, setGender] = useState<string | null>(null);
+  const [floLinked, setFloLinked] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -37,6 +39,8 @@ function Profil() {
       if (rp) {
         const p = JSON.parse(rp);
         setIdentity({ name: p.name, nickname: p.nickname });
+        setGender(p.gender ?? null);
+        setFloLinked(!!p.floLinked);
         if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
         if (typeof p.streak === "number") setStats((s) => ({ ...s, streak: p.streak }));
       }
@@ -133,6 +137,17 @@ function Profil() {
           <Pencil className="h-3 w-3" /> Edytuj
         </button>
       </div>
+
+      {gender === "k" && <CycleSection floLinked={floLinked} onFloLink={() => {
+        try {
+          const rp = localStorage.getItem("gw_profile");
+          const p = rp ? JSON.parse(rp) : {};
+          localStorage.setItem("gw_profile", JSON.stringify({ ...p, floLinked: true }));
+          setFloLinked(true);
+          toast.success("Połączono z FLO 🌸");
+        } catch {}
+      }} />}
+
       <section className="rounded-3xl glass p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -270,6 +285,148 @@ function BodyStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl bg-white/[0.03] p-2.5">
       <p className="font-display text-base leading-none">{value}</p>
       <p className="mt-1 text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink: () => void }) {
+  const [start, setStart] = useState<string>("");
+  const [length, setLength] = useState<number>(28);
+  const [period, setPeriod] = useState<number>(5);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_cycle");
+      if (raw) {
+        const c = JSON.parse(raw);
+        setStart(c.start ?? "");
+        setLength(c.length ?? 28);
+        setPeriod(c.period ?? 5);
+      }
+    } catch {}
+  }, []);
+  const save = (s: string, l: number, p: number) => {
+    setStart(s); setLength(l); setPeriod(p);
+    if (typeof window !== "undefined") localStorage.setItem("gw_cycle", JSON.stringify({ start: s, length: l, period: p }));
+    toast.success("Cykl zapisany");
+    setOpen(false);
+  };
+
+  // compute day & phase
+  const today = new Date(); today.setHours(0,0,0,0);
+  const startDate = start ? new Date(start) : null;
+  let day = 0;
+  let phase = "—";
+  let nextPeriodIn: number | null = null;
+  if (startDate) {
+    const diff = Math.floor((today.getTime() - startDate.getTime()) / 86400000);
+    day = ((diff % length) + length) % length + 1;
+    if (day <= period) phase = "Miesiączka";
+    else if (day <= length / 2 - 2) phase = "Folikularna";
+    else if (day <= length / 2 + 2) phase = "Owulacja";
+    else phase = "Lutealna";
+    nextPeriodIn = length - day + 1;
+  }
+
+  return (
+    <>
+      <div className="mb-3 mt-7 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Cykl menstruacyjny</h3>
+        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+          <Pencil className="h-3 w-3" /> {start ? "Edytuj" : "Ustaw"}
+        </button>
+      </div>
+      <section className="rounded-3xl glass p-5">
+        {!start ? (
+          <div className="text-center">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-2xl">🌸</div>
+            <p className="mt-3 text-sm font-medium">Trackuj swój cykl</p>
+            <p className="mt-1 text-xs text-muted-foreground">Dodaj datę ostatniej miesiączki, by GymWrld dopasował trening do Twojej fazy.</p>
+            <button onClick={() => setOpen(true)} className="mt-4 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-4 py-2 text-xs font-semibold text-white glow-primary">
+              Ustaw cykl
+            </button>
+            {!floLinked && (
+              <button onClick={onFloLink} className="mt-2 block w-full rounded-full bg-white/5 px-4 py-2 text-xs text-muted-foreground">
+                lub połącz z aplikacją FLO
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-4">
+              <div className="relative grid h-24 w-24 place-items-center rounded-full" style={{ background: `conic-gradient(var(--magenta) ${(day/length)*360}deg, rgba(255,255,255,0.06) 0)` }}>
+                <div className="absolute inset-1.5 rounded-full bg-[var(--surface)] grid place-items-center">
+                  <p className="font-display text-2xl leading-none">{day}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">dzień</p>
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/15 px-2.5 py-1 text-[11px] font-medium text-[var(--magenta)]">
+                  <Heart className="h-3 w-3" /> Faza: {phase}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">Następna miesiączka za <span className="text-foreground font-medium">{nextPeriodIn} dni</span></p>
+                <p className="mt-1 text-xs text-muted-foreground">Cykl {length} dni · krwawienie {period} dni</p>
+                {floLinked && <p className="mt-1 text-[10px] text-[var(--lime)]">✓ Połączono z FLO</p>}
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-7 gap-1">
+              {Array.from({ length }).map((_, i) => {
+                const d = i + 1;
+                const isPeriod = d <= period;
+                const isOvu = Math.abs(d - Math.round(length/2)) <= 1;
+                const isToday = d === day;
+                return (
+                  <div key={i} className={`h-7 rounded-md text-center text-[9px] leading-7 ${isToday ? "ring-1 ring-white" : ""} ${isPeriod ? "bg-[var(--magenta)]/60 text-white" : isOvu ? "bg-[var(--lime)]/40 text-background" : "bg-white/5 text-muted-foreground"}`}>
+                    {d}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-[10px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--magenta)]/60" /> Miesiączka</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--lime)]/60" /> Owulacja</span>
+            </div>
+          </>
+        )}
+      </section>
+      {open && (
+        <CycleSheet start={start} length={length} period={period} onClose={() => setOpen(false)} onSave={save} />
+      )}
+    </>
+  );
+}
+
+function CycleSheet({ start, length, period, onClose, onSave }: { start: string; length: number; period: number; onClose: () => void; onSave: (s: string, l: number, p: number) => void }) {
+  const [s, setS] = useState(start || new Date().toISOString().slice(0, 10));
+  const [l, setL] = useState(length);
+  const [p, setP] = useState(period);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Twój cykl</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <label className="mt-4 block rounded-2xl bg-white/5 p-3">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Data ostatniej miesiączki</span>
+          <input type="date" value={s} onChange={(e) => setS(e.target.value)} className="mt-1 w-full bg-transparent font-display text-xl outline-none" />
+        </label>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <label className="rounded-2xl bg-white/5 p-3">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Długość cyklu (dni)</span>
+            <input type="number" min={20} max={45} value={l} onChange={(e) => setL(parseInt(e.target.value) || 28)} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+          </label>
+          <label className="rounded-2xl bg-white/5 p-3">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Krwawienie (dni)</span>
+            <input type="number" min={2} max={10} value={p} onChange={(e) => setP(parseInt(e.target.value) || 5)} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+          </label>
+        </div>
+        <button onClick={() => onSave(s, l, p)} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary">
+          Zapisz cykl
+        </button>
+      </div>
     </div>
   );
 }

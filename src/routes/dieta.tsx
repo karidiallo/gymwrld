@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import foodHero from "@/assets/food-hero.jpg";
-import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight } from "lucide-react";
+import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight, Sparkles, Settings2 } from "lucide-react";
 import { readLogs } from "@/lib/training-log";
+import { readNutrition, writeNutrition, computeNutrition, type NutritionTarget } from "@/lib/nutrition";
 
 export const Route = createFileRoute("/dieta")({
   head: () => ({ meta: [{ title: "Dieta — GymWrld" }, { name: "description", content: "Twój dzienny plan żywieniowy." }] }),
@@ -16,6 +17,8 @@ type Meal = { id: string; icon: string; name: string; items: string; kcal: numbe
 function Dieta() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Meal | null>(null);
+  const [nutriOpen, setNutriOpen] = useState(false);
+  const [nutri, setNutri] = useState<NutritionTarget>({ kcal: 2400, p: 160, c: 280, f: 75 });
   const [water, setWater] = useState(6); // glasses out of 10 (250ml each => 2.5L cel)
   const [toilet, setToilet] = useState({ pee: 4, poop: 1 });
   const [meals, setMeals] = useState<Meal[]>([
@@ -27,6 +30,8 @@ function Dieta() {
   const [burned, setBurned] = useState(0);
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const n = readNutrition();
+    if (n) setNutri(n);
     const calc = () => {
       const start = new Date(); start.setHours(0, 0, 0, 0);
       const sum = readLogs().filter((l) => l.ts >= start.getTime()).reduce((s, l) => s + (l.kcal || 0), 0);
@@ -34,14 +39,25 @@ function Dieta() {
     };
     calc();
     window.addEventListener("gw_training_log_update", calc);
-    return () => window.removeEventListener("gw_training_log_update", calc);
+    const onNutri = () => { const n2 = readNutrition(); if (n2) setNutri(n2); };
+    window.addEventListener("gw_nutrition_update", onNutri);
+    return () => {
+      window.removeEventListener("gw_training_log_update", calc);
+      window.removeEventListener("gw_nutrition_update", onNutri);
+    };
   }, []);
   const eaten = meals.reduce((s, m) => s + m.kcal, 0);
-  const goal = 2400;
+  const goal = nutri.kcal;
   const remaining = goal - eaten;
   const waterMaxGlasses = 10;
   const waterLiters = (water * 0.25).toFixed(1);
   const waterGoal = 2.5;
+
+  const macroEaten = meals.reduce((acc, m) => ({
+    p: acc.p + (m.p ?? 0),
+    c: acc.c + (m.c ?? 0),
+    f: acc.f + (m.f ?? 0),
+  }), { p: 0, c: 0, f: 0 });
 
   const addMeal = (data: { name: string; items: string; kcal: number; slot: string; p?: number; c?: number; f?: number }) => {
     setMeals((prev) => {
@@ -97,6 +113,20 @@ function Dieta() {
         </div>
       </header>
 
+      {/* Personalized target banner */}
+      <button onClick={() => setNutriOpen(true)} className="mt-4 flex w-full items-center justify-between rounded-2xl glass p-3.5 text-left">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-background">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Twój cel · {goal} kcal / dzień</p>
+            <p className="text-[11px] text-muted-foreground">B {nutri.p}g · W {nutri.c}g · T {nutri.f}g — kliknij, by dostosować</p>
+          </div>
+        </div>
+        <Settings2 className="h-4 w-4 text-muted-foreground" />
+      </button>
+
       {/* Food hero — links to recipe detail */}
       <Link to="/przepisy" search={{ id: "power-bowl" }} className="relative mt-5 block overflow-hidden rounded-3xl transition-transform active:scale-[0.99]">
         <img src={foodHero} alt="Power Bowl — przepis dnia" className="h-44 w-full object-cover" width={1280} height={896} loading="lazy" />
@@ -127,9 +157,9 @@ function Dieta() {
         </div>
 
         <div className="mt-5 grid grid-cols-4 gap-3 text-center">
-          <Macro label="Białko" value={112} goal={160} color="var(--magenta)" unit="g" />
-          <Macro label="Węgle" value={184} goal={280} color="var(--orange)" unit="g" />
-          <Macro label="Tłuszcze" value={48} goal={75} color="var(--lime)" unit="g" />
+          <Macro label="Białko" value={macroEaten.p} goal={nutri.p} color="var(--magenta)" unit="g" />
+          <Macro label="Węgle" value={macroEaten.c} goal={nutri.c} color="var(--orange)" unit="g" />
+          <Macro label="Tłuszcze" value={macroEaten.f} goal={nutri.f} color="var(--lime)" unit="g" />
           <Macro label="Woda" value={1.8} goal={2.5} color="var(--violet)" unit="L" />
         </div>
       </section>
@@ -230,6 +260,22 @@ function Dieta() {
           onClose={() => setEditing(null)}
           onSave={(data) => updateMeal(editing.id, data)}
           onDelete={() => { deleteMeal(editing.id); setEditing(null); }}
+        />
+      )}
+      {nutriOpen && (
+        <NutritionSheet
+          current={nutri}
+          onClose={() => setNutriOpen(false)}
+          onSave={(n) => { setNutri(n); writeNutrition(n); toast.success("Cel kalorii zaktualizowany"); setNutriOpen(false); }}
+          onRecalc={() => {
+            try {
+              const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
+              const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
+              const n = computeNutrition({ gender: p.gender, age: p.age, weight: b.weight, height: b.height, freq: p.freq, goals: p.goals });
+              setNutri(n); writeNutrition(n);
+              toast.success(`Przeliczono · ${n.kcal} kcal`);
+            } catch { toast.error("Brakuje danych — uzupełnij wzrost/wagę w profilu"); }
+          }}
         />
       )}
     </main>
@@ -346,7 +392,7 @@ function EditMealSheet({
   const [f, setF] = useState<number | "">(meal.f ?? "");
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4 flex items-center justify-between">
           <h3 className="font-display text-xl">Edytuj · {meal.name}</h3>
@@ -405,7 +451,7 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8 animate-in slide-in-from-bottom duration-300"
+        className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28 animate-in slide-in-from-bottom duration-300"
       >
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4 flex items-center justify-between">
@@ -513,7 +559,57 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
           >
             Dodaj do dziennika
           </button>
+          <div className="h-24" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function NutritionSheet({ current, onClose, onSave, onRecalc }: { current: NutritionTarget; onClose: () => void; onSave: (n: NutritionTarget) => void; onRecalc: () => void }) {
+  const [kcal, setKcal] = useState<number | "">(current.kcal);
+  const [p, setP] = useState<number | "">(current.p);
+  const [c, setC] = useState<number | "">(current.c);
+  const [f, setF] = useState<number | "">(current.f);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Twoje zapotrzebowanie</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Edytuj ręcznie lub przelicz AI na podstawie Twoich danych z profilu.</p>
+        <button onClick={onRecalc} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[var(--magenta)]/30 to-[var(--orange)]/30 px-3 py-1.5 text-[11px] font-medium ring-1 ring-[var(--orange)]/40">
+          <Sparkles className="h-3 w-3" /> Przelicz AI z wagi/wzrostu
+        </button>
+        <div className="mt-4 space-y-2">
+          <label className="block rounded-2xl bg-white/5 p-3">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Kalorie / dzień (kcal)</span>
+            <input type="number" value={kcal} onChange={(e) => setKcal(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-3xl outline-none" />
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--magenta)]">Białko (g)</span>
+              <input type="number" value={p} onChange={(e) => setP(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--orange)]">Węgle (g)</span>
+              <input type="number" value={c} onChange={(e) => setC(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--lime)]">Tłuszcz (g)</span>
+              <input type="number" value={f} onChange={(e) => setF(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+          </div>
+        </div>
+        <button
+          onClick={() => kcal && onSave({ kcal: Number(kcal), p: Number(p) || 0, c: Number(c) || 0, f: Number(f) || 0 })}
+          disabled={!kcal}
+          className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary disabled:opacity-40"
+        >
+          Zapisz cele
+        </button>
       </div>
     </div>
   );

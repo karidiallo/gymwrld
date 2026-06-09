@@ -58,10 +58,13 @@ function Index() {
       qs.map((q) => {
         if (q.id !== id) return q;
         const done = !q.done;
+        const xp = parseInt(q.reward.replace(/[^\d]/g, "")) || 60;
         if (done) {
-          const xp = parseInt(q.reward.replace(/[^\d]/g, "")) || 60;
           awardXp(xp, q.title);
           toast.success(`Zadanie ukończone · ${q.reward}`);
+        } else {
+          awardXp(-xp, `cofnij: ${q.title}`);
+          toast(`Zadanie cofnięte · -${xp} XP`);
         }
         return { ...q, done, progress: done ? 1 : q.progress };
       }),
