@@ -160,7 +160,7 @@ function Onboarding() {
         {step === 4 && (
           <StepMultiChoice
             title="Jaki masz cel?"
-            subtitle="Wybierz jeden główny cel — pod niego dopasujemy plan."
+            subtitle="Możesz wybrać kilka — dopasujemy plan pod Twoje priorytety."
             options={[
               { id: "masa", label: "Budowa masy", emoji: "💪" },
               { id: "redukcja", label: "Redukcja tłuszczu", emoji: "🔥" },
@@ -168,7 +168,7 @@ function Onboarding() {
               { id: "zdrowie", label: "Zdrowy styl życia", emoji: "🌿" },
             ]}
             values={goals}
-            onToggle={(v) => setGoals([v as Goal])}
+            onToggle={(v) => setGoals((g) => g.includes(v as Goal) ? g.filter((x) => x !== v) : [...g, v as Goal])}
             onNext={() => setStep(5)}
             canNext={goals.length > 0}
           />
