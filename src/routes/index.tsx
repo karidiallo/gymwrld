@@ -34,7 +34,9 @@ function Index() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (cancelled) return;
       if (!data.user) {
-        navigate({ to: "/welcome", replace: true });
+        // Landing page only shown in normal browser; in installed PWA go straight to auth
+        const standalone = window.matchMedia?.("(display-mode: standalone)").matches || (navigator as any).standalone === true;
+        navigate({ to: standalone ? "/auth" : "/welcome", replace: true });
       } else {
         const cloudProfile = await ensureCloudProfile(data.user);
         await syncLocalState();
@@ -63,7 +65,13 @@ function Index() {
     if (typeof window !== "undefined") {
       try {
         const raw = localStorage.getItem("gw_avatar");
-        if (raw) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(raw) });
+        const rp = localStorage.getItem("gw_profile");
+        const cur = raw ? JSON.parse(raw) : DEFAULT_AVATAR;
+        const prof = rp ? JSON.parse(rp) : {};
+        // Force avatar gender to match profile gender (fix stale male default)
+        const merged = { ...DEFAULT_AVATAR, ...cur, gender: prof.gender ?? cur.gender ?? "m" };
+        if (merged.gender !== cur.gender) localStorage.setItem("gw_avatar", JSON.stringify(merged));
+        setAvatarCfg(merged);
       } catch {}
       loadProfile();
       window.addEventListener("gw_profile_update", loadProfile);
@@ -102,7 +110,7 @@ function Index() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <Link to="/profil" className="flex items-center gap-2">
-          <img src={logoAsset.url} alt="GymWrld" className="h-9 w-auto" />
+          <img src={logoAsset.url} alt="GymWRLD" className="h-12 w-auto" />
         </Link>
         <div className="flex items-center gap-2">
           <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.lvl ?? 1}`} />

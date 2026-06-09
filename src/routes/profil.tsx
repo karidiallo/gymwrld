@@ -41,6 +41,18 @@ function Profil() {
         setIdentity({ name: p.name, nickname: p.nickname });
         setGender(p.gender ?? null);
         setFloLinked(!!p.floLinked);
+        // Sync avatar gender with profile gender if mismatched (fix non-binary/female default)
+        if (p.gender && typeof window !== "undefined") {
+          try {
+            const ra = localStorage.getItem("gw_avatar");
+            const cur = ra ? JSON.parse(ra) : DEFAULT_AVATAR;
+            if (cur.gender !== p.gender) {
+              const next = { ...DEFAULT_AVATAR, ...cur, gender: p.gender };
+              localStorage.setItem("gw_avatar", JSON.stringify(next));
+              setAvatarCfg(next);
+            }
+          } catch {}
+        }
         if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
         if (typeof p.streak === "number") setStats((s) => ({ ...s, streak: p.streak }));
       }
@@ -103,16 +115,16 @@ function Profil() {
           <div className="relative h-36 w-28 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-transparent">
             <img src={getAvatarImage(avatarCfg.gender, avatarCfg.body)} alt="Avatar" className="h-full w-full object-contain" loading="lazy" style={{ filter: `drop-shadow(0 8px 16px ${avatarCfg.outfitTint}66)` }} />
           </div>
-          <div className="flex-1">
+          <Link to="/statystyki" className="flex-1 block rounded-2xl -m-2 p-2 transition active:scale-[0.99] hover:bg-white/[0.03]">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
               {identity.name || "Bez imienia"}{identity.nickname ? ` · @${identity.nickname}` : ""}
             </p>
-            <h2 className="mt-1 text-xl font-semibold">Poziom 1 — Początkujący</h2>
+            <h2 className="mt-1 text-xl font-semibold">Poziom 1 — Początkujący →</h2>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
               <div className="h-full w-[0%] rounded-full bg-gradient-to-r from-primary to-secondary" />
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">0 / 2 000 XP do Lvl 2</p>
-          </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">Zobacz Twój Progres · statystyki</p>
+          </Link>
         </div>
       </section>
 

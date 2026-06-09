@@ -10,7 +10,7 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "/__l5e/assets-v1/9e97d7e7-db69-48ed-85ad-3a6a94a9e3cf/gymwrld-logo.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
