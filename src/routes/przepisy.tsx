@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import foodHero from "@/assets/food-hero.jpg";
-import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2 } from "lucide-react";
+import recipePowerBowl from "@/assets/recipe-power-bowl.jpg";
+import recipeOwsianka from "@/assets/recipe-owsianka.jpg";
+import recipeLosos from "@/assets/recipe-losos.jpg";
+import recipeOmlet from "@/assets/recipe-omlet.jpg";
+import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2, ImageIcon, Camera } from "lucide-react";
 
 type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska";
 
@@ -18,20 +23,17 @@ type Recipe = {
   emoji: string;
 };
 
-const FOOD_IMAGES = [
-  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=80",
-];
+// Tylko zweryfikowane, ręcznie dopasowane zdjęcia. Reszta przepisów ma placeholder
+// i CTA „prześlij swoje zdjęcie" do moderacji.
+const RECIPE_IMAGES: Record<string, string> = {
+  "power-bowl": recipePowerBowl,
+  "owsianka-jagody": recipeOwsianka,
+  "losos-batat": recipeLosos,
+  "omlet-warzywa": recipeOmlet,
+};
 
-function recipeImage(recipe: Pick<Recipe, "id">) {
-  const hash = recipe.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return FOOD_IMAGES[hash % FOOD_IMAGES.length];
+function recipeImage(recipe: Pick<Recipe, "id">): string | undefined {
+  return RECIPE_IMAGES[recipe.id];
 }
 
 const RECIPES: Recipe[] = [
