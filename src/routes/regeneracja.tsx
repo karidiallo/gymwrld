@@ -11,7 +11,7 @@ export const Route = createFileRoute("/regeneracja")({
   component: Regeneracja,
 });
 
-type SleepEntry = { date: string; hours: number; quality: number };
+type SleepEntry = { id: string; date: string; ts: number; hours: number; quality: number; note?: string };
 type MindType = "medytacja" | "oddech" | "journal" | "afirmacja" | "spacer" | "kapiel";
 type MindEntry = { id: string; type: MindType; minutes: number; note?: string };
 
@@ -31,7 +31,17 @@ function Regeneracja() {
     if (typeof window === "undefined") return;
     try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_journal"); if (raw) setJournal(JSON.parse(raw)); } catch {}
+    try { const raw = localStorage.getItem("gw_recovery"); if (raw) setSleep(JSON.parse(raw)); } catch {}
   }, []);
+  const persistSleep = (next: SleepEntry[]) => {
+    setSleep(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_recovery", JSON.stringify(next));
+  };
+  const removeSleep = (id: string) => {
+    persistSleep(sleep.filter((s) => s.id !== id));
+    removeLog(id);
+    toast.success("Wpis snu usunięty");
+  };
   const persistJournal = (next: typeof journal) => {
     setJournal(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_journal", JSON.stringify(next));
