@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy, Smartphone, Target, Zap, Moon } from "lucide-react";
+import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy, Smartphone, Target, Zap, Moon, Activity } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
@@ -11,9 +11,9 @@ import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "GYMWRLD. — Twoja cyfrowa wersja siebie" },
+      { title: "GymWRLD. — Twoja cyfrowa wersja siebie" },
       { name: "description", content: "Premium aplikacja: trening, dieta, street workout, biegi i cykl. Jedna apka, którą rozwijasz razem ze swoim awatarem." },
-      { property: "og:title", content: "GYMWRLD." },
+      { property: "og:title", content: "GymWRLD." },
       { property: "og:description", content: "Premium aplikacja treningowa. Trenuj świadomie." },
       { property: "og:type", content: "website" },
     ],
@@ -22,25 +22,28 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const FEATURES = [
-  { icon: Dumbbell, title: "Trening siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
-  { icon: Apple, title: "Dieta i przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
+  { icon: Dumbbell, title: "Trening Siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
+  { icon: Apple, title: "Dieta i Przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
   { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście. Klikasz pin — przechodzisz do wizytówki Google z opiniami i nawigacją.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
-  { icon: Footprints, title: "Biegi i kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
-  { icon: Heart, title: "Cykl i regeneracja", desc: "Tracker cyklu (połącz z FLO), pomiar snu, wymiary ciała i strefa reset. Plan dopasowuje intensywność do Twojej fazy.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
-  { icon: Sparkles, title: "Awatar i questy", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Codzienne questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
+  { icon: Footprints, title: "Biegi i Kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
+  { icon: Moon, title: "Sen i Regeneracja", desc: "Tracker snu, strefa reset, oddychanie i mind sesje. Sen wpływa na statystyki — bez regeneracji nie ma progresu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
+  { icon: Heart, title: "Cykl (dla Kobiet)", desc: "Tracker cyklu z integracją FLO, faza dnia widoczna w planie. Intensywność treningu i kalorie dopasowują się do Twojej fazy.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
+  { icon: Sparkles, title: "Gra RPG", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
+  { icon: Activity, title: "Statystyki & Medale", desc: "Pięć atrybutów: Siła, Kondycja, Dieta, Sen, Rozwój. Odblokowuj medale za pierwsze sesje, streaki i kamienie milowe.", tint: "from-[var(--lime)]/40 to-[var(--orange)]/20" },
 ];
 
 const FAQ = [
-  { q: "Czy GymWrld jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i cykl są w pełni darmowe. Premium odblokowuje plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
-  { q: "Czy mogę zainstalować GymWrld na telefonie?", a: "Tak — działamy jako PWA. Na iPhone otwórz w Safari i wybierz „Dodaj do ekranu początkowego”. Wersje natywne App Store i Google Play są w drodze." },
+  { q: "Czy GymWRLD jest darmowy?", a: "Tak. Trening, dieta, mapa, biegi i cykl są w pełni darmowe. Pro i Premium odblokowują plany AI, dodatkowe pokoje sanktuarium i ekskluzywne promocje lokalne." },
+  { q: "Czy mogę zainstalować GymWRLD na telefonie?", a: "Tak — działamy jako PWA. Na iPhone otwórz w Safari i wybierz „Dodaj do ekranu początkowego”. Wersje natywne App Store i Google Play są w drodze." },
   { q: "Czy moje dane są bezpieczne?", a: "Tak. Konto i dane treningowe trzymamy w zaszyfrowanej bazie z polityką dostępu RLS. W każdej chwili wyeksportujesz lub usuniesz konto." },
   { q: "Czym różnicie się od FLO, Stravy i MyFitnessPal?", a: "Jedna aplikacja zamiast pięciu. Łączymy siłownię, dietę, kalistenikę, bieg i cykl — z gamifikacją i awatarem, który rozwija się razem z Tobą." },
   { q: "Czy potrzebuję sprzętu?", a: "Nie. Mamy plany na masę ciała, gumy, oraz pełną siłownię — dobieramy ćwiczenia pod Twój sprzęt." },
 ];
 
 const PLANS = [
-  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, cykl", "Mapa Street Workout", "Podstawowy awatar", "Statystyki i poziomy"], cta: "Zacznij za darmo", highlight: false },
-  { name: "Premium", price: "29 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Plany AI dopasowane do Ciebie", "Wszystkie pokoje sanktuarium", "Ekskluzywne promocje lokalne", "Priorytetowe wsparcie"], cta: "Wypróbuj 7 dni gratis", highlight: true },
+  { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, cykl", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
+  { name: "Pro", price: "9,99 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Skanowanie produktów", "Plany treningowe premium", "Zaawansowane statystyki i rekordy", "3 dodatkowe pokoje"], cta: "Wybierz Pro", highlight: true, badge: "Najpopularniejsze" },
+  { name: "Premium", price: "24,99 zł", tag: "/ miesiąc", features: ["Wszystko z Pro", "AI Coach 24/7", "Premium Deals (zniżki marek)", "Wszystkie pokoje + dekoracje", "Indywidualny plan AI"], cta: "Odblokuj Premium", highlight: false, badge: "VIP" },
 ];
 
 function WelcomePage() {
@@ -91,7 +94,7 @@ function WelcomePage() {
       <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-background/70 border-b border-white/5" : ""}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="#top" className="flex items-center gap-2">
-            <img src={logo} alt="GYMWRLD" className="h-9 w-auto" />
+            <img src={logo} alt="GymWRLD" className="h-14 w-auto md:h-16" />
           </a>
           <nav className="hidden gap-8 text-[13px] text-muted-foreground md:flex">
             <a href="#features" className="hover:text-foreground">Funkcje</a>
@@ -145,86 +148,94 @@ function WelcomePage() {
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-[10px] font-bold ring-2 ring-background">+2k</div>
               </div>
               <div className="text-xs text-muted-foreground">
-                <span className="text-foreground font-semibold">2 000+</span> osób buduje formę razem z GymWrld
+                <span className="text-foreground font-semibold">2 000+</span> osób buduje formę razem z GymWRLD
               </div>
             </div>
           </div>
 
-          {/* Hero stats / quest panel */}
+          {/* Hero phone mockup with avatar + stats */}
           <div className="relative">
             <div aria-hidden className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--lime)]/20 blur-3xl" />
-            <div className="relative mx-auto w-full max-w-[420px] space-y-3">
-              {/* Level card */}
-              <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[var(--surface)] to-background p-5 shadow-2xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-background font-display text-lg">7</div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Twój poziom</p>
-                      <p className="font-display text-lg">Średniozaawansowany</p>
+            {/* floating mini cards around the phone */}
+            <div className="pointer-events-none absolute -left-4 top-16 z-20 hidden rounded-2xl border border-white/10 bg-[var(--surface)]/90 p-3 shadow-2xl backdrop-blur md:block">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-[var(--lime)]" />
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Osiągnięcie</p>
+                  <p className="text-xs font-semibold">Pierwszy krok · +150 XP</p>
+                </div>
+              </div>
+            </div>
+            <div className="pointer-events-none absolute -right-6 bottom-24 z-20 hidden rounded-2xl border border-[var(--orange)]/30 bg-gradient-to-br from-[var(--magenta)]/20 to-[var(--orange)]/10 p-3 shadow-2xl backdrop-blur md:block">
+              <div className="flex items-center gap-2">
+                <Flame className="h-4 w-4 text-[var(--orange)]" />
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Streak</p>
+                  <p className="text-xs font-semibold">12 dni z rzędu</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Phone bezel */}
+            <div className="relative mx-auto w-full max-w-[300px]">
+              <div className="relative rounded-[2.75rem] border border-white/10 bg-[#0b0710] p-2 shadow-[0_30px_80px_-20px_rgba(233,69,96,0.45)] ring-1 ring-white/5">
+                <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
+                <div className="overflow-hidden rounded-[2.25rem] bg-gradient-to-b from-[var(--surface)] to-background">
+                  {/* status bar */}
+                  <div className="flex items-center justify-between px-5 pb-1 pt-4 text-[10px] text-muted-foreground">
+                    <span>9:41</span>
+                    <span>●●● GymWRLD</span>
+                  </div>
+                  {/* hero avatar */}
+                  <div className="relative mx-3 mt-2 overflow-hidden rounded-2xl bg-gradient-to-b from-[var(--magenta)]/25 via-[var(--orange)]/15 to-transparent">
+                    <img src={avatarMale} alt="Awatar" className="mx-auto h-44 w-auto object-contain" />
+                    <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-1 text-[9px] backdrop-blur">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--lime)] animate-pulse" /> Lvl 7
+                    </div>
+                    <div className="absolute right-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[9px] backdrop-blur">1 440 / 2 000 XP</div>
+                  </div>
+                  {/* XP bar */}
+                  <div className="mx-3 mt-2">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1 rounded-full glass px-3 py-1.5 text-[11px]"><Flame className="h-3 w-3 text-[var(--orange)]" /> 12 dni z rzędu</span>
-                </div>
-                <div className="mt-4 flex items-baseline justify-between text-xs">
-                  <span className="text-muted-foreground">1 440 / 2 000 XP do Lvl 8</span>
-                  <span className="font-semibold text-foreground">72%</span>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
-                </div>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { icon: Dumbbell, label: "Siła", v: 68, color: "var(--magenta)" },
-                  { icon: Footprints, label: "Kondycja", v: 54, color: "var(--orange)" },
-                  { icon: Moon, label: "Sen", v: 81, color: "var(--violet)" },
-                ].map((s) => (
-                  <div key={s.label} className="rounded-2xl border border-white/10 bg-[var(--surface)]/70 p-3.5">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <s.icon className="h-3.5 w-3.5" style={{ color: s.color }} />
-                      <span className="text-[10px] uppercase tracking-wider">{s.label}</span>
+                  {/* stats mini */}
+                  <div className="mx-3 mt-3 grid grid-cols-3 gap-2">
+                    {[
+                      { icon: Dumbbell, label: "Siła", v: 68, color: "var(--magenta)" },
+                      { icon: Footprints, label: "Kond.", v: 54, color: "var(--orange)" },
+                      { icon: Moon, label: "Sen", v: 81, color: "var(--violet)" },
+                    ].map((s) => (
+                      <div key={s.label} className="rounded-xl border border-white/10 bg-[var(--surface)]/70 p-2">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <s.icon className="h-3 w-3" style={{ color: s.color }} />
+                          <span className="text-[8px] uppercase tracking-wider">{s.label}</span>
+                        </div>
+                        <p className="mt-0.5 font-display text-base leading-none">{s.v}<span className="text-[9px] text-muted-foreground">/100</span></p>
+                        <div className="mt-1 h-0.5 overflow-hidden rounded-full bg-white/5">
+                          <div className="h-full rounded-full" style={{ width: `${s.v}%`, background: `linear-gradient(90deg, ${s.color}, var(--lime))` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Quest card */}
+                  <div className="mx-3 mt-3 mb-4 rounded-2xl border border-[var(--orange)]/30 bg-gradient-to-br from-[var(--magenta)]/15 via-[var(--orange)]/10 to-transparent p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-widest text-muted-foreground">
+                        <Target className="h-2.5 w-2.5 text-[var(--lime)]" /> Quest dnia
+                      </span>
+                      <span className="rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[9px] font-semibold text-[var(--lime)]">+180 XP</span>
                     </div>
-                    <p className="mt-2 font-display text-2xl">{s.v}<span className="text-xs text-muted-foreground">/100</span></p>
-                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/5">
-                      <div className="h-full rounded-full" style={{ width: `${s.v}%`, background: `linear-gradient(90deg, ${s.color}, var(--lime))` }} />
+                    <p className="mt-1 font-display text-sm leading-snug">Push: klatka, barki, triceps</p>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[9px] text-muted-foreground">
+                      <Zap className="h-2.5 w-2.5 text-[var(--orange)]" />
+                      <span>+5 Siła · +1 Rozwój · streak +1</span>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Active quest */}
-              <div className="rounded-3xl border border-[var(--orange)]/30 bg-gradient-to-br from-[var(--magenta)]/15 via-[var(--orange)]/10 to-transparent p-5">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-                    <Target className="h-3 w-3 text-[var(--lime)]" /> Quest dnia
-                  </span>
-                  <span className="rounded-full bg-[var(--lime)]/15 px-2.5 py-0.5 text-[10px] font-semibold text-[var(--lime)]">+180 XP</span>
-                </div>
-                <p className="mt-2 font-display text-lg leading-snug">Push: klatka, barki, triceps</p>
-                <p className="mt-1 text-xs text-muted-foreground">8 ćwiczeń · ~45 min · siłownia lub dom z gumami</p>
-                <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <Zap className="h-3.5 w-3.5 text-[var(--orange)]" />
-                  <span>+5 Siła · +1 Rozwój · streak +1</span>
                 </div>
               </div>
-
-              {/* avatars peek */}
-              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[var(--surface)]/60 p-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-3">
-                    <img src={avatarFemale} alt="" className="h-12 w-12 rounded-full object-cover ring-2 ring-background bg-[var(--surface)]" />
-                    <img src={avatarMale} alt="" className="h-12 w-12 rounded-full object-cover ring-2 ring-background bg-[var(--surface)]" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold">Twój awatar rośnie z Tobą</p>
-                    <p className="text-[10px] text-muted-foreground">Kobieta · mężczyzna · non-binary</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
+              <p className="mt-5 text-center text-xs text-muted-foreground">Twój awatar rośnie z Tobą</p>
             </div>
           </div>
         </div>
@@ -234,7 +245,7 @@ function WelcomePage() {
       <section className="border-y border-white/5 bg-background/40 backdrop-blur-sm">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
           {[
-            { v: "5w1", l: "Trening · dieta · biegi · cykl · awatar" },
+            { v: "5w1", l: "Trening · Dieta · Biegi · Cykl · Gra RPG" },
             { v: "4.9★", l: "Średnia ocena testerów" },
             { v: "AI", l: "Plany dopasowane do Ciebie" },
             { v: "PWA", l: "Instalujesz w 5 sekund" },
@@ -275,7 +286,14 @@ function WelcomePage() {
 
           {/* magazine row */}
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {[{src: gymHero, t: "Siłownia"}, {src: foodHero, t: "Dieta"}, {src: calisthenicsHero, t: "Street"}].map((c) => (
+            {[
+              {src: gymHero, t: "Siłownia"},
+              {src: foodHero, t: "Dieta"},
+              {src: calisthenicsHero, t: "Street Workout"},
+              {src: gymHero, t: "Biegi"},
+              {src: foodHero, t: "Sen & Regeneracja"},
+              {src: calisthenicsHero, t: "Cykl (dla Kobiet)"},
+            ].map((c) => (
               <div key={c.t} className="group relative aspect-[4/5] overflow-hidden rounded-3xl">
                 <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
@@ -297,7 +315,7 @@ function WelcomePage() {
             <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Prosto i <span className="text-gradient">uczciwie</span>.</h2>
             <p className="mt-4 text-sm text-muted-foreground">Bez ukrytych kosztów. Anuluj kiedy chcesz.</p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-3">
             {PLANS.map((p) => (
               <div
                 key={p.name}
@@ -307,9 +325,9 @@ function WelcomePage() {
                     : "glass"
                 }`}
               >
-                {p.highlight && (
+                {p.badge && (
                   <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[var(--magenta)] to-[var(--orange)] px-3 py-1 text-[10px] uppercase tracking-widest font-semibold text-background">
-                    <Trophy className="mr-1 inline h-3 w-3" /> Polecane
+                    <Trophy className="mr-1 inline h-3 w-3" /> {p.badge}
                   </span>
                 )}
                 <h3 className="font-display text-3xl tracking-tight">{p.name}</h3>
@@ -346,7 +364,7 @@ function WelcomePage() {
         <div className="mx-auto max-w-3xl px-6 py-28 md:py-36">
           <div className="mb-14 text-center">
             <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">— FAQ</p>
-            <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Często pytane.</h2>
+            <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Częste Pytania</h2>
           </div>
           <div className="divide-y divide-white/5 rounded-3xl glass px-6">
             {FAQ.map((item, i) => {
@@ -381,7 +399,7 @@ function WelcomePage() {
             </div>
             <div className="relative">
               <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">— Pobierz</p>
-              <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Zainstaluj <span className="text-gradient">GymWrld</span>.</h2>
+              <h2 className="mt-4 font-display text-4xl tracking-tight md:text-6xl">Zainstaluj <span className="text-gradient">GymWRLD</span>.</h2>
               <p className="mx-auto mt-5 max-w-md text-sm text-muted-foreground">Działa jako PWA — dodaj do ekranu początkowego i otwieraj jak natywną apkę. Wersje App Store i Google Play wkrótce.</p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <Link to="/onboarding" className="rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary">
@@ -401,8 +419,8 @@ function WelcomePage() {
         <div className="mx-auto max-w-6xl px-6 py-14">
           <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="GYMWRLD" className="h-10 w-auto" />
-              <span className="font-display text-xl tracking-tight">GymWrld<span className="text-gradient">.</span></span>
+              <img src={logo} alt="GymWRLD" className="h-16 w-auto md:h-20" />
+              <span className="font-display text-2xl tracking-tight">GymWRLD<span className="text-gradient">.</span></span>
             </div>
             <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
               <Link to="/privacy" className="hover:text-foreground">Polityka prywatności</Link>
@@ -411,7 +429,7 @@ function WelcomePage() {
             </nav>
           </div>
           <div className="mt-10 border-t border-white/5 pt-6 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} GymWrld. Wszelkie prawa zastrzeżone. · gymwrld.com
+            © {new Date().getFullYear()} GymWRLD. Wszelkie prawa zastrzeżone. · gymwrld.com
           </div>
         </div>
       </footer>

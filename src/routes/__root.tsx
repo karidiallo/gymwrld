@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
+import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
@@ -142,6 +143,11 @@ function RootComponent() {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     installLocalStateCloudSync();
+    const onAchv = (e: any) => {
+      const d = e.detail ?? {};
+      toast.success(`🏆 ${d.title}`, { description: `Osiągnięcie odblokowane · +${d.xp} XP` });
+    };
+    window.addEventListener("gw_achievement", onAchv as any);
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
@@ -155,7 +161,10 @@ function RootComponent() {
       router.invalidate();
       queryClient.invalidateQueries();
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      sub.subscription.unsubscribe();
+      window.removeEventListener("gw_achievement", onAchv as any);
+    };
   }, [router, queryClient]);
 
   return (
