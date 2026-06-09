@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ChevronLeft, User, Mail, Crown, LogOut, Bell, Lock, Trash2, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/ustawienia")({
   head: () => ({ meta: [{ title: "Ustawienia — GymWrld" }] }),
@@ -83,13 +84,14 @@ function Ustawienia() {
         <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Konto</h3>
         <div className="space-y-2">
           <button
-            onClick={() => {
+            onClick={async () => {
+              try { await supabase.auth.signOut(); } catch {}
               if (typeof window !== "undefined") {
                 localStorage.removeItem("gw_onboarded");
                 localStorage.removeItem("gw_session_persist");
               }
               toast.success("Wylogowano");
-              navigate({ to: "/onboarding" });
+              navigate({ to: "/auth" });
             }}
             className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left"
           >

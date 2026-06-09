@@ -8,6 +8,7 @@ import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 import { awardXp } from "@/lib/training-log";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,10 +26,20 @@ function Index() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [profile, setProfile] = useState<{ name?: string; lvl?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("gw_onboarded") !== "1") {
-      navigate({ to: "/onboarding" });
-      return;
-    }
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (!data.session) {
+        const onboarded = localStorage.getItem("gw_onboarded") === "1";
+        navigate({ to: onboarded ? "/auth" : "/onboarding" });
+      }
+    });
+    return () => { cancelled = true; };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const loadProfile = () => {
       try {
         const raw = localStorage.getItem("gw_profile");
