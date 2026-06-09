@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ChevronLeft, MapPin, Plus, X, Activity, Dumbbell, Info } from "lucide-react";
 import { addLog, removeLog, updateLog } from "@/lib/training-log";
 import { EntryActions } from "@/components/EntryActions";
+import { PL_CITIES } from "@/routes/onboarding";
 
 export const Route = createFileRoute("/street")({
   head: () => ({ meta: [{ title: "Street Workout — GymWrld" }, { name: "description", content: "Mapa lokalnych outdoor siłek, baza ćwiczeń kalistenicznych i logowanie treningów." }] }),
@@ -13,9 +14,12 @@ export const Route = createFileRoute("/street")({
 type Log = { id: string; name: string; sets: number; reps: number; ts: number };
 
 const SPOTS = [
-  { name: "Park Skaryszewski · Warszawa", dist: "2.1 km", x: 25, y: 60 },
-  { name: "Pole Mokotowskie · Warszawa", dist: "4.3 km", x: 55, y: 35 },
-  { name: "Park Jordana · Kraków", dist: "—", x: 75, y: 70 },
+  { city: "warszawa", name: "Park Skaryszewski", dist: "2.1 km", x: 25, y: 60 },
+  { city: "warszawa", name: "Pole Mokotowskie", dist: "4.3 km", x: 55, y: 35 },
+  { city: "krakow", name: "Park Jordana", dist: "1.8 km", x: 70, y: 55 },
+  { city: "poznan", name: "Cytadela Workout", dist: "2.6 km", x: 45, y: 42 },
+  { city: "gdansk", name: "Park Reagana", dist: "3.2 km", x: 62, y: 50 },
+  { city: "wroclaw", name: "Wyspa Słodowa", dist: "1.4 km", x: 52, y: 48 },
 ];
 
 const STREET_EXERCISES = [
@@ -34,14 +38,22 @@ function Street() {
   const [sets, setSets] = useState<number | "">(3);
   const [reps, setReps] = useState<number | "">(8);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [cityId, setCityId] = useState("warszawa");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const raw = localStorage.getItem("gw_street");
       if (raw) setLogs(JSON.parse(raw));
+      const rp = localStorage.getItem("gw_profile");
+      if (rp) { const p = JSON.parse(rp); if (p.city) setCityId(p.city); }
     } catch {}
   }, []);
+
+  const city = PL_CITIES.find((c) => c.id === cityId) ?? PL_CITIES[0];
+  const spots = SPOTS.filter((s) => s.city === cityId);
+  const d = 0.035;
+  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${city.lon - d},${city.lat - d / 2},${city.lon + d},${city.lat + d / 2}&layer=mapnik&marker=${city.lat},${city.lon}`;
 
   const save = () => {
     if (!name || !sets || !reps) { toast.error("Uzupełnij dane"); return; }
@@ -98,16 +110,16 @@ function Street() {
       </section>
 
       {/* Map */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Lokalne siłki</h3>
+      <div className="mb-3 mt-7 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Lokalne siłki · {city.name}</h3>
+        <select value={cityId} onChange={(e) => setCityId(e.target.value)} className="rounded-full bg-white/5 px-3 py-1 text-[11px] outline-none">
+          {PL_CITIES.map((c) => <option key={c.id} value={c.id} className="bg-background">{c.name}</option>)}
+        </select>
+      </div>
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0a1a14]">
-        <div className="relative h-56" style={{
-          background:
-            "radial-gradient(circle at 30% 50%, rgba(74,222,128,0.18), transparent 50%)," +
-            "radial-gradient(circle at 70% 40%, rgba(190,242,100,0.15), transparent 50%)," +
-            "repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 24px)," +
-            "linear-gradient(180deg,#0b1a14,#050a08)",
-        }}>
-          {SPOTS.map((s) => (
+        <div className="relative h-64">
+          <iframe key={cityId} title={`Street workout ${city.name}`} src={mapSrc} className="h-full w-full" style={{ filter: "invert(0.92) hue-rotate(180deg) saturate(0.9)" }} loading="lazy" />
+          {spots.map((s) => (
             <button key={s.name} onClick={() => toast.success(s.name)} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
               <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--lime)] text-background shadow-lg">
                 <MapPin className="h-4 w-4" />
@@ -116,9 +128,9 @@ function Street() {
           ))}
         </div>
         <div className="space-y-1 p-3">
-          {SPOTS.map((s) => (
+          {spots.map((s) => (
             <div key={s.name} className="flex items-center justify-between rounded-xl bg-white/[0.03] px-3 py-2 text-xs">
-              <span className="flex items-center gap-2"><MapPin className="h-3 w-3 text-[var(--lime)]" /> {s.name}</span>
+              <span className="flex items-center gap-2"><MapPin className="h-3 w-3 text-[var(--lime)]" /> {s.name} · {city.name}</span>
               <span className="text-muted-foreground">{s.dist}</span>
             </div>
           ))}

@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Sparkles, Lock, Tag, Copy } from "lucide-react";
+import { Sparkles, Lock, Tag, Copy, MapPin } from "lucide-react";
+import { PL_CITIES } from "@/routes/onboarding";
 
 export const Route = createFileRoute("/promo")({
   head: () => ({ meta: [{ title: "Promo — GymWrld" }] }),
@@ -10,13 +11,16 @@ export const Route = createFileRoute("/promo")({
 
 type Tab = "darmowe" | "premium";
 
-type Deal = { brand: string; cat: string; code: string; off: string; from: string; to: string };
+type Deal = { brand: string; cat: string; code: string; off: string; from: string; to: string; city?: string };
 
 const free: Deal[] = [
   { brand: "ProteinLab", cat: "Suplementy", code: "GYMWRLD10", off: "-10%", from: "#ff4d8d", to: "#ff9a3c" },
   { brand: "Athleisure", cat: "Odzież", code: "RUN20", off: "-20%", from: "#6a5cff", to: "#22d3ee" },
   { brand: "ForestEats", cat: "Zdrowa żywność", code: "FRESH15", off: "-15%", from: "#16a34a", to: "#bef264" },
   { brand: "FitGear", cat: "Sprzęt", code: "HOME25", off: "-25%", from: "#f59e0b", to: "#ef4444" },
+  { brand: "Local Gym Pass", cat: "Lokalne wejściówki", code: "CITYFIT", off: "-15%", from: "#22c55e", to: "#84cc16", city: "warszawa" },
+  { brand: "Poznań Active", cat: "Lokalne studio", code: "POZWRLD", off: "-20%", from: "#14b8a6", to: "#bef264", city: "poznan" },
+  { brand: "Kraków Bowl", cat: "Lokalne jedzenie", code: "KRK15", off: "-15%", from: "#f97316", to: "#ef4444", city: "krakow" },
 ];
 
 const premium: Deal[] = [
@@ -27,6 +31,11 @@ const premium: Deal[] = [
 
 function Promo() {
   const [tab, setTab] = useState<Tab>("darmowe");
+  const [cityId, setCityId] = useState(() => {
+    if (typeof window === "undefined") return "warszawa";
+    try { return JSON.parse(localStorage.getItem("gw_profile") ?? "{}").city ?? "warszawa"; } catch { return "warszawa"; }
+  });
+  const deals = (tab === "darmowe" ? free : premium).filter((d) => !d.city || d.city === cityId);
   return (
     <main className="px-5 pt-6">
       <header>
@@ -59,8 +68,16 @@ function Promo() {
         </button>
       </div>
 
+      <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 ring-1 ring-white/10">
+        <MapPin className="h-4 w-4 text-[var(--lime)]" />
+        <span className="text-xs text-muted-foreground">Lokalne oferty dla</span>
+        <select value={cityId} onChange={(e) => setCityId(e.target.value)} className="ml-auto bg-transparent text-xs font-medium outline-none">
+          {PL_CITIES.map((c) => <option key={c.id} value={c.id} className="bg-background">{c.name}</option>)}
+        </select>
+      </div>
+
       <div className="mt-4 space-y-3">
-        {(tab === "darmowe" ? free : premium).map((d, i) => (
+        {deals.map((d, i) => (
           <Deal key={d.brand} d={d} locked={tab === "premium" && i > 0} premium={tab === "premium"} />
         ))}
       </div>
@@ -112,6 +129,7 @@ function Deal({ d, locked, premium }: { d: Deal; locked?: boolean; premium?: boo
         <div className="flex-1">
           <p className="font-display text-base leading-tight">{d.brand}</p>
           <p className="text-xs text-muted-foreground">{d.cat}</p>
+          {d.city && <p className="mt-0.5 text-[9px] uppercase tracking-wider text-[var(--lime)]">Lokalna</p>}
         </div>
         <div className="text-right">
           <p className="font-display text-2xl leading-none" style={{ background: bg, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{d.off}</p>
