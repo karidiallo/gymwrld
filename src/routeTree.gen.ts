@@ -13,6 +13,7 @@ import { Route as WorkoutsRouteImport } from './routes/workouts'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
+import { Route as StatystykiRouteImport } from './routes/statystyki'
 import { Route as RegeneracjaRouteImport } from './routes/regeneracja'
 import { Route as PrzepisyRouteImport } from './routes/przepisy'
 import { Route as PromoRouteImport } from './routes/promo'
@@ -42,6 +43,11 @@ const TreningRoute = TreningRouteImport.update({
 const StreetRoute = StreetRouteImport.update({
   id: '/street',
   path: '/street',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatystykiRoute = StatystykiRouteImport.update({
+  id: '/statystyki',
+  path: '/statystyki',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegeneracjaRoute = RegeneracjaRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   PromoRoute: typeof PromoRoute
   PrzepisyRoute: typeof PrzepisyRoute
   RegeneracjaRoute: typeof RegeneracjaRoute
+  StatystykiRoute: typeof StatystykiRoute
   StreetRoute: typeof StreetRoute
   TreningRoute: typeof TreningRoute
   UstawieniaRoute: typeof UstawieniaRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/street'
       fullPath: '/street'
       preLoaderRoute: typeof StreetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/statystyki': {
+      id: '/statystyki'
+      path: '/statystyki'
+      fullPath: '/statystyki'
+      preLoaderRoute: typeof StatystykiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/regeneracja': {
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   PromoRoute: PromoRoute,
   PrzepisyRoute: PrzepisyRoute,
   RegeneracjaRoute: RegeneracjaRoute,
+  StatystykiRoute: StatystykiRoute,
   StreetRoute: StreetRoute,
   TreningRoute: TreningRoute,
   UstawieniaRoute: UstawieniaRoute,
