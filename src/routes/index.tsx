@@ -65,7 +65,13 @@ function Index() {
     if (typeof window !== "undefined") {
       try {
         const raw = localStorage.getItem("gw_avatar");
-        if (raw) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(raw) });
+        const rp = localStorage.getItem("gw_profile");
+        const cur = raw ? JSON.parse(raw) : DEFAULT_AVATAR;
+        const prof = rp ? JSON.parse(rp) : {};
+        // Force avatar gender to match profile gender (fix stale male default)
+        const merged = { ...DEFAULT_AVATAR, ...cur, gender: prof.gender ?? cur.gender ?? "m" };
+        if (merged.gender !== cur.gender) localStorage.setItem("gw_avatar", JSON.stringify(merged));
+        setAvatarCfg(merged);
       } catch {}
       loadProfile();
       window.addEventListener("gw_profile_update", loadProfile);
