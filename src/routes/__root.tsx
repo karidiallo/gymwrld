@@ -16,9 +16,6 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
-import logoAsset from "../assets/gymwrld-logo.png.asset.json";
-
-const logoAssetUrl = logoAsset.url;
 
 function NotFoundComponent() {
   return (
@@ -100,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: logoAssetUrl },
+      { rel: "apple-touch-icon", href: "/__l5e/assets-v1/9e97d7e7-db69-48ed-85ad-3a6a94a9e3cf/gymwrld-logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
