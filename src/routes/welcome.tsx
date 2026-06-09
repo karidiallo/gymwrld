@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy, Smartphone, Target, Zap, Moon, Activity } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
@@ -48,12 +48,18 @@ const PLANS = [
 
 function WelcomePage() {
   const logo = logoAsset.url;
+  const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [scrolled, setScrolled] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
+    // Landing only available in browser. In installed PWA, send straight to login.
+    if (typeof window !== "undefined") {
+      const standalone = window.matchMedia?.("(display-mode: standalone)").matches || (navigator as any).standalone === true;
+      if (standalone) { navigate({ to: "/auth", replace: true }); return; }
+    }
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll);
     const onPrompt = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
