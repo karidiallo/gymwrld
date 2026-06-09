@@ -289,10 +289,26 @@ function Przepisy() {
 }
 
 function RecipeSheet({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
+  const img = recipeImage(recipe);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[92vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] pb-10">
-        <img src={recipeImage(recipe)} alt={recipe.title} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        {img ? (
+          <img src={img} alt={recipe.title} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="relative grid aspect-[16/9] w-full place-items-center bg-gradient-to-br from-[var(--magenta)]/15 via-[var(--orange)]/10 to-transparent">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Brak zdjęcia</p>
+              <button
+                onClick={(e) => { e.stopPropagation(); toast.success("Dzięki! Twoje zdjęcie trafi do moderacji ✨"); }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-medium"
+              >
+                <Camera className="h-3 w-3" /> Prześlij swoje zdjęcie
+              </button>
+            </div>
+          </div>
+        )}
         <div className="px-5 pt-4">
           <div className="flex items-start justify-between gap-3">
             <div>
