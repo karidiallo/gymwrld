@@ -130,14 +130,6 @@ function Profil() {
         </div>
       </Link>
 
-      {/* Body measurements */}
-      <div className="mb-3 mt-7 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Wymiary</h3>
-        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
-          <Pencil className="h-3 w-3" /> Edytuj
-        </button>
-      </div>
-
       {gender === "k" && <CycleSection floLinked={floLinked} onFloLink={() => {
         try {
           const rp = localStorage.getItem("gw_profile");
@@ -147,6 +139,14 @@ function Profil() {
           toast.success("Połączono z FLO 🌸");
         } catch {}
       }} />}
+
+      {/* Body measurements */}
+      <div className="mb-3 mt-7 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Wymiary</h3>
+        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+          <Pencil className="h-3 w-3" /> Edytuj
+        </button>
+      </div>
 
       <section className="rounded-3xl glass p-5">
         <div className="flex items-center justify-between">
