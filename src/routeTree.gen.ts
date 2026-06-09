@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZadaniaRouteImport } from './routes/zadania'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
@@ -37,6 +38,11 @@ const ZadaniaRoute = ZadaniaRouteImport.update({
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UstawieniaRoute = UstawieniaRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
 }
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
 }
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
+  '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
 }
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/welcome'
     | '/workouts'
     | '/zadania'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/welcome'
     | '/workouts'
     | '/zadania'
   id:
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/street'
     | '/trening'
     | '/ustawienia'
+    | '/welcome'
     | '/workouts'
     | '/zadania'
   fileRoutesById: FileRoutesById
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   StreetRoute: typeof StreetRoute
   TreningRoute: typeof TreningRoute
   UstawieniaRoute: typeof UstawieniaRoute
+  WelcomeRoute: typeof WelcomeRoute
   WorkoutsRoute: typeof WorkoutsRoute
   ZadaniaRoute: typeof ZadaniaRoute
 }
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/workouts'
       fullPath: '/workouts'
       preLoaderRoute: typeof WorkoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ustawienia': {
@@ -433,19 +453,10 @@ const rootRouteChildren: RootRouteChildren = {
   StreetRoute: StreetRoute,
   TreningRoute: TreningRoute,
   UstawieniaRoute: UstawieniaRoute,
+  WelcomeRoute: WelcomeRoute,
   WorkoutsRoute: WorkoutsRoute,
   ZadaniaRoute: ZadaniaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
