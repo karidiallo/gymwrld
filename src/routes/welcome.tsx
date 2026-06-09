@@ -148,7 +148,7 @@ function WelcomePage() {
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-[10px] font-bold ring-2 ring-background">+2k</div>
               </div>
               <div className="text-xs text-muted-foreground">
-                <span className="text-foreground font-semibold">2 000+</span> osób buduje formę razem z GymWrld
+                <span className="text-foreground font-semibold">2 000+</span> osób buduje formę razem z GymWRLD
               </div>
             </div>
           </div>
