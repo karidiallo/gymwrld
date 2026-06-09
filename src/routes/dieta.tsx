@@ -175,7 +175,7 @@ function Dieta() {
           <Macro label="Białko" value={macroEaten.p} goal={nutri.p} color="var(--magenta)" unit="g" />
           <Macro label="Węgle" value={macroEaten.c} goal={nutri.c} color="var(--orange)" unit="g" />
           <Macro label="Tłuszcze" value={macroEaten.f} goal={nutri.f} color="var(--lime)" unit="g" />
-          <Macro label="Woda" value={1.8} goal={2.5} color="var(--violet)" unit="L" />
+          <Macro label="Woda" value={Number(waterLiters)} goal={waterGoal} color="var(--violet)" unit="L" />
         </div>
       </section>
 
