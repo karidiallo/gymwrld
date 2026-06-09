@@ -84,7 +84,10 @@ function Ustawienia() {
         <div className="space-y-2">
           <button
             onClick={() => {
-              if (typeof window !== "undefined") localStorage.removeItem("gw_onboarded");
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("gw_onboarded");
+                localStorage.removeItem("gw_session_persist");
+              }
               toast.success("Wylogowano");
               navigate({ to: "/onboarding" });
             }}
@@ -97,7 +100,7 @@ function Ustawienia() {
             onClick={() => {
               if (!confirm("Usunąć wszystkie dane lokalne?")) return;
               if (typeof window !== "undefined") {
-                ["gw_onboarded","gw_profile","gw_avatar","gw_training_log","gw_mind","gw_journal","gw_treadmill","gw_runs","gw_street","gw_body","gw_prs"].forEach((k) => localStorage.removeItem(k));
+                ["gw_onboarded","gw_session_persist","gw_profile","gw_avatar","gw_training_log","gw_mind","gw_journal","gw_treadmill","gw_runs","gw_street","gw_body","gw_prs","gw_weight_log","gw_cycle","gw_nutrition"].forEach((k) => localStorage.removeItem(k));
               }
               toast.success("Dane usunięte");
               navigate({ to: "/onboarding" });
