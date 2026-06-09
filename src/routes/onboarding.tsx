@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
-import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
+import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -149,9 +149,10 @@ function Onboarding() {
             weight={weight} setWeight={setWeight}
             height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
+            avatar={avatar} setAvatar={setAvatar}
             onGenderPick={(g) => {
               setGender(g);
-              if (g === "k" && floLinked === null) setFloPromptOpen(true);
+              if ((g === "k" || g === "nb") && floLinked === null) setFloPromptOpen(true);
             }}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
@@ -257,7 +258,7 @@ function StepName({
 
 
 function StepPersonal({
-  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick,
+  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick, avatar, setAvatar,
 }: {
   age: number | ""; setAge: (v: number | "") => void;
   weight: number | ""; setWeight: (v: number | "") => void;
@@ -265,6 +266,8 @@ function StepPersonal({
   gender: Gender | null; setGender: (g: Gender) => void;
   onNext: () => void;
   onGenderPick: (g: Gender) => void;
+  avatar: AvatarConfig;
+  setAvatar: (cb: (a: AvatarConfig) => AvatarConfig) => void;
 }) {
   const genders: { id: Gender; label: string; emoji: string }[] = [
     { id: "m", label: "Mężczyzna", emoji: "♂" },
@@ -274,6 +277,7 @@ function StepPersonal({
   const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender
     && !!weight && Number(weight) >= 30 && Number(weight) <= 250
     && !!height && Number(height) >= 120 && Number(height) <= 230;
+  const nbBase = avatar.nbBase ?? "m";
   return (
     <div className="space-y-6">
       <div>
@@ -309,6 +313,33 @@ function StepPersonal({
           })}
         </div>
       </div>
+
+      {gender === "nb" && (
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Wybierz wygląd avatara</p>
+          <div className="grid grid-cols-2 gap-2">
+            {(["m","k"] as const).map((g) => {
+              const active = nbBase === g;
+              return (
+                <button
+                  key={g}
+                  onClick={() => setAvatar((a) => ({ ...a, nbBase: g }))}
+                  className={`relative flex flex-col items-center overflow-hidden rounded-2xl p-3 transition ${active ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}
+                >
+                  <img
+                    src={getAvatarImageFor("nb", avatar.body, g)}
+                    alt={g === "m" ? "Avatar męski" : "Avatar żeński"}
+                    className="h-32 object-contain"
+                    style={{ filter: skinFilter(avatar.skinTone) }}
+                  />
+                  <span className="mt-1 text-xs font-medium">{g === "m" ? "Sylwetka męska" : "Sylwetka żeńska"}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[10px] text-muted-foreground">Wybór jest tylko wizualny — możesz go zmienić w dowolnej chwili w profilu.</p>
+        </div>
+      )}
 
       <button
         onClick={onNext}
