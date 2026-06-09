@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
-import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";

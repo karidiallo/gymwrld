@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronRight, Dumbbell, Apple, MapPin, Footprints, Heart, Check, Smartphone, Plus, Minus, Sparkles } from "lucide-react";
 import sanctuary from "@/assets/sanctuary.jpg";
-import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({

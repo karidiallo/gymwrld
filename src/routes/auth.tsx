@@ -5,7 +5,7 @@ import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
-import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import logoAsset from "@/assets/gymwrld-wordmark.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Zaloguj się — GymWrld" }] }),
