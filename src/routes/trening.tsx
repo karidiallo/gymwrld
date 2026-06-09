@@ -814,7 +814,7 @@ function WorkoutSession({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background">
+    <div className="fixed inset-0 z-[80] overflow-y-auto bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-white/5 bg-background/80 px-5 py-4 backdrop-blur-xl">
         <div className="flex items-center justify-between">
@@ -938,8 +938,8 @@ function WorkoutSession({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="sticky bottom-0 border-t border-white/5 bg-background/90 px-5 py-4 backdrop-blur-xl">
+      {/* Footer — above BottomNav */}
+      <div className="sticky bottom-0 z-[81] border-t border-white/5 bg-background/95 px-5 py-4 pb-[max(env(safe-area-inset-bottom),1rem)] backdrop-blur-xl">
         <button
           onClick={onFinish}
           className="w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary"

@@ -329,6 +329,14 @@ function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink:
     nextPeriodIn = length - day + 1;
   }
 
+  const PHASES: Record<string, { color: string; energy: string; training: string; tip: string; emoji: string }> = {
+    "Miesiączka":  { color: "#e94560", energy: "Niska", training: "Joga, spacer, mobilizacja, lekkie cardio", tip: "Słuchaj ciała — odpuść PR-y, postaw na regenerację i nawodnienie.", emoji: "🩸" },
+    "Folikularna": { color: "#bef264", energy: "Wysoka",  training: "Siłowy progres, hipertrofia, HIIT — to Twój peak", tip: "Najlepszy czas na bicie rekordów i intensywne sesje.", emoji: "⚡" },
+    "Owulacja":    { color: "#ffd166", energy: "Szczyt",  training: "Maksymalna siła, sprinty, rywalizacja",        tip: "Energia i koordynacja na maksa — wykorzystaj okno mocy.", emoji: "🔥" },
+    "Lutealna":    { color: "#a78bfa", energy: "Spadająca", training: "Umiarkowane cardio, technika, stretching",     tip: "Tempo spada — postaw na objętość zamiast intensywności, więcej snu.", emoji: "🌙" },
+  };
+  const ph = PHASES[phase] ?? PHASES["Folikularna"];
+
   return (
     <>
       <div className="mb-3 mt-7 flex items-center justify-between">
@@ -355,37 +363,52 @@ function CycleSection({ floLinked, onFloLink }: { floLinked: boolean; onFloLink:
         ) : (
           <>
             <div className="flex items-center gap-4">
-              <div className="relative grid h-24 w-24 place-items-center rounded-full" style={{ background: `conic-gradient(var(--magenta) ${(day/length)*360}deg, rgba(255,255,255,0.06) 0)` }}>
+              <div className="relative grid h-28 w-28 place-items-center rounded-full" style={{ background: `conic-gradient(${ph.color} ${(day/length)*360}deg, rgba(255,255,255,0.06) 0)` }}>
                 <div className="absolute inset-1.5 rounded-full bg-[var(--surface)] grid place-items-center">
-                  <p className="font-display text-2xl leading-none">{day}</p>
+                  <p className="text-xl leading-none">{ph.emoji}</p>
+                  <p className="font-display text-2xl leading-none mt-0.5">{day}</p>
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">dzień</p>
                 </div>
               </div>
               <div className="flex-1">
-                <p className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/15 px-2.5 py-1 text-[11px] font-medium text-[var(--magenta)]">
-                  <Heart className="h-3 w-3" /> Faza: {phase}
+                <p className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium" style={{ background: `${ph.color}22`, color: ph.color }}>
+                  <Heart className="h-3 w-3" /> {phase}
                 </p>
-                <p className="mt-2 text-xs text-muted-foreground">Następna miesiączka za <span className="text-foreground font-medium">{nextPeriodIn} dni</span></p>
-                <p className="mt-1 text-xs text-muted-foreground">Cykl {length} dni · krwawienie {period} dni</p>
+                <p className="mt-2 text-xs text-muted-foreground">Energia: <span className="text-foreground font-medium">{ph.energy}</span></p>
+                <p className="mt-1 text-xs text-muted-foreground">Następna miesiączka za <span className="text-foreground font-medium">{nextPeriodIn} dni</span></p>
                 {floLinked && <p className="mt-1 text-[10px] text-[var(--lime)]">✓ Połączono z FLO</p>}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-7 gap-1">
-              {Array.from({ length }).map((_, i) => {
-                const d = i + 1;
-                const isPeriod = d <= period;
-                const isOvu = Math.abs(d - Math.round(length/2)) <= 1;
-                const isToday = d === day;
-                return (
-                  <div key={i} className={`h-7 rounded-md text-center text-[9px] leading-7 ${isToday ? "ring-1 ring-white" : ""} ${isPeriod ? "bg-[var(--magenta)]/60 text-white" : isOvu ? "bg-[var(--lime)]/40 text-background" : "bg-white/5 text-muted-foreground"}`}>
-                    {d}
-                  </div>
-                );
-              })}
+
+            {/* Phase ribbon */}
+            <div className="mt-4">
+              <div className="relative h-3 w-full overflow-hidden rounded-full">
+                <div className="absolute inset-0 flex">
+                  <div style={{ flex: period, background: PHASES["Miesiączka"].color }} />
+                  <div style={{ flex: Math.max(1, length / 2 - 2 - period), background: PHASES["Folikularna"].color }} />
+                  <div style={{ flex: 4, background: PHASES["Owulacja"].color }} />
+                  <div style={{ flex: Math.max(1, length - (length / 2 + 2)), background: PHASES["Lutealna"].color }} />
+                </div>
+                <div className="absolute top-0 h-3 w-0.5 bg-white" style={{ left: `${((day - 1) / length) * 100}%` }} />
+              </div>
+              <div className="mt-2 grid grid-cols-4 gap-1 text-[9px] text-muted-foreground">
+                <span>🩸 Miesiączka</span>
+                <span>⚡ Folikularna</span>
+                <span>🔥 Owulacja</span>
+                <span>🌙 Lutealna</span>
+              </div>
             </div>
-            <div className="mt-3 flex items-center gap-3 text-[10px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--magenta)]/60" /> Miesiączka</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--lime)]/60" /> Owulacja</span>
+
+            {/* Training guidance */}
+            <div className="mt-4 space-y-2">
+              <div className="rounded-2xl bg-white/[0.04] p-3">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Trening na dziś</p>
+                <p className="mt-1 text-sm font-medium">{ph.training}</p>
+              </div>
+              <div className="rounded-2xl bg-gradient-to-br from-[var(--magenta)]/10 to-[var(--lime)]/5 p-3">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Wskazówka</p>
+                <p className="mt-1 text-xs">{ph.tip}</p>
+              </div>
             </div>
           </>
         )}

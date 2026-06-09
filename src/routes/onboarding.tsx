@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, ChevronRight, Check, Sparkles } from "lucide-react";
+import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
@@ -19,12 +19,15 @@ function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [stayLogged, setStayLogged] = useState(true);
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [weight, setWeight] = useState<number | "">("");
   const [height, setHeight] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
+  const [city, setCity] = useState<string>("");
   const [floLinked, setFloLinked] = useState<boolean | null>(null);
   const [floPromptOpen, setFloPromptOpen] = useState(false);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
@@ -41,7 +44,9 @@ function Onboarding() {
   const finish = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, goals, level, freq, age, gender, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
+      if (stayLogged) localStorage.setItem("gw_session_persist", "1");
+      else localStorage.removeItem("gw_session_persist");
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
       localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
       const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
@@ -51,7 +56,7 @@ function Onboarding() {
     navigate({ to: "/" });
   };
 
-  const total = 6;
+  const total = 7;
   const progress = ((step + 1) / total) * 100;
 
   // First screen: pure black, huge logo only.
@@ -67,7 +72,7 @@ function Onboarding() {
           />
         </div>
         <div className="w-full max-w-[480px]">
-          <StepAuth email={email} setEmail={setEmail} onNext={() => setStep(1)} />
+          <StepAuth email={email} setEmail={setEmail} password={password} setPassword={setPassword} stayLogged={stayLogged} setStayLogged={setStayLogged} onNext={() => setStep(1)} />
         </div>
       </main>
     );
@@ -114,6 +119,9 @@ function Onboarding() {
           />
         )}
         {step === 3 && (
+          <StepCity city={city} setCity={setCity} onNext={() => setStep(4)} />
+        )}
+        {step === 4 && (
           <StepMultiChoice
             title="Jaki masz cel?"
             subtitle="Możesz wybrać kilka — dopasujemy plan."
@@ -125,11 +133,11 @@ function Onboarding() {
             ]}
             values={goals}
             onToggle={(v) => setGoals((gs) => gs.includes(v as Goal) ? gs.filter((x) => x !== v) : [...gs, v as Goal])}
-            onNext={() => setStep(4)}
+            onNext={() => setStep(5)}
             canNext={goals.length > 0}
           />
         )}
-        {step === 4 && (
+        {step === 5 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -140,11 +148,11 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(5)}
+            onNext={() => setStep(6)}
             canNext={!!level}
           />
         )}
-        {step === 5 && (
+        {step === 6 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
@@ -366,7 +374,63 @@ function StepMultiChoice({
   );
 }
 
-function StepAuth({ email, setEmail, onNext }: { email: string; setEmail: (v: string) => void; onNext: () => void }) {
+const PL_CITIES = [
+  { id: "warszawa", name: "Warszawa", lat: 52.2297, lon: 21.0122 },
+  { id: "krakow", name: "Kraków", lat: 50.0647, lon: 19.945 },
+  { id: "poznan", name: "Poznań", lat: 52.4064, lon: 16.9252 },
+  { id: "gdansk", name: "Gdańsk", lat: 54.352, lon: 18.6466 },
+  { id: "gdynia", name: "Gdynia", lat: 54.5189, lon: 18.5305 },
+  { id: "wroclaw", name: "Wrocław", lat: 51.1079, lon: 17.0385 },
+  { id: "torun", name: "Toruń", lat: 53.0138, lon: 18.5984 },
+  { id: "bydgoszcz", name: "Bydgoszcz", lat: 53.1235, lon: 18.0084 },
+  { id: "lodz", name: "Łódź", lat: 51.7592, lon: 19.4559 },
+  { id: "szczecin", name: "Szczecin", lat: 53.4285, lon: 14.5528 },
+  { id: "katowice", name: "Katowice", lat: 50.2649, lon: 19.0238 },
+  { id: "lublin", name: "Lublin", lat: 51.2465, lon: 22.5684 },
+  { id: "bialystok", name: "Białystok", lat: 53.1325, lon: 23.1688 },
+  { id: "rzeszow", name: "Rzeszów", lat: 50.0413, lon: 21.999 },
+];
+
+function StepCity({ city, setCity, onNext }: { city: string; setCity: (v: string) => void; onNext: () => void }) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl leading-tight">Skąd <span className="text-gradient">jesteś?</span></h1>
+        <p className="mt-2 text-sm text-muted-foreground">Dobierzemy lokalne wydarzenia, trasy i zawody w Twoim mieście.</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto pr-1">
+        {PL_CITIES.map((c) => {
+          const active = city === c.id;
+          return (
+            <button key={c.id} onClick={() => setCity(c.id)} className={`flex items-center gap-2 rounded-2xl p-3.5 text-left transition ${active ? "bg-gradient-to-br from-[var(--magenta)]/25 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}>
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{c.name}</span>
+            </button>
+          );
+        })}
+      </div>
+      <button
+        onClick={onNext}
+        disabled={!city}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
+      >
+        Dalej <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayLogged, onNext }: { email: string; setEmail: (v: string) => void; password: string; setPassword: (v: string) => void; stayLogged: boolean; setStayLogged: (v: boolean) => void; onNext: () => void }) {
+  const [show, setShow] = useState(false);
+  const generate = () => {
+    const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$";
+    let p = "";
+    for (let i = 0; i < 14; i++) p += chars[Math.floor(Math.random() * chars.length)];
+    setPassword(p);
+    setShow(true);
+    toast.success("Wygenerowano silne hasło — zapisz je!");
+  };
+  const canNext = email.includes("@") && password.length >= 8;
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -406,9 +470,34 @@ function StepAuth({ email, setEmail, onNext }: { email: string; setEmail: (v: st
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
         </div>
+        <div className="flex items-center gap-2 rounded-2xl glass px-4 py-3">
+          <Lock className="h-4 w-4 text-muted-foreground" />
+          <input
+            type={show ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="hasło (min. 8 znaków)"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          <button type="button" onClick={() => setShow((s) => !s)} className="text-muted-foreground">
+            {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+          <button type="button" onClick={generate} title="Wygeneruj hasło" className="text-muted-foreground">
+            <Shuffle className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex items-center justify-between text-[11px]">
+          <label className="inline-flex items-center gap-2 text-muted-foreground">
+            <input type="checkbox" checked={stayLogged} onChange={(e) => setStayLogged(e.target.checked)} className="accent-[var(--magenta)]" />
+            Pozostań zalogowany
+          </label>
+          <button type="button" onClick={() => email.includes("@") ? toast.success(`Link do resetu hasła wysłany na ${email}`) : toast.error("Podaj e-mail powyżej")} className="text-[var(--magenta)] hover:underline">
+            Zapomniałem hasła
+          </button>
+        </div>
         <button
           onClick={onNext}
-          disabled={!email.includes("@")}
+          disabled={!canNext}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
         >
           Dalej <ChevronRight className="h-4 w-4" />
@@ -421,6 +510,8 @@ function StepAuth({ email, setEmail, onNext }: { email: string; setEmail: (v: st
     </div>
   );
 }
+
+export { PL_CITIES };
 
 function StepChoice({
   title, subtitle, options, value, onChange, onNext, canNext,
