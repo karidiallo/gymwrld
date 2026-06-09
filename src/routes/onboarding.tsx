@@ -31,8 +31,6 @@ function Onboarding() {
   const [height, setHeight] = useState<number | "">("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [city, setCity] = useState<string>("");
-  const [floLinked, setFloLinked] = useState<boolean | null>(null);
-  const [floPromptOpen, setFloPromptOpen] = useState(false);
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [level, setLevel] = useState<Level | null>(null);
@@ -72,7 +70,6 @@ function Onboarding() {
         goals,
         level,
         freq,
-        flo_linked: !!floLinked,
       }, { onConflict: "id" });
       if (profileError) throw profileError;
       saved = true;
@@ -86,7 +83,7 @@ function Onboarding() {
       localStorage.setItem("gw_onboarded", "1");
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
       else localStorage.removeItem("gw_session_persist");
-      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, floLinked: !!floLinked, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
+      localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
       localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
       const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
@@ -150,10 +147,7 @@ function Onboarding() {
             height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
             avatar={avatar} setAvatar={setAvatar}
-            onGenderPick={(g) => {
-              setGender(g);
-              if ((g === "k" || g === "nb") && floLinked === null) setFloPromptOpen(true);
-            }}
+            onGenderPick={(g) => setGender(g)}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
         )}
@@ -195,12 +189,6 @@ function Onboarding() {
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
-      {floPromptOpen && (
-        <FloPrompt
-          onSkip={() => { setFloLinked(false); setFloPromptOpen(false); }}
-          onLink={() => { setFloLinked(true); setFloPromptOpen(false); toast.success("Połączono z FLO 🌸"); }}
-        />
-      )}
     </main>
   );
 }
