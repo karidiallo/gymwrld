@@ -23,6 +23,8 @@ export function awardXp(amount: number, reason?: string) {
     let xp = prevXp + amount;
     let lvl = prevLvl;
     while (xp >= 2000) { xp -= 2000; lvl += 1; }
+    while (xp < 0 && lvl > 1) { xp += 2000; lvl -= 1; }
+    if (xp < 0) xp = 0;
     const stats = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
     const next = { ...p, xp, lvl, stats };
     localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
