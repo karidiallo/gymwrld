@@ -53,3 +53,20 @@ export async function syncLocalState() {
   await restoreCloudStateToLocal();
   await migrateLocalStateToCloud();
 }
+
+let installed = false;
+let timer: ReturnType<typeof setTimeout> | undefined;
+
+export function installLocalStateCloudSync() {
+  if (installed || typeof window === "undefined") return;
+  installed = true;
+  const original = window.localStorage.setItem.bind(window.localStorage);
+  window.localStorage.setItem = (key: string, value: string) => {
+    original(key, value);
+    if (!key.startsWith("gw_")) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      migrateLocalStateToCloud().catch(() => undefined);
+    }, 500);
+  };
+}
