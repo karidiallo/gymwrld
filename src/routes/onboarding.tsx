@@ -297,7 +297,7 @@ function NumField({ label, unit, value, onChange, min, max, placeholder, step }:
 function FloPrompt({ onSkip, onLink }: { onSkip: () => void; onLink: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+      <div className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-5 text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-2xl">🌸</div>

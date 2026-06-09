@@ -36,9 +36,9 @@ export function AvatarViewer({ cfg, onClose }: { cfg: AvatarConfig; onClose: () 
       </div>
 
       {/* avatar stage */}
-      <div className="absolute inset-x-0 top-20 bottom-40 grid place-items-end">
+      <div className="absolute inset-x-0 top-28 bottom-48 grid place-items-end justify-center">
         <div
-          className="h-[88%]"
+          className="h-[72%]"
           style={{ filter: `drop-shadow(0 30px 40px rgba(0,0,0,0.6)) drop-shadow(0 0 30px ${cfg.outfitTint}55)` }}
         >
           <AvatarModel cfg={cfg} height="100%" rotation={0} />

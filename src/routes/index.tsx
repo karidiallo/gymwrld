@@ -151,7 +151,7 @@ function Index() {
       </section>
 
       {/* Today's progress */}
-      <SectionTitle title="Dzisiejszy progres" actionTo="/profil" action="Zobacz szczegóły" />
+      <SectionTitle title="Dzisiejszy progres" actionTo="/statystyki" action="Zobacz szczegóły" />
       <div className="grid grid-cols-3 gap-3">
         <StatCard to="/trening" icon={<Dumbbell className="h-4 w-4" />} title="Siła" value={profile.stats?.sila ?? 0} />
         <StatCard to="/dieta" icon={<Apple className="h-4 w-4" />} title="Dieta" value={profile.stats?.dieta ?? 0} />
@@ -163,8 +163,8 @@ function Index() {
       </div>
 
       {/* Steps card */}
-      <SectionTitle title="Dzisiejsze kroki" actionTo="/trening" action="Historia" />
-      <Link to="/trening" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
+      <SectionTitle title="Dzisiejsze kroki" actionTo="/kroki" action="Historia" />
+      <Link to="/kroki" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel 10 000</p>
@@ -187,7 +187,7 @@ function Index() {
       </Link>
 
       {/* Quests */}
-      <SectionTitle title="Dzisiejsze zadania" actionTo="/trening" action="Wszystkie" />
+      <SectionTitle title="Dzisiejsze zadania" actionTo="/zadania" action="Wszystkie" />
       <div className="space-y-2.5">
         {quests.map((q) => (
           <Quest key={q.id} {...q} onToggle={() => toggleQuest(q.id)} />

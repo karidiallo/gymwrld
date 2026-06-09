@@ -9,21 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZadaniaRouteImport } from './routes/zadania'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
 import { Route as UstawieniaRouteImport } from './routes/ustawienia'
 import { Route as TreningRouteImport } from './routes/trening'
 import { Route as StreetRouteImport } from './routes/street'
+import { Route as StatystykiRouteImport } from './routes/statystyki'
 import { Route as RegeneracjaRouteImport } from './routes/regeneracja'
 import { Route as PrzepisyRouteImport } from './routes/przepisy'
 import { Route as PromoRouteImport } from './routes/promo'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as KrokiRouteImport } from './routes/kroki'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ZadaniaRoute = ZadaniaRouteImport.update({
+  id: '/zadania',
+  path: '/zadania',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
@@ -42,6 +50,11 @@ const TreningRoute = TreningRouteImport.update({
 const StreetRoute = StreetRouteImport.update({
   id: '/street',
   path: '/street',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatystykiRoute = StatystykiRouteImport.update({
+  id: '/statystyki',
+  path: '/statystyki',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegeneracjaRoute = RegeneracjaRouteImport.update({
@@ -74,6 +87,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KrokiRoute = KrokiRouteImport.update({
+  id: '/kroki',
+  path: '/kroki',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DietaRoute = DietaRouteImport.update({
   id: '/dieta',
   path: '/dieta',
@@ -100,32 +118,38 @@ export interface FileRoutesByFullPath {
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,16 +157,19 @@ export interface FileRoutesById {
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/profil': typeof ProfilRoute
   '/promo': typeof PromoRoute
   '/przepisy': typeof PrzepisyRoute
   '/regeneracja': typeof RegeneracjaRoute
+  '/statystyki': typeof StatystykiRoute
   '/street': typeof StreetRoute
   '/trening': typeof TreningRoute
   '/ustawienia': typeof UstawieniaRoute
   '/workouts': typeof WorkoutsRoute
+  '/zadania': typeof ZadaniaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,48 +178,57 @@ export interface FileRouteTypes {
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/kroki'
     | '/onboarding'
     | '/premium'
     | '/profil'
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/kroki'
     | '/onboarding'
     | '/premium'
     | '/profil'
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   id:
     | '__root__'
     | '/'
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/kroki'
     | '/onboarding'
     | '/premium'
     | '/profil'
     | '/promo'
     | '/przepisy'
     | '/regeneracja'
+    | '/statystyki'
     | '/street'
     | '/trening'
     | '/ustawienia'
     | '/workouts'
+    | '/zadania'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -200,20 +236,30 @@ export interface RootRouteChildren {
   BiegiRoute: typeof BiegiRoute
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
+  KrokiRoute: typeof KrokiRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
   ProfilRoute: typeof ProfilRoute
   PromoRoute: typeof PromoRoute
   PrzepisyRoute: typeof PrzepisyRoute
   RegeneracjaRoute: typeof RegeneracjaRoute
+  StatystykiRoute: typeof StatystykiRoute
   StreetRoute: typeof StreetRoute
   TreningRoute: typeof TreningRoute
   UstawieniaRoute: typeof UstawieniaRoute
   WorkoutsRoute: typeof WorkoutsRoute
+  ZadaniaRoute: typeof ZadaniaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zadania': {
+      id: '/zadania'
+      path: '/zadania'
+      fullPath: '/zadania'
+      preLoaderRoute: typeof ZadaniaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workouts': {
       id: '/workouts'
       path: '/workouts'
@@ -240,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/street'
       fullPath: '/street'
       preLoaderRoute: typeof StreetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/statystyki': {
+      id: '/statystyki'
+      path: '/statystyki'
+      fullPath: '/statystyki'
+      preLoaderRoute: typeof StatystykiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/regeneracja': {
@@ -284,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kroki': {
+      id: '/kroki'
+      path: '/kroki'
+      fullPath: '/kroki'
+      preLoaderRoute: typeof KrokiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dieta': {
       id: '/dieta'
       path: '/dieta'
@@ -320,27 +380,20 @@ const rootRouteChildren: RootRouteChildren = {
   BiegiRoute: BiegiRoute,
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
+  KrokiRoute: KrokiRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
   ProfilRoute: ProfilRoute,
   PromoRoute: PromoRoute,
   PrzepisyRoute: PrzepisyRoute,
   RegeneracjaRoute: RegeneracjaRoute,
+  StatystykiRoute: StatystykiRoute,
   StreetRoute: StreetRoute,
   TreningRoute: TreningRoute,
   UstawieniaRoute: UstawieniaRoute,
   WorkoutsRoute: WorkoutsRoute,
+  ZadaniaRoute: ZadaniaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
