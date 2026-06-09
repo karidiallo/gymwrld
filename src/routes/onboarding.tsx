@@ -5,6 +5,8 @@ import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -41,7 +43,37 @@ function Onboarding() {
     }
   }, [navigate]);
 
-  const finish = () => {
+  const finish = async () => {
+    // 1. Create Supabase account if we have email+password and there's no active session
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session && email && password.length >= 8) {
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { name, nickname },
+          },
+        });
+        if (error && !/already/i.test(error.message)) {
+          toast.error(error.message);
+        }
+      }
+      // 2. Save profile to database (if logged in)
+      const { data: sess2 } = await supabase.auth.getSession();
+      if (sess2.session?.user) {
+        await supabase.from("profiles").upsert({
+          id: sess2.session.user.id,
+          email: email || sess2.session.user.email,
+          name, nickname, city, gender, age: Number(age) || null,
+          weight: Number(weight) || null, height: Number(height) || null,
+          goals, level, freq, flo_linked: !!floLinked,
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     if (typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
