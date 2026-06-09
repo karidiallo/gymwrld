@@ -22,7 +22,7 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const FEATURES = [
-  { icon: Dumbbell, title: "Trening siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka „Siła" rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
+  { icon: Dumbbell, title: "Trening siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
   { icon: Apple, title: "Dieta i przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
   { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście. Klikasz pin — przechodzisz do wizytówki Google z opiniami i nawigacją.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
   { icon: Footprints, title: "Biegi i kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
@@ -74,8 +74,8 @@ function WelcomePage() {
     }
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     alert(isIos
-      ? "Na iPhone: otwórz w Safari → przycisk Udostępnij → „Do ekranu początkowego"."
-      : "Otwórz menu przeglądarki → „Zainstaluj aplikację" / „Dodaj do ekranu głównego".");
+      ? "Na iPhone: otwórz w Safari → przycisk Udostępnij → Do ekranu początkowego."
+      : "Otwórz menu przeglądarki → Zainstaluj aplikację / Dodaj do ekranu głównego.");
   };
 
   return (
