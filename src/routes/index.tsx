@@ -7,7 +7,7 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
-import { awardXp } from "@/lib/training-log";
+import { awardXp, readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
@@ -83,6 +83,14 @@ function Index() {
     { id: "q2", title: "Wypij 2.5 L wody", reward: "+60 XP", progress: 0.7, done: false },
     { id: "q3", title: "Osiągnij 10 000 kroków", reward: "+80 XP", progress: 0.78, done: false },
   ]);
+  const [recentLogs, setRecentLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const load = () => setRecentLogs(readLogs().slice(0, 3));
+    load();
+    window.addEventListener("gw_training_log_update", load);
+    return () => window.removeEventListener("gw_training_log_update", load);
+  }, []);
   const toggleQuest = (id: string) => {
     setQuests((qs) =>
       qs.map((q) => {
@@ -104,6 +112,7 @@ function Index() {
   if (!authChecked) {
     return <main className="min-h-screen" aria-hidden />;
   }
+
 
   return (
     <main className="px-5 pt-6">
@@ -225,9 +234,24 @@ function Index() {
 
       {/* Last activity */}
       <SectionTitle title="Ostatnia aktywność" />
-      <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
-        Brak aktywności · zaloguj pierwszy trening
-      </div>
+      {recentLogs.length === 0 ? (
+        <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
+          Brak aktywności · zaloguj pierwszy trening
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {recentLogs.map((l) => (
+            <div key={l.id} className="flex items-center gap-3 rounded-2xl glass p-3.5">
+              <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: `${KIND_COLOR[l.kind]}20`, color: KIND_COLOR[l.kind] }}>●</span>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{l.title}</p>
+                <p className="text-[11px] text-muted-foreground">{KIND_LABEL[l.kind]} · {l.minutes} min · {l.kcal} kcal</p>
+              </div>
+              <span className="text-[10px] text-muted-foreground">{new Date(l.ts).toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" })}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {viewerOpen && <AvatarViewer cfg={avatarCfg} onClose={() => setViewerOpen(false)} />}
     </main>

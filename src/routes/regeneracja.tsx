@@ -11,7 +11,7 @@ export const Route = createFileRoute("/regeneracja")({
   component: Regeneracja,
 });
 
-type SleepEntry = { date: string; hours: number; quality: number };
+type SleepEntry = { id: string; date: string; ts: number; hours: number; quality: number; note?: string };
 type MindType = "medytacja" | "oddech" | "journal" | "afirmacja" | "spacer" | "kapiel";
 type MindEntry = { id: string; type: MindType; minutes: number; note?: string };
 
@@ -31,7 +31,17 @@ function Regeneracja() {
     if (typeof window === "undefined") return;
     try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_journal"); if (raw) setJournal(JSON.parse(raw)); } catch {}
+    try { const raw = localStorage.getItem("gw_recovery"); if (raw) setSleep(JSON.parse(raw)); } catch {}
   }, []);
+  const persistSleep = (next: SleepEntry[]) => {
+    setSleep(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_recovery", JSON.stringify(next));
+  };
+  const removeSleep = (id: string) => {
+    persistSleep(sleep.filter((s) => s.id !== id));
+    removeLog(id);
+    toast.success("Wpis snu usunięty");
+  };
   const persistJournal = (next: typeof journal) => {
     setJournal(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_journal", JSON.stringify(next));
@@ -115,14 +125,36 @@ function Regeneracja() {
         </button>
       </div>
 
-      {/* Sleep history */}
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Historia snu</h3>
+      {/* Sleep advice */}
+      {sleep.length > 0 && (() => {
+        const avg = sleep.reduce((s, x) => s + x.hours, 0) / sleep.length;
+        const avgQ = sleep.reduce((s, x) => s + x.quality, 0) / sleep.length;
+        const tips: string[] = [];
+        if (avg < 6.5) tips.push("Średnia poniżej 6,5h — celuj w 7-9h, regularnie kładź się o tej samej porze.");
+        else if (avg < 7.5) tips.push("Blisko celu. Dorzuć 30-60 min snu i zobacz różnicę w energii.");
+        else tips.push("Świetna ilość snu — utrzymuj regularność, to klucz do regeneracji.");
+        if (avgQ < 60) tips.push("Niska jakość: ogranicz ekran 1h przed snem, chłodna sypialnia (18-20°C), zero kofeiny po 14:00.");
+        if (avgQ >= 80) tips.push("Jakość snu na wysokim poziomie — Twoja regeneracja pracuje na Ciebie.");
+        return (
+          <div className="mt-5 rounded-2xl bg-gradient-to-br from-[var(--violet)]/20 to-[var(--magenta)]/10 p-4 ring-1 ring-white/10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--violet)]">Twoja regeneracja</p>
+            <p className="mt-1 text-sm">Średnia: <span className="font-semibold">{avg.toFixed(1)}h</span> · jakość {Math.round(avgQ)}%</p>
+            <ul className="mt-2 space-y-1 text-[12px] text-muted-foreground">
+              {tips.map((t, i) => <li key={i}>• {t}</li>)}
+            </ul>
+          </div>
+        );
+      })()}
+
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Historia snu</h3>
+      </div>
       {sleep.length === 0 ? (
         <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">Brak danych · zaloguj sen</div>
       ) : (
       <div className="space-y-2.5">
-        {sleep.map((s, i) => (
-          <div key={i} className="flex items-center gap-3 rounded-2xl glass p-3.5">
+        {sleep.map((s) => (
+          <div key={s.id} className="flex items-center gap-3 rounded-2xl glass p-3.5">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--violet)]/15 text-[var(--violet)]"><Moon className="h-4 w-4" /></div>
             <div className="flex-1">
               <p className="text-sm font-medium">{s.date}</p>
@@ -134,6 +166,9 @@ function Regeneracja() {
               <p className="text-sm font-semibold">{s.hours}h</p>
               <p className="text-[10px] text-muted-foreground">jakość {s.quality}%</p>
             </div>
+            <button onClick={() => removeSleep(s.id)} aria-label="Usuń wpis snu" className="grid h-8 w-8 place-items-center rounded-full bg-white/5 hover:bg-red-500/30">
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
         ))}
       </div>
@@ -246,7 +281,10 @@ function Regeneracja() {
       <div className="h-24" />
 
       {openSleep && <SleepSheet onClose={() => setOpenSleep(false)} onSave={(h, q) => {
-        setSleep((prev) => [{ date: "Dziś", hours: h, quality: q }, ...prev.slice(1)]);
+        const kcal = Math.round(h * 50);
+        const log = addLog({ kind: "sen", title: `Sen ${h}h`, kcal, minutes: Math.round(h * 60), meta: { quality: q } });
+        const entry: SleepEntry = { id: log.id, ts: log.ts, date: new Date(log.ts).toLocaleDateString("pl-PL", { weekday: "short", day: "2-digit", month: "2-digit" }), hours: h, quality: q };
+        persistSleep([entry, ...sleep]);
         toast.success(`Zapisano sen: ${h}h · jakość ${q}%`);
         setOpenSleep(false);
       }} />}

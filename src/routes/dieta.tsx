@@ -32,6 +32,17 @@ function Dieta() {
     if (typeof window === "undefined") return;
     const n = readNutrition();
     if (n) setNutri(n);
+    try {
+      const raw = localStorage.getItem("gw_diet");
+      if (raw) {
+        const d = JSON.parse(raw);
+        const today = new Date().toDateString();
+        if (d.date === today) {
+          if (typeof d.water === "number") setWater(d.water);
+          if (d.toilet) setToilet(d.toilet);
+        }
+      }
+    } catch {}
     const calc = () => {
       const start = new Date(); start.setHours(0, 0, 0, 0);
       const sum = readLogs().filter((l) => l.ts >= start.getTime()).reduce((s, l) => s + (l.kcal || 0), 0);
@@ -46,6 +57,10 @@ function Dieta() {
       window.removeEventListener("gw_nutrition_update", onNutri);
     };
   }, []);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("gw_diet", JSON.stringify({ date: new Date().toDateString(), water, toilet }));
+  }, [water, toilet]);
   const eaten = meals.reduce((s, m) => s + m.kcal, 0);
   const goal = nutri.kcal;
   const remaining = goal - eaten;
@@ -160,7 +175,7 @@ function Dieta() {
           <Macro label="Białko" value={macroEaten.p} goal={nutri.p} color="var(--magenta)" unit="g" />
           <Macro label="Węgle" value={macroEaten.c} goal={nutri.c} color="var(--orange)" unit="g" />
           <Macro label="Tłuszcze" value={macroEaten.f} goal={nutri.f} color="var(--lime)" unit="g" />
-          <Macro label="Woda" value={1.8} goal={2.5} color="var(--violet)" unit="L" />
+          <Macro label="Woda" value={Number(waterLiters)} goal={waterGoal} color="var(--violet)" unit="L" />
         </div>
       </section>
 

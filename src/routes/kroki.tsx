@@ -63,20 +63,18 @@ function Steps() {
         </div>
       </header>
 
-      {!connected && (
-        <section className="mt-5 overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--lime)]/20 to-[var(--violet)]/20 p-5 ring-1 ring-white/10">
+      <section className="mt-5 overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--lime)]/20 to-[var(--violet)]/20 p-5 ring-1 ring-white/10">
           <div className="flex items-start gap-3">
             <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10"><Smartphone className="h-5 w-5" /></div>
             <div className="flex-1">
-              <p className="font-semibold">Włącz zapis ruchu GPS</p>
-              <p className="text-[11px] text-muted-foreground">Aplikacja poprosi system o udostępnienie położenia i będzie mogła zapisywać trasy.</p>
+              <p className="font-semibold">{connected ? "GPS aktywny" : "Włącz zapis ruchu GPS"}</p>
+              <p className="text-[11px] text-muted-foreground">{connected ? "Możesz odświeżyć uprawnienia w każdej chwili — np. po przeinstalowaniu aplikacji na ekran główny." : "Aplikacja poprosi system o udostępnienie położenia i będzie mogła zapisywać trasy."}</p>
             </div>
           </div>
           <div className="mt-4">
-            <button onClick={connect} className="w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] to-[var(--violet)] px-3 py-3 text-xs font-semibold text-background"><MapPin className="mr-1 inline h-3 w-3" /> Udostępnij położenie</button>
+            <button onClick={connect} className="w-full rounded-2xl bg-gradient-to-r from-[var(--lime)] to-[var(--violet)] px-3 py-3 text-xs font-semibold text-background"><MapPin className="mr-1 inline h-3 w-3" /> {connected ? "Odśwież dostęp do GPS" : "Udostępnij położenie"}</button>
           </div>
-        </section>
-      )}
+      </section>
 
       <section className="mt-5 rounded-3xl glass p-5">
         <div className="flex items-center gap-4">
