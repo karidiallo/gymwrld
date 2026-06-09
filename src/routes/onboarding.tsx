@@ -489,6 +489,34 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     if (error) toast.error(error.message);
     else toast.success(`Link do resetu wysłany na ${email}`);
   };
+  const continueWithEmail = async () => {
+    if (!canNext) return;
+    setBusy(true);
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const signIn = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+      if (!signIn.error && signIn.data.user) {
+        await ensureCloudProfile(signIn.data.user);
+        onNext();
+        return;
+      }
+      if (signIn.error && !/invalid login credentials/i.test(signIn.error.message)) throw signIn.error;
+      const signUp = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (signUp.error) throw signUp.error;
+      if (signUp.data.session?.user) {
+        await ensureCloudProfile(signUp.data.session.user);
+        onNext();
+        return;
+      }
+      toast.success("Konto utworzone — potwierdź e-mail i wróć do logowania.");
+    } catch (e: any) {
+      toast.error(e?.message?.includes("Email not confirmed") ? "Potwierdź najpierw e-mail aktywacyjny." : e?.message ?? "Nie udało się zalogować");
+    } finally { setBusy(false); }
+  };
   const canNext = email.includes("@") && password.length >= 8;
   return (
     <div className="space-y-6">
@@ -556,11 +584,11 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
           </button>
         </div>
         <button
-          onClick={onNext}
-          disabled={!canNext}
+          onClick={continueWithEmail}
+          disabled={!canNext || busy}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
         >
-          Dalej <ChevronRight className="h-4 w-4" />
+          Zaloguj / utwórz konto <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
