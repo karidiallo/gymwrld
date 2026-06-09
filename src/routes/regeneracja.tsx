@@ -256,7 +256,10 @@ function Regeneracja() {
       <div className="h-24" />
 
       {openSleep && <SleepSheet onClose={() => setOpenSleep(false)} onSave={(h, q) => {
-        setSleep((prev) => [{ date: "Dziś", hours: h, quality: q }, ...prev.slice(1)]);
+        const kcal = Math.round(h * 50);
+        const log = addLog({ kind: "sen", title: `Sen ${h}h`, kcal, minutes: Math.round(h * 60), meta: { quality: q } });
+        const entry: SleepEntry = { id: log.id, ts: log.ts, date: new Date(log.ts).toLocaleDateString("pl-PL", { weekday: "short", day: "2-digit", month: "2-digit" }), hours: h, quality: q };
+        persistSleep([entry, ...sleep]);
         toast.success(`Zapisano sen: ${h}h · jakość ${q}%`);
         setOpenSleep(false);
       }} />}
