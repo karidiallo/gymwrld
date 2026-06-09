@@ -19,8 +19,8 @@ function Dieta() {
   const [editing, setEditing] = useState<Meal | null>(null);
   const [nutriOpen, setNutriOpen] = useState(false);
   const [nutri, setNutri] = useState<NutritionTarget>({ kcal: 2400, p: 160, c: 280, f: 75 });
-  const [water, setWater] = useState(6); // glasses out of 10 (250ml each => 2.5L cel)
-  const [toilet, setToilet] = useState({ pee: 4, poop: 1 });
+  const [water, setWater] = useState(0); // glasses out of 10 (250ml each => 2.5L cel)
+  const [toilet, setToilet] = useState({ pee: 0, poop: 0 });
   const [meals, setMeals] = useState<Meal[]>([
     { id: "m1", icon: "coffee", name: "Śniadanie", items: "", kcal: 0 },
     { id: "m2", icon: "lunch", name: "Obiad", items: "", kcal: 0 },
