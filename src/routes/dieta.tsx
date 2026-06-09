@@ -559,7 +559,57 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
           >
             Dodaj do dziennika
           </button>
+          <div className="h-24" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function NutritionSheet({ current, onClose, onSave, onRecalc }: { current: NutritionTarget; onClose: () => void; onSave: (n: NutritionTarget) => void; onRecalc: () => void }) {
+  const [kcal, setKcal] = useState<number | "">(current.kcal);
+  const [p, setP] = useState<number | "">(current.p);
+  const [c, setC] = useState<number | "">(current.c);
+  const [f, setF] = useState<number | "">(current.f);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
+        <div className="mt-4 flex items-center justify-between">
+          <h3 className="font-display text-xl">Twoje zapotrzebowanie</h3>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full bg-white/5"><X className="h-4 w-4" /></button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Edytuj ręcznie lub przelicz AI na podstawie Twoich danych z profilu.</p>
+        <button onClick={onRecalc} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[var(--magenta)]/30 to-[var(--orange)]/30 px-3 py-1.5 text-[11px] font-medium ring-1 ring-[var(--orange)]/40">
+          <Sparkles className="h-3 w-3" /> Przelicz AI z wagi/wzrostu
+        </button>
+        <div className="mt-4 space-y-2">
+          <label className="block rounded-2xl bg-white/5 p-3">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Kalorie / dzień (kcal)</span>
+            <input type="number" value={kcal} onChange={(e) => setKcal(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-3xl outline-none" />
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--magenta)]">Białko (g)</span>
+              <input type="number" value={p} onChange={(e) => setP(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--orange)]">Węgle (g)</span>
+              <input type="number" value={c} onChange={(e) => setC(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+            <label className="rounded-2xl bg-white/5 p-3">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--lime)]">Tłuszcz (g)</span>
+              <input type="number" value={f} onChange={(e) => setF(e.target.value ? parseInt(e.target.value) : "")} className="mt-1 w-full bg-transparent font-display text-2xl outline-none" />
+            </label>
+          </div>
+        </div>
+        <button
+          onClick={() => kcal && onSave({ kcal: Number(kcal), p: Number(p) || 0, c: Number(c) || 0, f: Number(f) || 0 })}
+          disabled={!kcal}
+          className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary disabled:opacity-40"
+        >
+          Zapisz cele
+        </button>
       </div>
     </div>
   );
