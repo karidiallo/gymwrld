@@ -7,7 +7,7 @@ import { DEFAULT_AVATAR, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { ensureCloudProfile } from "@/lib/auth-flow";
+import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -41,44 +41,48 @@ function Onboarding() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) ensureCloudProfile(data.user);
+      if (!data.user) return;
+      setEmail((current) => current || data.user?.email || "");
+      ensureCloudProfile(data.user).then((profile) => {
+        if (isProfileComplete(profile)) navigate({ to: "/", replace: true });
+        else setStep((current) => current === 0 ? 1 : current);
+      });
     });
-  }, []);
+  }, [navigate]);
 
   const finish = async () => {
-    // 1. Create Supabase account if we have email+password and there's no active session
+    let saved = false;
     try {
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session && email && password.length >= 8) {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { name, nickname },
-          },
-        });
-        if (error && !/already/i.test(error.message)) {
-          toast.error(error.message);
-        }
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        toast.error("Najpierw zaloguj się albo potwierdź e-mail aktywacyjny.");
+        setStep(0);
+        return;
       }
-      // 2. Save profile to database (if logged in)
-      const { data: sess2 } = await supabase.auth.getSession();
-      if (sess2.session?.user) {
-        const { error: profileError } = await supabase.from("profiles").upsert({
-          id: sess2.session.user.id,
-          email: email || sess2.session.user.email,
-          name, nickname, city, gender, age: Number(age) || null,
-          weight: Number(weight) || null, height: Number(height) || null,
-          goals, level, freq, flo_linked: !!floLinked,
-        });
-        if (profileError) throw profileError;
-      }
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: userData.user.id,
+        email: userData.user.email ?? email,
+        name: name.trim(),
+        nickname: nickname.trim().replace(/^@/, "").toLowerCase(),
+        city,
+        gender,
+        age: Number(age) || null,
+        weight: Number(weight) || null,
+        height: Number(height) || null,
+        goals,
+        level,
+        freq,
+        flo_linked: !!floLinked,
+      }, { onConflict: "id" });
+      if (profileError) throw profileError;
+      saved = true;
     } catch (e) {
       console.error(e);
       toast.error("Nie udało się zapisać profilu w backendzie");
+      return;
     }
 
-    if (typeof window !== "undefined") {
+    if (saved && typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
       else localStorage.removeItem("gw_session_persist");
@@ -89,7 +93,7 @@ function Onboarding() {
       writeNutrition(n);
     }
     toast.success("Witaj w GymWrld!", { description: `Twoje dzienne zapotrzebowanie: ~${computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals }).kcal} kcal` });
-    navigate({ to: "/" });
+    navigate({ to: "/", replace: true });
   };
 
   const total = 7;
