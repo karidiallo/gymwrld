@@ -137,6 +137,17 @@ function Profil() {
           <Pencil className="h-3 w-3" /> Edytuj
         </button>
       </div>
+
+      {gender === "k" && <CycleSection floLinked={floLinked} onFloLink={() => {
+        try {
+          const rp = localStorage.getItem("gw_profile");
+          const p = rp ? JSON.parse(rp) : {};
+          localStorage.setItem("gw_profile", JSON.stringify({ ...p, floLinked: true }));
+          setFloLinked(true);
+          toast.success("Połączono z FLO 🌸");
+        } catch {}
+      }} />}
+
       <section className="rounded-3xl glass p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
