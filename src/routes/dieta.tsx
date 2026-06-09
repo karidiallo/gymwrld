@@ -392,7 +392,7 @@ function EditMealSheet({
   const [f, setF] = useState<number | "">(meal.f ?? "");
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4 flex items-center justify-between">
           <h3 className="font-display text-xl">Edytuj · {meal.name}</h3>
@@ -451,7 +451,7 @@ function AddMealSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (d: { na
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8 animate-in slide-in-from-bottom duration-300"
+        className="w-full max-w-[480px] rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28 animate-in slide-in-from-bottom duration-300"
       >
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4 flex items-center justify-between">
