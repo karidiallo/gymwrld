@@ -26,6 +26,7 @@ function Index() {
   const navigate = useNavigate();
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [profile, setProfile] = useState<{ name?: string; lvl?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -33,12 +34,16 @@ function Index() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (cancelled) return;
       if (!data.user) {
-        const onboarded = localStorage.getItem("gw_onboarded") === "1";
-        navigate({ to: onboarded ? "/auth" : "/welcome" });
+        navigate({ to: "/welcome", replace: true });
       } else {
         const cloudProfile = await ensureCloudProfile(data.user);
         await syncLocalState();
-        if (!cancelled && !isProfileComplete(cloudProfile)) navigate({ to: "/onboarding" });
+        if (cancelled) return;
+        if (!isProfileComplete(cloudProfile)) {
+          navigate({ to: "/onboarding", replace: true });
+        } else {
+          setAuthChecked(true);
+        }
       }
     });
     return () => { cancelled = true; };
@@ -87,6 +92,10 @@ function Index() {
       }),
     );
   };
+
+  if (!authChecked) {
+    return <main className="min-h-screen" aria-hidden />;
+  }
 
   return (
     <main className="px-5 pt-6">

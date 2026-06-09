@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy } from "lucide-react";
+import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy, Smartphone, Target, Zap, Moon } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
-import sanctuary from "@/assets/sanctuary.jpg";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
 import gymHero from "@/assets/gym-hero.jpg";
@@ -23,12 +22,12 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const FEATURES = [
-  { icon: Dumbbell, title: "Trening siłowy", desc: "Plany AI, log ciężarów, timer i analiza progresji.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
-  { icon: Apple, title: "Dieta & przepisy", desc: "Makra, posiłki i baza przepisów z opcją dodawania własnych.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
-  { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
-  { icon: Footprints, title: "Biegi & kroki", desc: "Maraton mode, kroki, kalorie i trasy wokół Ciebie.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
-  { icon: Heart, title: "Cykl & regeneracja", desc: "Tracker cyklu, sen, wymiary ciała i strefa regeneracji.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
-  { icon: Sparkles, title: "Awatar & poziomy", desc: "Twoja cyfrowa postać rośnie z każdym treningiem.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
+  { icon: Dumbbell, title: "Trening siłowy", desc: "Loguj serie, ciężary i powtórzenia. Statystyka Siła rośnie wraz z intensywnością — widzisz realny progres tydzień po tygodniu.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
+  { icon: Apple, title: "Dieta i przepisy", desc: "Twoje kcal i makro wyliczone z wagi, wzrostu i celu. Baza polskich przepisów + możliwość dodania własnego — zatwierdzimy go w aplikacji.", tint: "from-[var(--orange)]/40 to-[var(--lime)]/20" },
+  { icon: MapPin, title: "Street Workout", desc: "Mapa realnych parków kalistenicznych w Twoim mieście. Klikasz pin — przechodzisz do wizytówki Google z opiniami i nawigacją.", tint: "from-[var(--lime)]/40 to-[var(--violet)]/20" },
+  { icon: Footprints, title: "Biegi i kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
+  { icon: Heart, title: "Cykl i regeneracja", desc: "Tracker cyklu (połącz z FLO), pomiar snu, wymiary ciała i strefa reset. Plan dopasowuje intensywność do Twojej fazy.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
+  { icon: Sparkles, title: "Awatar i questy", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Codzienne questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
 ];
 
 const FAQ = [
@@ -48,12 +47,36 @@ function WelcomePage() {
   const logo = logoAsset.url;
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [scrolled, setScrolled] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const onPrompt = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
+    const onInstalled = () => setInstalled(true);
+    window.addEventListener("beforeinstallprompt", onPrompt as any);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("beforeinstallprompt", onPrompt as any);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
+
+  const installApp = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const r = await installPrompt.userChoice;
+      if (r.outcome === "accepted") setInstalled(true);
+      setInstallPrompt(null);
+      return;
+    }
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(isIos
+      ? "Na iPhone: otwórz w Safari → przycisk Udostępnij → Do ekranu początkowego."
+      : "Otwórz menu przeglądarki → Zainstaluj aplikację / Dodaj do ekranu głównego.");
+  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden text-foreground">
@@ -78,7 +101,7 @@ function WelcomePage() {
           </nav>
           <div className="flex items-center gap-3">
             <Link to="/auth" className="hidden text-[13px] text-muted-foreground hover:text-foreground sm:inline-block">Zaloguj</Link>
-            <Link to="/onboarding" className="rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-2 text-[13px] font-semibold text-background glow-primary">
+            <Link to="/auth" search={{ mode: "signup" } as any} className="rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-2 text-[13px] font-semibold text-background glow-primary">
               Zacznij
             </Link>
           </div>
@@ -96,16 +119,22 @@ function WelcomePage() {
               Buduj <span className="text-gradient">swoją</span><br />najlepszą wersję.
             </h1>
             <p className="mt-7 max-w-lg text-base text-muted-foreground md:text-lg">
-              Siłownia, dieta, kalistenika, biegi i cykl — w jednej premium apce. Z gamifikacją i awatarem, który rośnie razem z Tobą.
+              Siłownia, dieta, street workout, biegi i cykl — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Link to="/onboarding" className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
+              <Link to="/auth" search={{ mode: "signup" } as any} className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
                 Zacznij za darmo
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
               </Link>
               <Link to="/auth" className="inline-flex items-center gap-2 rounded-full glass px-7 py-4 text-sm font-medium text-foreground/85 hover:text-foreground">
                 Mam już konto
               </Link>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button onClick={installApp} disabled={installed} className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-xs font-medium text-foreground/85 hover:text-foreground disabled:opacity-50">
+                <Smartphone className="h-4 w-4" /> {installed ? "Zainstalowano ✓" : "Dodaj do ekranu głównego"}
+              </button>
+              <span className="text-[11px] text-muted-foreground">App Store i Google Play · wkrótce</span>
             </div>
             <p className="mt-5 text-xs text-muted-foreground">Bez karty · 7 dni Premium gratis · Anuluj kiedy chcesz</p>
 
@@ -121,23 +150,80 @@ function WelcomePage() {
             </div>
           </div>
 
-          {/* Hero device mock */}
+          {/* Hero stats / quest panel */}
           <div className="relative">
             <div aria-hidden className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-[var(--magenta)]/30 via-[var(--orange)]/20 to-[var(--lime)]/20 blur-3xl" />
-            <div className="relative mx-auto aspect-[9/19] w-full max-w-[320px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-[var(--surface)] shadow-2xl">
-              <img src={sanctuary} alt="" className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/10 to-background" />
-              <img src={avatarFemale} alt="" className="absolute bottom-0 left-1/2 h-[78%] -translate-x-1/2 object-contain" />
-              <div className="absolute inset-x-4 top-4 flex items-center justify-between">
-                <span className="rounded-full glass px-3 py-1 text-[10px] uppercase tracking-widest">Lvl 7</span>
-                <span className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[10px]"><Flame className="h-3 w-3 text-[var(--orange)]" /> 12 dni</span>
-              </div>
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl glass p-3">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Dzisiaj</p>
-                <p className="mt-0.5 text-sm font-semibold">Push · 45 min · +180 XP</p>
-                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+            <div className="relative mx-auto w-full max-w-[420px] space-y-3">
+              {/* Level card */}
+              <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[var(--surface)] to-background p-5 shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-background font-display text-lg">7</div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Twój poziom</p>
+                      <p className="font-display text-lg">Średniozaawansowany</p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full glass px-3 py-1.5 text-[11px]"><Flame className="h-3 w-3 text-[var(--orange)]" /> 12 dni z rzędu</span>
+                </div>
+                <div className="mt-4 flex items-baseline justify-between text-xs">
+                  <span className="text-muted-foreground">1 440 / 2 000 XP do Lvl 8</span>
+                  <span className="font-semibold text-foreground">72%</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full w-[72%] rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" />
                 </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon: Dumbbell, label: "Siła", v: 68, color: "var(--magenta)" },
+                  { icon: Footprints, label: "Kondycja", v: 54, color: "var(--orange)" },
+                  { icon: Moon, label: "Sen", v: 81, color: "var(--violet)" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-2xl border border-white/10 bg-[var(--surface)]/70 p-3.5">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <s.icon className="h-3.5 w-3.5" style={{ color: s.color }} />
+                      <span className="text-[10px] uppercase tracking-wider">{s.label}</span>
+                    </div>
+                    <p className="mt-2 font-display text-2xl">{s.v}<span className="text-xs text-muted-foreground">/100</span></p>
+                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/5">
+                      <div className="h-full rounded-full" style={{ width: `${s.v}%`, background: `linear-gradient(90deg, ${s.color}, var(--lime))` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Active quest */}
+              <div className="rounded-3xl border border-[var(--orange)]/30 bg-gradient-to-br from-[var(--magenta)]/15 via-[var(--orange)]/10 to-transparent p-5">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <Target className="h-3 w-3 text-[var(--lime)]" /> Quest dnia
+                  </span>
+                  <span className="rounded-full bg-[var(--lime)]/15 px-2.5 py-0.5 text-[10px] font-semibold text-[var(--lime)]">+180 XP</span>
+                </div>
+                <p className="mt-2 font-display text-lg leading-snug">Push: klatka, barki, triceps</p>
+                <p className="mt-1 text-xs text-muted-foreground">8 ćwiczeń · ~45 min · siłownia lub dom z gumami</p>
+                <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <Zap className="h-3.5 w-3.5 text-[var(--orange)]" />
+                  <span>+5 Siła · +1 Rozwój · streak +1</span>
+                </div>
+              </div>
+
+              {/* avatars peek */}
+              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[var(--surface)]/60 p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-3">
+                    <img src={avatarFemale} alt="" className="h-12 w-12 rounded-full object-cover ring-2 ring-background bg-[var(--surface)]" />
+                    <img src={avatarMale} alt="" className="h-12 w-12 rounded-full object-cover ring-2 ring-background bg-[var(--surface)]" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">Twój awatar rośnie z Tobą</p>
+                    <p className="text-[10px] text-muted-foreground">Kobieta · mężczyzna · non-binary</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
           </div>

@@ -73,6 +73,19 @@ function bumpStats(kind: TrainingKind, kcal = 0, minutes = 0) {
   } catch {}
 }
 
+function unbumpStats(kind: TrainingKind, kcal = 0, minutes = 0) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    const p = raw ? JSON.parse(raw) : {};
+    const s = p.stats ?? { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 };
+    const bump = scaledBump(kind, kcal, minutes);
+    for (const [k, v] of Object.entries(bump)) s[k] = Math.max(0, (s[k] ?? 0) - (v as number));
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...p, stats: s }));
+    window.dispatchEvent(new Event("gw_profile_update"));
+  } catch {}
+}
+
 export function readLogs(): TrainingLog[] {
   if (typeof window === "undefined") return [];
   try {
@@ -111,7 +124,14 @@ export function updateLog(id: string, patch: Partial<TrainingLog>) {
 }
 
 export function removeLog(id: string) {
-  writeLogs(readLogs().filter((l) => l.id !== id));
+  const logs = readLogs();
+  const target = logs.find((l) => l.id === id);
+  writeLogs(logs.filter((l) => l.id !== id));
+  if (target) {
+    const xpScale = Math.min(2.5, Math.max(0.6, (target.kcal / 100) * 0.5 + (target.minutes / 20) * 0.5));
+    awardXp(-Math.round((XP_PER_KIND[target.kind] ?? 30) * xpScale), `cofnij: ${target.title}`);
+    unbumpStats(target.kind, target.kcal, target.minutes);
+  }
 }
 
 export const KIND_COLOR: Record<TrainingKind, string> = {
