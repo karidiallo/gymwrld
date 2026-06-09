@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -15,6 +15,8 @@ function Profil() {
   const [customOpen, setCustomOpen] = useState(false);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
+  const [gender, setGender] = useState<string | null>(null);
+  const [floLinked, setFloLinked] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -37,6 +39,8 @@ function Profil() {
       if (rp) {
         const p = JSON.parse(rp);
         setIdentity({ name: p.name, nickname: p.nickname });
+        setGender(p.gender ?? null);
+        setFloLinked(!!p.floLinked);
         if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
         if (typeof p.streak === "number") setStats((s) => ({ ...s, streak: p.streak }));
       }
