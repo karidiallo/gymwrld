@@ -11,6 +11,41 @@ export type TrainingLog = {
 
 const KEY = "gw_training_log";
 const PROFILE_KEY = "gw_profile";
+const ACHV_KEY = "gw_achievements";
+
+/** Achievement definitions — must mirror /statystyki MEDALS list */
+const ACHIEVEMENTS: { id: string; title: string; xp: number; check: (logs: TrainingLog[], lvl: number) => boolean }[] = [
+  { id: "first",    title: "Pierwszy krok",     xp: 150, check: (l)    => l.length >= 1 },
+  { id: "ten",      title: "10 treningów",      xp: 300, check: (l)    => l.length >= 10 },
+  { id: "fifty",    title: "50 treningów",      xp: 800, check: (l)    => l.length >= 50 },
+  { id: "lvl5",     title: "Lvl 5",             xp: 250, check: (_, v) => v >= 5 },
+  { id: "lvl10",    title: "Lvl 10",            xp: 500, check: (_, v) => v >= 10 },
+  { id: "zen",      title: "Zen master",        xp: 400, check: (l)    => l.filter((x) => x.kind === "mind").length >= 30 },
+];
+
+function readUnlocked(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(ACHV_KEY) ?? "[]"); } catch { return []; }
+}
+
+function checkAchievements() {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    const p = raw ? JSON.parse(raw) : {};
+    const lvl = Number(p.lvl ?? 1);
+    const logs = readLogs();
+    const unlocked = new Set(readUnlocked());
+    for (const a of ACHIEVEMENTS) {
+      if (!unlocked.has(a.id) && a.check(logs, lvl)) {
+        unlocked.add(a.id);
+        awardXp(a.xp, `Osiągnięcie: ${a.title}`);
+        window.dispatchEvent(new CustomEvent("gw_achievement", { detail: { id: a.id, title: a.title, xp: a.xp } }));
+      }
+    }
+    localStorage.setItem(ACHV_KEY, JSON.stringify([...unlocked]));
+  } catch {}
+}
 
 /** Award XP to user profile, handle level up. Triggered by any training log. */
 export function awardXp(amount: number, reason?: string) {
@@ -116,6 +151,7 @@ export function addLog(log: Omit<TrainingLog, "id" | "ts"> & { ts?: number; id?:
   const xpScale = Math.min(2.5, Math.max(0.6, (next.kcal / 100) * 0.5 + (next.minutes / 20) * 0.5));
   awardXp(Math.round((XP_PER_KIND[next.kind] ?? 30) * xpScale));
   bumpStats(next.kind, next.kcal, next.minutes);
+  checkAchievements();
   return next;
 }
 
