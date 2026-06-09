@@ -251,7 +251,7 @@ export function AvatarCustomizer({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[94vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-8">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[480px] max-h-[94vh] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[var(--surface)] p-5 pb-28">
         <div className="mx-auto h-1 w-10 rounded-full bg-white/15" />
         <div className="mt-4">{content}</div>
       </div>
