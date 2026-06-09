@@ -489,6 +489,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     if (error) toast.error(error.message);
     else toast.success(`Link do resetu wysłany na ${email}`);
   };
+  const canNext = email.includes("@") && password.length >= 8;
   const continueWithEmail = async () => {
     if (!canNext) return;
     setBusy(true);
@@ -517,7 +518,6 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
       toast.error(e?.message?.includes("Email not confirmed") ? "Potwierdź najpierw e-mail aktywacyjny." : e?.message ?? "Nie udało się zalogować");
     } finally { setBusy(false); }
   };
-  const canNext = email.includes("@") && password.length >= 8;
   return (
     <div className="space-y-6">
       <div className="text-center">
