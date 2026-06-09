@@ -83,6 +83,14 @@ function Index() {
     { id: "q2", title: "Wypij 2.5 L wody", reward: "+60 XP", progress: 0.7, done: false },
     { id: "q3", title: "Osiągnij 10 000 kroków", reward: "+80 XP", progress: 0.78, done: false },
   ]);
+  const [recentLogs, setRecentLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const load = () => setRecentLogs(readLogs().slice(0, 3));
+    load();
+    window.addEventListener("gw_training_log_update", load);
+    return () => window.removeEventListener("gw_training_log_update", load);
+  }, []);
   const toggleQuest = (id: string) => {
     setQuests((qs) =>
       qs.map((q) => {
