@@ -428,8 +428,7 @@ function WelcomePage() {
         <div className="mx-auto max-w-6xl px-6 py-14">
           <div className="flex flex-col items-start gap-10 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="GymWRLD" className="h-16 w-auto md:h-20" />
-              <span className="font-display text-2xl tracking-tight">GymWRLD<span className="text-gradient">.</span></span>
+              <img src={logo} alt="GymWRLD" className="h-24 w-auto md:h-32" />
             </div>
             <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
               <Link to="/privacy" className="hover:text-foreground">Polityka prywatności</Link>
