@@ -162,13 +162,13 @@ function Profil() {
 
       {/* Quick settings: toggle cycle tracker + change avatar — always visible */}
       <section className="mt-5 grid grid-cols-2 gap-2">
-        <button
-          onClick={() => setCustomOpen(true)}
-          className="rounded-2xl glass p-3 text-left transition active:scale-[0.98]"
+        <Link
+          to="/ustawienia"
+          className="rounded-2xl glass p-3 text-left transition active:scale-[0.98] block"
         >
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Avatar</p>
-          <p className="mt-0.5 text-sm font-medium">Zmień wygląd ✨</p>
-        </button>
+          <p className="mt-0.5 text-sm font-medium">Zmień sylwetkę ✨</p>
+        </Link>
         <button
           onClick={() => {
             const next = !cycleEnabled;
