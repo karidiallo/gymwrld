@@ -209,6 +209,32 @@ function Biegi() {
         )}
       </div>
 
+      {/* Live GPS recorder */}
+      <div className="mt-3 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0e1a14] to-black p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.24em] text-[var(--lime)]">Live GPS</p>
+            <p className="mt-0.5 text-sm font-medium">{tracking ? "Nagrywam bieg…" : "Nagraj bieg z GPS"}</p>
+          </div>
+          {!tracking ? (
+            <button onClick={startTracking} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--lime)] px-3 py-1.5 text-[11px] font-semibold text-background">
+              <Play className="h-3 w-3" /> Start
+            </button>
+          ) : (
+            <button onClick={stopTracking} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--magenta)] px-3 py-1.5 text-[11px] font-semibold text-white">
+              <Square className="h-3 w-3" /> Stop
+            </button>
+          )}
+        </div>
+        {tracking && (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <Stat label="Dystans" value={`${trackKm.toFixed(2)} km`} />
+            <Stat label="Czas" value={`${Math.floor(trackSec/60)}:${String(trackSec%60).padStart(2,"0")}`} />
+            <Stat label="Pace" value={trackKm > 0.05 ? (() => { const p = (trackSec/60)/trackKm; const m = Math.floor(p); const s = Math.round((p-m)*60); return `${m}:${String(s).padStart(2,"0")}`; })() : "—"} />
+          </div>
+        )}
+      </div>
+
       {/* Map */}
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Mapa · {city.name}</h3>
