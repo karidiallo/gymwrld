@@ -45,8 +45,8 @@ const FAQ = [
 
 const PLANS = [
   { name: "Free", price: "0 zł", tag: "Na zawsze", features: ["Trening, dieta, biegi, mind health", "Mapa Street Workout", "Podstawowy awatar", "Statystyki tygodniowe", "1 pokój sanktuarium"], cta: "Zacznij za darmo", highlight: false, badge: null as string | null },
-  { name: "Pro", price: "9,99 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Skanowanie produktów", "Plany treningowe premium", "Zaawansowane statystyki i rekordy", "3 dodatkowe pokoje"], cta: "Wybierz Pro", highlight: true, badge: "Najpopularniejsze" },
-  { name: "Premium", price: "24,99 zł", tag: "/ miesiąc", features: ["Wszystko z Pro", "AI Coach 24/7", "Premium Deals (zniżki marek)", "Wszystkie pokoje + dekoracje", "Indywidualny plan AI"], cta: "Odblokuj Premium", highlight: false, badge: "VIP" },
+  { name: "Pro", price: "9,99 zł", tag: "/ miesiąc", features: ["Wszystko z Free", "Plany treningowe premium", "Przepisy premium", "Premium Deals (zniżki marek)", "Zaawansowane statystyki i rekordy", "3 dodatkowe pokoje"], cta: "Wybierz Pro", highlight: true, badge: "Najpopularniejsze" },
+  { name: "Premium", price: "24,99 zł", tag: "/ miesiąc", features: ["Wszystko z Pro", "Skanowanie produktów", "AI Coach 24/7", "Indywidualny plan treningowy AI", "Indywidualny plan żywieniowy AI", "Wszystkie pokoje + dekoracje"], cta: "Odblokuj Premium", highlight: false, badge: "VIP" },
 ];
 
 function WelcomePage() {
