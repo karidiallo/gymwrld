@@ -171,17 +171,13 @@ export const Route = createFileRoute("/przepisy")({
 function Przepisy() {
   const { id } = Route.useSearch();
   const navigate = useNavigate();
-  const [subscription, setSubscription] = useState<string>("free");
-  if (typeof window !== "undefined") {
-    // read once on render; cheap because localStorage
-  }
-  useMemo(() => {
-    if (typeof window === "undefined") return;
+  const [subscription] = useState<string>(() => {
+    if (typeof window === "undefined") return "free";
     try {
       const raw = localStorage.getItem("gw_profile");
-      if (raw) setSubscription(JSON.parse(raw).subscription ?? "free");
-    } catch {}
-  }, []);
+      return raw ? (JSON.parse(raw).subscription ?? "free") : "free";
+    } catch { return "free"; }
+  });
   const tierAllowed = (t?: "pro" | "premium") => {
     if (!t) return true;
     if (subscription === "premium") return true;
