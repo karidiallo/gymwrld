@@ -151,6 +151,7 @@ function Onboarding() {
             height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
             avatar={avatar} setAvatar={setAvatar}
+            cycleTracker={cycleTracker} setCycleTracker={setCycleTracker}
             onGenderPick={(g) => setGender(g)}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
