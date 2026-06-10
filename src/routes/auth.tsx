@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
@@ -20,20 +20,53 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [stayLogged, setStayLogged] = useState(true);
+  const [existing, setExisting] = useState<{ name?: string; email?: string; avatarUrl?: string } | null>(null);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (cancelled || !data.user) return;
-      const to = await getPostAuthDestination(data.user);
-      if (!cancelled) navigate({ to });
-    });
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+      const persist = typeof window !== "undefined" && localStorage.getItem("gw_session_persist") === "1";
+      if (data.user) {
+        if (!persist) {
+          // User opted out of "Remember me" — drop the session.
+          try { await supabase.auth.signOut(); } catch {}
+          setExisting(null);
+        } else {
+          const meta: any = data.user.user_metadata ?? {};
+          setExisting({
+            name: meta.full_name ?? meta.name ?? data.user.email?.split("@")[0],
+            email: data.user.email ?? undefined,
+            avatarUrl: meta.avatar_url ?? meta.picture,
+          });
+        }
+      }
+      setChecking(false);
+    })();
     return () => { cancelled = true; };
-  }, [navigate]);
+  }, []);
+
+  const continueAs = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
+  };
+
+  const switchAccount = async () => {
+    try { await supabase.auth.signOut(); } catch {}
+    if (typeof window !== "undefined") localStorage.removeItem("gw_session_persist");
+    setExisting(null);
+  };
 
   const signInGoogle = async () => {
     setBusy(true);
     try {
+      if (typeof window !== "undefined") {
+        if (stayLogged) localStorage.setItem("gw_session_persist", "1");
+        else localStorage.removeItem("gw_session_persist");
+      }
       const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
       if (r.error) {
         toast.error("Google: " + r.error.message);
@@ -49,6 +82,10 @@ function AuthPage() {
     if (!email.includes("@")) return toast.error("Podaj poprawny e-mail");
     setBusy(true);
     try {
+      if (typeof window !== "undefined") {
+        if (stayLogged) localStorage.setItem("gw_session_persist", "1");
+        else localStorage.removeItem("gw_session_persist");
+      }
       if (mode === "reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth?recovery=1`,
@@ -83,6 +120,52 @@ function AuthPage() {
       toast.error(msg.includes("Email not confirmed") ? "Najpierw potwierdź e-mail z wiadomości aktywacyjnej." : msg);
     } finally { setBusy(false); }
   };
+
+  if (checking) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-black text-white">
+        <img src={logoAsset.url} alt="GymWrld" className="w-32 animate-pulse" />
+      </main>
+    );
+  }
+
+  if (existing) {
+    const initials = (existing.name ?? existing.email ?? "?").slice(0, 1).toUpperCase();
+    return (
+      <main className="relative min-h-screen bg-black px-5 pt-10 pb-12 text-white">
+        <div className="mx-auto flex max-w-[420px] flex-col items-center pt-10">
+          <img src={logoAsset.url} alt="GymWrld" className="w-[40%] max-w-[180px]" />
+          <h1 className="mt-10 font-display text-2xl">Witaj z powrotem 👋</h1>
+          <p className="mt-1 text-center text-xs text-muted-foreground">Kontynuuj jako poprzednio zalogowane konto.</p>
+
+          <button
+            onClick={continueAs}
+            className="mt-8 flex w-full items-center gap-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 text-left transition active:scale-[0.99]"
+          >
+            {existing.avatarUrl ? (
+              <img src={existing.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
+            ) : (
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-lg font-semibold text-black">
+                {initials}
+              </div>
+            )}
+            <div className="flex-1">
+              <p className="text-sm font-semibold">{existing.name ?? "Twoje konto"}</p>
+              <p className="text-[11px] text-muted-foreground">{existing.email}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </button>
+
+          <button
+            onClick={switchAccount}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-transparent px-5 py-3 text-sm text-muted-foreground ring-1 ring-white/10 hover:text-white"
+          >
+            <LogOut className="h-4 w-4" /> Zaloguj się jako ktoś inny
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-screen bg-black px-5 pt-10 pb-12 text-white">
@@ -137,6 +220,17 @@ function AuthPage() {
           <button onClick={submit} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background disabled:opacity-50">
             {mode === "signin" ? "Zaloguj" : mode === "signup" ? "Utwórz konto" : "Wyślij link"} <ChevronRight className="h-4 w-4" />
           </button>
+          {mode !== "reset" && (
+            <label className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={stayLogged}
+                onChange={(e) => setStayLogged(e.target.checked)}
+                className="h-4 w-4 accent-[var(--lime)]"
+              />
+              Zapamiętaj mnie na tym urządzeniu
+            </label>
+          )}
         </div>
 
         <div className="mt-6 flex flex-col items-center gap-2 text-xs">

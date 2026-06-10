@@ -36,6 +36,9 @@ function Onboarding() {
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
   const [cycleTracker, setCycleTracker] = useState<boolean | null>(null);
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -84,8 +87,16 @@ function Onboarding() {
       localStorage.setItem("gw_onboarded", "1");
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
       else localStorage.removeItem("gw_session_persist");
+      // RODO art. 7 — wykazanie zgody (timestamp + wersja polityki).
+      localStorage.setItem("gw_consent", JSON.stringify({
+        privacy: consentPrivacy,
+        terms: consentTerms,
+        marketing: consentMarketing,
+        version: "2026-06-09",
+        ts: Date.now(),
+      }));
       localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
-      // Cycle tracker preference: women get it by default, NB only if they opted in.
+      // Cycle tracker preference: default ON for women, opt-in for NB; men get it OFF unless they opted in via NB visual.
       const wantsCycle = gender === "k" ? true : gender === "nb" ? !!cycleTracker : false;
       localStorage.setItem("gw_cycle_enabled", wantsCycle ? "1" : "0");
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
@@ -97,7 +108,7 @@ function Onboarding() {
     navigate({ to: "/", replace: true });
   };
 
-  const total = 7;
+  const total = 8;
   const progress = ((step + 1) / total) * 100;
 
   // First screen: pure black, huge logo only.
@@ -145,6 +156,14 @@ function Onboarding() {
           <StepName name={name} setName={setName} nickname={nickname} setNickname={setNickname} onNext={() => setStep(2)} />
         )}
         {step === 2 && (
+          <StepConsent
+            consentPrivacy={consentPrivacy} setConsentPrivacy={setConsentPrivacy}
+            consentTerms={consentTerms} setConsentTerms={setConsentTerms}
+            consentMarketing={consentMarketing} setConsentMarketing={setConsentMarketing}
+            onNext={() => setStep(3)}
+          />
+        )}
+        {step === 3 && (
           <StepPersonal
             age={age} setAge={setAge}
             weight={weight} setWeight={setWeight}
@@ -153,13 +172,13 @@ function Onboarding() {
             avatar={avatar} setAvatar={setAvatar}
             cycleTracker={cycleTracker} setCycleTracker={setCycleTracker}
             onGenderPick={(g) => setGender(g)}
-            onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
+            onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(4); }}
           />
         )}
-        {step === 3 && (
-          <StepCity city={city} setCity={setCity} onNext={() => setStep(4)} />
-        )}
         {step === 4 && (
+          <StepCity city={city} setCity={setCity} onNext={() => setStep(5)} />
+        )}
+        {step === 5 && (
           <StepMultiChoice
             title="Jaki masz cel?"
             subtitle="Możesz wybrać kilka — dopasujemy plan pod Twoje priorytety."
@@ -171,11 +190,11 @@ function Onboarding() {
             ]}
             values={goals}
             onToggle={(v) => setGoals((g) => g.includes(v as Goal) ? g.filter((x) => x !== v) : [...g, v as Goal])}
-            onNext={() => setStep(5)}
+            onNext={() => setStep(6)}
             canNext={goals.length > 0}
           />
         )}
-        {step === 5 && (
+        {step === 6 && (
           <StepChoice
             title="Twój poziom"
             subtitle="Zaczynamy od miejsca, w którym jesteś."
@@ -186,15 +205,89 @@ function Onboarding() {
             ]}
             value={level}
             onChange={(v) => setLevel(v as Level)}
-            onNext={() => setStep(6)}
+            onNext={() => setStep(7)}
             canNext={!!level}
           />
         )}
-        {step === 6 && (
+        {step === 7 && (
           <StepFreq freq={freq} setFreq={setFreq} onFinish={finish} />
         )}
       </section>
     </main>
+  );
+}
+
+function StepConsent({
+  consentPrivacy, setConsentPrivacy,
+  consentTerms, setConsentTerms,
+  consentMarketing, setConsentMarketing,
+  onNext,
+}: {
+  consentPrivacy: boolean; setConsentPrivacy: (v: boolean) => void;
+  consentTerms: boolean; setConsentTerms: (v: boolean) => void;
+  consentMarketing: boolean; setConsentMarketing: (v: boolean) => void;
+  onNext: () => void;
+}) {
+  const canNext = consentPrivacy && consentTerms;
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl leading-tight">Zanim ruszymy — <span className="text-gradient">krótka formalność</span></h1>
+        <p className="mt-2 text-sm text-muted-foreground">RODO i Apple/Google wymagają, abyś świadomie zaakceptował/a poniższe.</p>
+      </div>
+
+      <ConsentRow
+        checked={consentPrivacy}
+        onChange={setConsentPrivacy}
+        required
+        label={
+          <>Akceptuję <a href="/privacy" target="_blank" rel="noreferrer" className="text-[var(--lime)] underline">Politykę prywatności</a> (przetwarzanie danych zdrowotnych i treningowych zgodnie z RODO).</>
+        }
+      />
+      <ConsentRow
+        checked={consentTerms}
+        onChange={setConsentTerms}
+        required
+        label={
+          <>Akceptuję <a href="/privacy#regulamin" target="_blank" rel="noreferrer" className="text-[var(--lime)] underline">Regulamin</a> serwisu GymWrld.</>
+        }
+      />
+      <ConsentRow
+        checked={consentMarketing}
+        onChange={setConsentMarketing}
+        label={<>Chcę otrzymywać newsletter, motywacyjne pushe i promocje (możesz wycofać w dowolnej chwili).</>}
+      />
+
+      <p className="rounded-2xl bg-white/[0.03] p-3 text-[11px] leading-relaxed text-muted-foreground">
+        Klikając „Dalej” potwierdzasz, że masz co najmniej 13 lat oraz że zapoznałeś/aś się z polityką prywatności.
+        Twoje dane przechowujemy zaszyfrowane w UE (Supabase). Możesz w każdej chwili pobrać kopię lub usunąć konto z poziomu ustawień.
+      </p>
+
+      <button
+        onClick={onNext}
+        disabled={!canNext}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background glow-primary transition disabled:opacity-40"
+      >
+        Dalej <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function ConsentRow({ checked, onChange, label, required }: { checked: boolean; onChange: (v: boolean) => void; label: React.ReactNode; required?: boolean }) {
+  return (
+    <label className={`flex items-start gap-3 rounded-2xl p-3.5 transition cursor-pointer ${checked ? "bg-gradient-to-br from-[var(--lime)]/15 to-transparent ring-1 ring-[var(--lime)]/40" : "glass"}`}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--lime)]"
+      />
+      <span className="text-sm leading-snug">
+        {label}
+        {required && <span className="ml-1 text-[var(--magenta)]">*</span>}
+      </span>
+    </label>
   );
 }
 

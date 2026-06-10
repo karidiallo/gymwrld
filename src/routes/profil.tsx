@@ -16,6 +16,7 @@ function Profil() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [gender, setGender] = useState<string | null>(null);
+  const [cycleEnabled, setCycleEnabled] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -59,6 +60,9 @@ function Profil() {
       const rw = localStorage.getItem("gw_weight_log");
       if (rw) setWeightLog(JSON.parse(rw));
     } catch {}
+    try {
+      setCycleEnabled(localStorage.getItem("gw_cycle_enabled") === "1");
+    } catch {}
     const onUpd = () => {
       try {
         const rp = localStorage.getItem("gw_profile");
@@ -66,6 +70,9 @@ function Profil() {
           const p = JSON.parse(rp);
           if (p.stats) setStats((s) => ({ ...s, ...p.stats }));
         }
+      } catch {}
+      try {
+        setCycleEnabled(localStorage.getItem("gw_cycle_enabled") === "1");
       } catch {}
     };
     window.addEventListener("gw_profile_update", onUpd);
@@ -151,7 +158,32 @@ function Profil() {
         </div>
       </Link>
 
-      {(gender === "k" || gender === "nb") && <CycleSection />}
+      {cycleEnabled && <CycleSection />}
+
+      {/* Quick settings: toggle cycle tracker + change avatar — always visible */}
+      <section className="mt-5 grid grid-cols-2 gap-2">
+        <button
+          onClick={() => setCustomOpen(true)}
+          className="rounded-2xl glass p-3 text-left transition active:scale-[0.98]"
+        >
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Avatar</p>
+          <p className="mt-0.5 text-sm font-medium">Zmień wygląd ✨</p>
+        </button>
+        <button
+          onClick={() => {
+            const next = !cycleEnabled;
+            setCycleEnabled(next);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("gw_cycle_enabled", next ? "1" : "0");
+            }
+            toast.success(next ? "Tracker cyklu włączony" : "Tracker cyklu wyłączony");
+          }}
+          className="rounded-2xl glass p-3 text-left transition active:scale-[0.98]"
+        >
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Tracker cyklu</p>
+          <p className="mt-0.5 text-sm font-medium">{cycleEnabled ? "Włączony · wyłącz" : "Wyłączony · włącz"}</p>
+        </button>
+      </section>
 
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
