@@ -324,14 +324,7 @@ function BMIBar({ weight, height }: { weight: number; height: number }) {
   );
 }
 
-function ChipDup({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium">
-      {icon}
-      {label}
-    </span>
-  );
-}
+
 
 function SectionTitle({ title, action, actionTo }: { title: string; action?: string; actionTo?: string }) {
   return (
