@@ -110,12 +110,12 @@ function Trening() {
     outdoor: outdoorHero,
   };
   const heroTitles: Record<Cat, { eyebrow: string; main: string; sub: string }> = {
-    silownia: { eyebrow: "Następny trening", main: "Push Day", sub: "Klatka i barki" },
+    silownia: { eyebrow: "Polecany trening", main: "Push Day", sub: "Klatka i barki" },
     kobiety: { eyebrow: "Polecane dla Ciebie", main: "Glute Builder", sub: "Pośladki & nogi" },
-    redukcja: { eyebrow: "Spalanie tłuszczu", main: "HIIT Burn", sub: "25 min · max efekt" },
-    dom: { eyebrow: "Trening w domu", main: "Full Body", sub: "Bez sprzętu" },
-    kalistenika: { eyebrow: "Mistrzostwo ciała", main: "Push-Pull", sub: "Drążek i poręcze" },
-    outdoor: { eyebrow: "Na świeżym powietrzu", main: "Interwały", sub: "Bieganie 5×3 min" },
+    redukcja: { eyebrow: "Polecany trening", main: "HIIT Burn", sub: "25 min · max efekt" },
+    dom: { eyebrow: "Polecany trening", main: "Full Body", sub: "Bez sprzętu" },
+    kalistenika: { eyebrow: "Polecany trening", main: "Push-Pull", sub: "Drążek i poręcze" },
+    outdoor: { eyebrow: "Polecany trening", main: "Interwały", sub: "Bieganie 5×3 min" },
   };
   const hero = heroTitles[cat];
 
