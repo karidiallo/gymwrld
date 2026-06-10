@@ -271,6 +271,7 @@ function Profil() {
           <BodyStat label="Biceps" value={body.biceps ? `${body.biceps} cm` : "—"} />
           <BodyStat label="Udo" value={body.thigh ? `${body.thigh} cm` : "—"} />
         </div>
+        <ProfileBMI weight={body.weight} height={body.height} />
       </section>
 
       {/* Stats */}
