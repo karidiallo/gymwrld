@@ -73,6 +73,7 @@ const RECIPES: Recipe[] = [
     ingredients: ["1 banan", "1 łyżka masła orzechowego"],
     steps: ["Pokrój banana, posmaruj masłem."] },
   { id: "tofu-curry", title: "Tofu curry z kaszą", kcal: 510, time: 25, cat: "wege", tags: ["wege", "curry"], macro: { p: 28, c: 60, f: 16 }, emoji: "🍛",
+    tier: "pro",
     ingredients: ["200g tofu", "100g kaszy jaglanej", "Mleczko kokosowe", "Pasta curry", "Warzywa"],
     steps: ["Podsmaż tofu w paście curry.", "Dodaj warzywa i mleczko.", "Duś 10 min.", "Podaj z kaszą."] },
   { id: "wege-burger", title: "Wege burger z ciecierzycą", kcal: 460, time: 30, cat: "wege", tags: ["wege"], macro: { p: 22, c: 54, f: 14 }, emoji: "🍔",
@@ -97,6 +98,7 @@ const RECIPES: Recipe[] = [
     steps: ["Podsmaż warzywa.", "Dodaj soczewicę i bulion.", "Gotuj 20 min.", "Dolej mleczko, dopraw."] },
   // —— więcej białkowych
   { id: "wolowina-ryz", title: "Wołowina po orientalnu z ryżem", kcal: 580, time: 25, cat: "bialkowe", tags: ["bialkowe", "azjatycka"], macro: { p: 48, c: 60, f: 14 }, emoji: "🥩",
+    tier: "premium",
     ingredients: ["200g wołowiny", "100g ryżu", "Brokuł", "Sos sojowy, czosnek, imbir"],
     steps: ["Marynuj wołowinę 10 min.", "Smaż 5 min na woku.", "Dodaj warzywa.", "Podaj z ryżem."] },
   { id: "indyk-quinoa", title: "Indyk z quinoa i szpinakiem", kcal: 520, time: 22, cat: "bialkowe", tags: ["bialkowe"], macro: { p: 50, c: 50, f: 10 }, emoji: "🦃",
@@ -111,13 +113,16 @@ const RECIPES: Recipe[] = [
     steps: ["Pokrój pomidory i mozzarellę.", "Ułóż naprzemiennie.", "Skrop oliwą, posyp bazylią."] },
   // —— Azjatycka
   { id: "ramen-light", title: "Ramen z kurczakiem", kcal: 540, time: 25, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 62, f: 14 }, emoji: "🍜",
+    tier: "pro",
     ingredients: ["Makaron ramen", "150g kurczaka", "Bulion miso", "Jajko, szczypiorek, nori"],
     steps: ["Zagotuj bulion.", "Dodaj makaron.", "Włóż kurczaka i jajko.", "Posyp nori i szczypiorkiem."] },
   { id: "sushi-bowl", title: "Sushi bowl z łososiem", kcal: 580, time: 20, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 64, f: 18 }, emoji: "🍣",
+    tier: "premium",
     ingredients: ["150g surowego łososia", "100g ryżu sushi", "Awokado, ogórek, edamame", "Sojowa, sezam"],
     steps: ["Ugotuj ryż.", "Pokrój łososia.", "Złóż bowl z warzywami i sosem."] },
   // —— Meksykańska
   { id: "burrito-bowl", title: "Burrito bowl", kcal: 640, time: 20, cat: "obiady", tags: ["meksykanska"], macro: { p: 42, c: 72, f: 18 }, emoji: "🌯",
+    tier: "pro",
     ingredients: ["150g kurczaka", "Czarna fasola", "Ryż, kukurydza, salsa, guacamole"],
     steps: ["Smaż kurczaka z przyprawami Tex-Mex.", "Złóż bowl.", "Polej salsą i guacamole."] },
   { id: "tacos-fish", title: "Tacos z rybą", kcal: 480, time: 18, cat: "kolacje", tags: ["meksykanska"], macro: { p: 32, c: 48, f: 16 }, emoji: "🌮",
