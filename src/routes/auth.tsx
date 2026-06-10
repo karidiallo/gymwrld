@@ -63,6 +63,10 @@ function AuthPage() {
   const signInGoogle = async () => {
     setBusy(true);
     try {
+      if (typeof window !== "undefined") {
+        if (stayLogged) localStorage.setItem("gw_session_persist", "1");
+        else localStorage.removeItem("gw_session_persist");
+      }
       const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
       if (r.error) {
         toast.error("Google: " + r.error.message);
