@@ -607,3 +607,41 @@ function WeightSheet({ current, onClose, onSave }: { current: number; onClose: (
     </div>
   );
 }
+function ProfileBMI({ weight, height }: { weight: number; height: number }) {
+  if (!weight || !height) return null;
+  const h = height / 100;
+  const bmi = weight / (h * h);
+  const pct = Math.max(0, Math.min(100, ((bmi - 15) / 20) * 100));
+  const cat =
+    bmi < 18.5 ? { label: "Niedowaga", color: "text-[#60a5fa]" } :
+    bmi < 25   ? { label: "Norma",     color: "text-[var(--lime)]" } :
+    bmi < 30   ? { label: "Nadwaga",   color: "text-[var(--orange)]" } :
+                 { label: "Otyłość",   color: "text-[var(--magenta)]" };
+  return (
+    <div className="mt-4 rounded-2xl bg-white/[0.03] p-3">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="uppercase tracking-widest text-muted-foreground">BMI</span>
+        <span className="font-medium tabular-nums">
+          {bmi.toFixed(1)} <span className={cat.color}>· {cat.label}</span>
+        </span>
+      </div>
+      <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-full opacity-70"
+          style={{
+            background:
+              "linear-gradient(to right, #60a5fa 0%, #60a5fa 17.5%, #bef264 17.5%, #bef264 50%, #ff8c3c 50%, #ff8c3c 75%, #e94560 75%, #e94560 100%)",
+          }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 h-3.5 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+          style={{ left: `calc(${pct}% - 2px)` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between text-[9px] text-muted-foreground">
+        <span>15</span><span>18.5</span><span>25</span><span>30</span><span>35</span>
+      </div>
+    </div>
+  );
+}
