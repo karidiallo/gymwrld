@@ -17,7 +17,7 @@ import { Toaster } from "../components/ui/sonner";
 import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
-import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
+import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 
 function NotFoundComponent() {
   return (
@@ -154,6 +154,8 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
+        clearLocalAppState();
+        if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
         router.invalidate();
         return;
