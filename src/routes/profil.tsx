@@ -18,6 +18,7 @@ function Profil() {
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [gender, setGender] = useState<string | null>(null);
   const [cycleEnabled, setCycleEnabled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -64,6 +65,7 @@ function Profil() {
     try {
       setCycleEnabled(localStorage.getItem("gw_cycle_enabled") === "1");
     } catch {}
+    try { setPushEnabled(isPushEnabled()); } catch {}
     const onUpd = () => {
       try {
         const rp = localStorage.getItem("gw_profile");
