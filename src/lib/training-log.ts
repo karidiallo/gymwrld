@@ -6,6 +6,8 @@ export type TrainingLog = {
   kcal: number;
   minutes: number;
   ts: number;
+  rating?: number;
+  notes?: string;
   meta?: Record<string, string | number>;
 };
 
