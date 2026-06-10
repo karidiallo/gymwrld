@@ -157,10 +157,7 @@ function Trening() {
         <img src={heroes[cat]} alt="Trening" className="h-56 w-full object-cover" width={1280} height={896} loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
         <div className="absolute inset-x-5 bottom-5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[var(--lime)] to-[var(--orange)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background">
-            ★ Polecane na dziś
-          </span>
-          <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/70">{hero.eyebrow}</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">{hero.eyebrow}</p>
           <h2 className="mt-1 font-display text-3xl leading-none text-white">{hero.main}<br/><span className="text-gradient">{hero.sub}</span></h2>
           <div className="mt-3 flex gap-3 text-xs text-white/80">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Clock className="h-3 w-3" /> 55 min</span>
