@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet, ChevronRight } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -147,7 +147,7 @@ function Profil() {
             <p className="text-sm font-semibold leading-tight">Masz kontuzję?</p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">Sprawdź listę polecanych fizjoterapeutów w Twoim mieście.</p>
           </div>
-          <ChevronRightIcon />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
       </Link>
 
