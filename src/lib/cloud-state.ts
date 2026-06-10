@@ -19,6 +19,22 @@ const MODULE_KEYS = [
   ["nutrition", "gw_nutrition"],
 ] as const;
 
+const USER_TAG_KEY = "gw_last_user_id";
+const PRESERVE_KEYS = new Set(["gw_last_user_id", "gw_session_persist"]);
+
+/** Wipe all module localStorage keys (used on signout or on user-id mismatch). */
+export function clearLocalAppState() {
+  if (typeof window === "undefined") return;
+  const toRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("gw_") && !PRESERVE_KEYS.has(k)) toRemove.push(k);
+  }
+  for (const k of toRemove) localStorage.removeItem(k);
+  window.dispatchEvent(new Event("gw_profile_update"));
+  window.dispatchEvent(new Event("gw_training_log_update"));
+}
+
 export async function migrateLocalStateToCloud() {
   if (typeof window === "undefined") return;
   const { data: userData } = await supabase.auth.getUser();
@@ -43,6 +59,13 @@ export async function restoreCloudStateToLocal() {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
   if (!user) return;
+  // If signed-in user changed since last session, wipe stale local state
+  // BEFORE restoring cloud data — prevents data leak between accounts.
+  const lastUser = localStorage.getItem(USER_TAG_KEY);
+  if (lastUser !== user.id) {
+    clearLocalAppState();
+    localStorage.setItem(USER_TAG_KEY, user.id);
+  }
   const { data } = await supabase.from("user_app_state").select("module,payload");
   if (!data) return;
   for (const [module, key] of MODULE_KEYS) {
