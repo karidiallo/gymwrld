@@ -250,7 +250,7 @@ function StepName({
 
 
 function StepPersonal({
-  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick, avatar, setAvatar,
+  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick, avatar, setAvatar, cycleTracker, setCycleTracker,
 }: {
   age: number | ""; setAge: (v: number | "") => void;
   weight: number | ""; setWeight: (v: number | "") => void;
@@ -260,6 +260,7 @@ function StepPersonal({
   onGenderPick: (g: Gender) => void;
   avatar: AvatarConfig;
   setAvatar: (cb: (a: AvatarConfig) => AvatarConfig) => void;
+  cycleTracker: boolean | null; setCycleTracker: (v: boolean) => void;
 }) {
   const genders: { id: Gender; label: string; emoji: string }[] = [
     { id: "m", label: "Mężczyzna", emoji: "♂" },
@@ -268,7 +269,8 @@ function StepPersonal({
   ];
   const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender
     && !!weight && Number(weight) >= 30 && Number(weight) <= 250
-    && !!height && Number(height) >= 120 && Number(height) <= 230;
+    && !!height && Number(height) >= 120 && Number(height) <= 230
+    && (gender !== "nb" || cycleTracker !== null);
   const nbBase = avatar.nbBase ?? "m";
   return (
     <div className="space-y-6">
@@ -330,6 +332,23 @@ function StepPersonal({
             })}
           </div>
           <p className="mt-2 text-[10px] text-muted-foreground">Wybór jest tylko wizualny — możesz go zmienić w dowolnej chwili w profilu.</p>
+        </div>
+      )}
+
+      {gender === "nb" && (
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Tracker miesiączki</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setCycleTracker(true)}
+              className={`rounded-2xl p-3 text-sm font-medium transition ${cycleTracker === true ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}
+            >Tak, włącz</button>
+            <button
+              onClick={() => setCycleTracker(false)}
+              className={`rounded-2xl p-3 text-sm font-medium transition ${cycleTracker === false ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}
+            >Nie, pomiń</button>
+          </div>
+          <p className="mt-2 text-[10px] text-muted-foreground">Możesz to zmienić w dowolnej chwili w ustawieniach profilu.</p>
         </div>
       )}
 
