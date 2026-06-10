@@ -32,7 +32,12 @@ function Regeneracja() {
     try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_journal"); if (raw) setJournal(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_recovery"); if (raw) setSleep(JSON.parse(raw)); } catch {}
+    try { const raw = localStorage.getItem("gw_moods"); if (raw) setMoods(JSON.parse(raw)); } catch {}
   }, []);
+  const persistMoods = (next: number[]) => {
+    setMoods(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_moods", JSON.stringify(next));
+  };
   const persistSleep = (next: SleepEntry[]) => {
     setSleep(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_recovery", JSON.stringify(next));
@@ -231,7 +236,14 @@ function Regeneracja() {
         );
       })()}
 
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Nastrój</h3>
+      <div className="mb-3 mt-7 flex items-end justify-between">
+        <h3 className="text-lg font-semibold">Nastrój</h3>
+        {moods.length > 0 && (
+          <button onClick={() => { persistMoods([]); toast.success("Nastrój wyzerowany"); }} className="inline-flex items-center gap-1 rounded-full glass px-3 py-1 text-[11px]">
+            <Trash2 className="h-3 w-3" /> Wyzeruj
+          </button>
+        )}
+      </div>
       <div className="rounded-2xl glass p-4">
         <div className="flex items-center justify-between">
           <div>
@@ -254,7 +266,7 @@ function Regeneracja() {
             <button
               key={i}
               onClick={() => {
-                setMoods((m) => [...m.slice(-9), i + 1]);
+                persistMoods([...moods.slice(-9), i + 1]);
                 toast.success(`Nastrój zapisany ${e}`);
               }}
               className={`grid h-12 w-12 place-items-center rounded-full text-2xl transition hover:scale-110 ${
@@ -269,12 +281,22 @@ function Regeneracja() {
           <>
             <div className="mt-4 flex items-end gap-1 border-t border-white/5 pt-3">
               {moods.slice(-10).map((m, i) => (
-                <div key={i} className="flex-1">
-                  <div className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--lime)]" style={{ height: `${(m / 5) * 36 + 4}px` }} />
-                </div>
+                <button
+                  key={i}
+                  onClick={() => {
+                    const startIdx = Math.max(0, moods.length - 10);
+                    const absIdx = startIdx + i;
+                    persistMoods(moods.filter((_, j) => j !== absIdx));
+                    toast.success("Wpis nastroju usunięty");
+                  }}
+                  className="flex-1 group"
+                  aria-label="Usuń wpis nastroju"
+                >
+                  <div className="rounded-full bg-gradient-to-t from-[var(--magenta)] to-[var(--lime)] transition group-hover:opacity-60" style={{ height: `${(m / 5) * 36 + 4}px` }} />
+                </button>
               ))}
             </div>
-            <p className="mt-1 text-center text-[10px] text-muted-foreground">Trend nastroju</p>
+            <p className="mt-1 text-center text-[10px] text-muted-foreground">Trend nastroju · kliknij słupek, by usunąć</p>
           </>
         )}
       </div>

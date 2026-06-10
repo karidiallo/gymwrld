@@ -510,8 +510,10 @@ function CatBtn({ active, onClick, icon, label }: { active: boolean; onClick: ()
 function WeekView() {
   const days = ["Pn","Wt","Śr","Cz","Pt","Sb","Nd"];
   const today = new Date();
-  const dow = (today.getDay() + 6) % 7;
+  today.setHours(0,0,0,0);
+  const [weekOffset, setWeekOffset] = useState(0);
   const [logs, setLogs] = useState<TrainingLog[]>([]);
+  const [selected, setSelected] = useState<Date | null>(null);
   useEffect(() => {
     const refresh = () => setLogs(readLogs());
     refresh();
@@ -520,35 +522,79 @@ function WeekView() {
       return () => window.removeEventListener("gw_training_log_update", refresh);
     }
   }, []);
-  const start = new Date(today); start.setDate(today.getDate() - dow); start.setHours(0,0,0,0);
-  const byDay = new Map<number, Set<string>>();
+  const dowToday = (today.getDay() + 6) % 7;
+  const start = new Date(today);
+  start.setDate(today.getDate() - dowToday + weekOffset * 7);
+  start.setHours(0,0,0,0);
+  const byDay = new Map<number, TrainingLog[]>();
   logs.forEach((l) => {
     const t = new Date(l.ts);
     const diff = Math.floor((t.getTime() - start.getTime()) / 86400000);
     if (diff >= 0 && diff < 7) {
-      const s = byDay.get(diff) ?? new Set();
-      s.add(l.kind);
-      byDay.set(diff, s);
+      const arr = byDay.get(diff) ?? [];
+      arr.push(l);
+      byDay.set(diff, arr);
     }
   });
+  const rangeLabel = `${start.toLocaleDateString("pl-PL", { day: "2-digit", month: "short" })} – ${new Date(start.getTime() + 6 * 86400000).toLocaleDateString("pl-PL", { day: "2-digit", month: "short" })}`;
+  const selectedDayLogs = selected ? logs.filter((l) => {
+    const d = new Date(l.ts);
+    return d.getFullYear() === selected.getFullYear() && d.getMonth() === selected.getMonth() && d.getDate() === selected.getDate();
+  }) : [];
   return (
-    <div className="grid grid-cols-7 gap-2">
-      {days.map((d, i) => {
-        const date = new Date(start); date.setDate(start.getDate() + i);
-        const kinds = byDay.get(i);
-        const isToday = i === dow;
-        return (
-          <div key={d} className={`rounded-2xl p-2 text-center ${isToday ? "ring-1 ring-[var(--magenta)] bg-[var(--magenta)]/10" : "glass"}`}>
-            <p className="text-[10px] text-muted-foreground">{d}</p>
-            <p className="mt-0.5 text-sm font-semibold">{date.getDate()}</p>
-            <div className="mx-auto mt-2 flex h-7 items-center justify-center gap-0.5">
-              {kinds ? [...kinds].slice(0,3).map((k) => (
-                <span key={k} className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[k as keyof typeof KIND_COLOR] }} />
-              )) : <span className="h-1 w-1 rounded-full bg-white/10" />}
-            </div>
-          </div>
-        );
-      })}
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <button onClick={() => setWeekOffset((o) => o - 1)} className="rounded-full glass px-3 py-1 text-[11px]">‹ Poprzedni</button>
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{weekOffset === 0 ? "Bieżący tydzień" : weekOffset < 0 ? `${-weekOffset} tyg. temu` : `Za ${weekOffset} tyg.`}</p>
+          <p className="text-[11px] font-medium">{rangeLabel}</p>
+        </div>
+        <button onClick={() => setWeekOffset((o) => o + 1)} className="rounded-full glass px-3 py-1 text-[11px]">Następny ›</button>
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((d, i) => {
+          const date = new Date(start); date.setDate(start.getDate() + i);
+          const items = byDay.get(i);
+          const isToday = date.getTime() === today.getTime();
+          const isSel = selected && date.getTime() === selected.getTime();
+          const kinds = items ? Array.from(new Set(items.map((l) => l.kind))) : [];
+          return (
+            <button
+              key={d}
+              onClick={() => setSelected(isSel ? null : date)}
+              className={`rounded-2xl p-2 text-center transition ${isSel ? "ring-2 ring-[var(--lime)] bg-[var(--lime)]/10" : isToday ? "ring-1 ring-[var(--magenta)] bg-[var(--magenta)]/10" : "glass hover:bg-white/[0.04]"}`}
+            >
+              <p className="text-[10px] text-muted-foreground">{d}</p>
+              <p className="mt-0.5 text-sm font-semibold">{date.getDate()}</p>
+              <div className="mx-auto mt-2 flex h-7 items-center justify-center gap-0.5">
+                {kinds.length ? kinds.slice(0, 3).map((k) => (
+                  <span key={k} className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[k as keyof typeof KIND_COLOR] }} />
+                )) : <span className="h-1 w-1 rounded-full bg-white/10" />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {selected && (
+        <div className="mt-3 rounded-2xl glass p-3">
+          <p className="mb-2 text-[11px] uppercase tracking-widest text-muted-foreground">
+            {selected.toLocaleDateString("pl-PL", { weekday: "long", day: "2-digit", month: "long" })}
+          </p>
+          {selectedDayLogs.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Brak treningów tego dnia.</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {selectedDayLogs.map((l) => (
+                <li key={l.id} className="flex items-center gap-2 text-xs">
+                  <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[l.kind] }} />
+                  <span className="flex-1 truncate">{l.title}</span>
+                  <span className="text-muted-foreground">{l.minutes} min · {l.kcal} kcal</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

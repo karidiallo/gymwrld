@@ -24,7 +24,18 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
-  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(() => {
+    if (typeof window === "undefined") return DEFAULT_AVATAR;
+    try {
+      const raw = localStorage.getItem("gw_avatar");
+      const rp = localStorage.getItem("gw_profile");
+      const cur = raw ? JSON.parse(raw) : DEFAULT_AVATAR;
+      const prof = rp ? JSON.parse(rp) : {};
+      return { ...DEFAULT_AVATAR, ...cur, gender: prof.gender ?? cur.gender ?? "m" };
+    } catch {
+      return DEFAULT_AVATAR;
+    }
+  });
   const [viewerOpen, setViewerOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [profile, setProfile] = useState<{ name?: string; lvl?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
