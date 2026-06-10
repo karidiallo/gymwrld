@@ -24,6 +24,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as KrokiRouteImport } from './routes/kroki'
+import { Route as FizjoRouteImport } from './routes/fizjo'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
 import { Route as BiegiRouteImport } from './routes/biegi'
@@ -105,6 +106,11 @@ const KrokiRoute = KrokiRouteImport.update({
   path: '/kroki',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FizjoRoute = FizjoRouteImport.update({
+  id: '/fizjo',
+  path: '/fizjo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DietaRoute = DietaRouteImport.update({
   id: '/dieta',
   path: '/dieta',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/fizjo': typeof FizjoRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/fizjo': typeof FizjoRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/biegi': typeof BiegiRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
+  '/fizjo': typeof FizjoRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/fizjo'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/fizjo'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/biegi'
     | '/cwiczenia'
     | '/dieta'
+    | '/fizjo'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   BiegiRoute: typeof BiegiRoute
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
+  FizjoRoute: typeof FizjoRoute
   KrokiRoute: typeof KrokiRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
@@ -397,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KrokiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fizjo': {
+      id: '/fizjo'
+      path: '/fizjo'
+      fullPath: '/fizjo'
+      preLoaderRoute: typeof FizjoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dieta': {
       id: '/dieta'
       path: '/dieta'
@@ -441,6 +461,7 @@ const rootRouteChildren: RootRouteChildren = {
   BiegiRoute: BiegiRoute,
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
+  FizjoRoute: FizjoRoute,
   KrokiRoute: KrokiRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
