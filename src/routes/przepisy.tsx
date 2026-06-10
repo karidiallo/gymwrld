@@ -54,6 +54,7 @@ const RECIPES: Recipe[] = [
     ingredients: ["200g kurczaka", "100g ryżu", "150g brokułów", "Sojowa, czosnek, imbir"],
     steps: ["Marynuj kurczaka w sojowej z czosnkiem.", "Smaż na patelni 8 min.", "Ryż ugotuj.", "Brokuły na parze.", "Złóż danie."] },
   { id: "losos-batat", title: "Łosoś z batatem", kcal: 580, time: 30, cat: "obiady", tags: ["omega-3"], macro: { p: 42, c: 56, f: 18 }, emoji: "🐟",
+    tier: "pro",
     ingredients: ["180g łososia", "1 batat", "Szpinak", "Cytryna, koper"],
     steps: ["Batat piecz 25 min w 200°C.", "Łosoś smaż 4 min z każdej strony.", "Szpinak podduś.", "Podaj z cytryną."] },
   { id: "sałatka-tunczyk", title: "Sałatka z tuńczykiem", kcal: 340, time: 8, cat: "kolacje", tags: ["light", "szybkie"], macro: { p: 32, c: 18, f: 16 }, emoji: "🥗",
