@@ -756,15 +756,57 @@ function MonthView() {
 }
 
 function DayView() {
+  const [logs, setLogs] = useState<TrainingLog[]>([]);
+  useEffect(() => {
+    const refresh = () => setLogs(readLogs());
+    refresh();
+    if (typeof window !== "undefined") {
+      window.addEventListener("gw_training_log_update", refresh);
+      return () => window.removeEventListener("gw_training_log_update", refresh);
+    }
+  }, []);
+  const today = new Date();
+  const todays = logs.filter((l) => {
+    const d = new Date(l.ts);
+    return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+  });
+  const totalMin = todays.reduce((s, l) => s + l.minutes, 0);
+  const totalKcal = todays.reduce((s, l) => s + l.kcal, 0);
   return (
     <div className="space-y-2.5">
+      {/* Recommended for today — distinct accent, no extra flag */}
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--lime)]/30 bg-gradient-to-br from-[var(--lime)]/15 via-[var(--orange)]/10 to-transparent p-3.5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--lime)]">Polecany trening</p>
+        <p className="mt-1 font-display text-base leading-tight">Push Day · Klatka i barki</p>
+        <p className="text-[11px] text-muted-foreground">Siłownia · ~55 min · ~412 kcal</p>
+      </div>
+
+      {/* Today's summary */}
       <div className="flex items-center gap-3 rounded-2xl glass p-3.5">
         <Calendar className="h-4 w-4 text-primary" />
         <div className="flex-1">
-          <p className="text-sm font-medium">Push Day · 18:30</p>
-          <p className="text-xs text-muted-foreground">Siłownia · 55 min</p>
+          <p className="text-sm font-medium">
+            {today.toLocaleDateString("pl-PL", { weekday: "long", day: "2-digit", month: "long" })}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {todays.length === 0 ? "Brak zalogowanych sesji" : `${todays.length} sesji · ${totalMin} min · ${totalKcal} kcal`}
+          </p>
         </div>
       </div>
+
+      {/* Today's logs (treningi, bieżnia, biegi, street, mind, sen) */}
+      {todays.length > 0 ? (
+        <div className="rounded-2xl glass p-3">
+          <p className="mb-2 text-[11px] uppercase tracking-widest text-muted-foreground">Dzisiaj</p>
+          <ul className="space-y-1.5">
+            {todays.map((l) => <LogRow key={l.id} log={l} />)}
+          </ul>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-white/10 p-4 text-center text-xs text-muted-foreground">
+          Zaloguj bieżnię, bieg lub trening — pojawi się tutaj automatycznie
+        </div>
+      )}
     </div>
   );
 }
