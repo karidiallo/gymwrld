@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, User, Mail, Crown, LogOut, Bell, Lock, Trash2, Sparkles, Smartphone } from "lucide-react";
+import { ChevronLeft, User, Mail, Crown, LogOut, Bell, Lock, Trash2, Sparkles, Smartphone, UserCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 
 export const Route = createFileRoute("/ustawienia")({
   head: () => ({ meta: [{ title: "Ustawienia — GymWrld" }] }),
@@ -15,12 +16,17 @@ function Ustawienia() {
   const navigate = useNavigate();
   const [p, setP] = useState<Profile>({});
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const raw = localStorage.getItem("gw_profile");
       if (raw) setP(JSON.parse(raw));
+    } catch {}
+    try {
+      const ra = localStorage.getItem("gw_avatar");
+      if (ra) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(ra) });
     } catch {}
   }, []);
 
@@ -55,6 +61,21 @@ function Ustawienia() {
   const subLabel = p.subscription === "premium" ? "Premium" : p.subscription === "pro" ? "Pro" : "Free";
   const subColor = p.subscription === "premium" ? "from-[#dc2626] to-[#7a1a1a]" : p.subscription === "pro" ? "from-[var(--magenta)] to-[var(--orange)]" : "from-white/10 to-white/5";
 
+  const swapAvatar = (g: "m" | "k") => {
+    const next = { ...avatarCfg, gender: g, nbBase: g };
+    setAvatarCfg(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gw_avatar", JSON.stringify(next));
+      // also keep profile gender in sync so hero matches
+      try {
+        const cur = JSON.parse(localStorage.getItem("gw_profile") ?? "{}");
+        localStorage.setItem("gw_profile", JSON.stringify({ ...cur, gender: g }));
+      } catch {}
+      window.dispatchEvent(new Event("gw_profile_update"));
+    }
+    toast.success(g === "k" ? "Avatar: sylwetka żeńska" : "Avatar: sylwetka męska");
+  };
+
   return (
     <main className="px-5 pt-6 pb-32">
       <header className="flex items-center gap-3">
@@ -70,6 +91,35 @@ function Ustawienia() {
         <Field icon={<User className="h-4 w-4" />} label="Imię" value={p.name ?? ""} onChange={(v) => save({ ...p, name: v })} placeholder="Twoje imię" />
         <Field icon={<Sparkles className="h-4 w-4" />} label="Nick (@)" value={p.nickname ?? ""} onChange={(v) => save({ ...p, nickname: v.replace(/[^a-zA-Z0-9_]/g, "") })} placeholder="np. aleks" />
         <Field icon={<Mail className="h-4 w-4" />} label="E-mail" value={p.email ?? ""} onChange={(v) => save({ ...p, email: v })} placeholder="ty@email.com" />
+      </section>
+
+      <section className="mt-6">
+        <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Sylwetka avatara</h3>
+        <div className="rounded-2xl glass p-3">
+          <p className="text-[11px] text-muted-foreground">
+            Wybierz wygląd swojej postaci. Możesz zmienić w dowolnej chwili.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {(["m","k"] as const).map((g) => {
+              const active = (avatarCfg.gender === "nb" ? avatarCfg.nbBase : avatarCfg.gender) === g;
+              return (
+                <button
+                  key={g}
+                  onClick={() => swapAvatar(g)}
+                  className={`flex flex-col items-center gap-1 overflow-hidden rounded-2xl p-3 transition active:scale-[0.98] ${active ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "bg-white/[0.03] hover:bg-white/[0.06]"}`}
+                >
+                  <img
+                    src={getAvatarImageFor(g, avatarCfg.body, g)}
+                    alt={g === "m" ? "Sylwetka męska" : "Sylwetka żeńska"}
+                    className="h-28 object-contain"
+                    style={{ filter: skinFilter(avatarCfg.skinTone) }}
+                  />
+                  <span className="text-xs font-medium">{g === "m" ? "Mężczyzna" : "Kobieta"}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       <section className="mt-6">

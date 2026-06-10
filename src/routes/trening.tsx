@@ -9,7 +9,7 @@ import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
-import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
+import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
 import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
@@ -110,12 +110,12 @@ function Trening() {
     outdoor: outdoorHero,
   };
   const heroTitles: Record<Cat, { eyebrow: string; main: string; sub: string }> = {
-    silownia: { eyebrow: "Następny trening", main: "Push Day", sub: "Klatka i barki" },
+    silownia: { eyebrow: "Polecany trening", main: "Push Day", sub: "Klatka i barki" },
     kobiety: { eyebrow: "Polecane dla Ciebie", main: "Glute Builder", sub: "Pośladki & nogi" },
-    redukcja: { eyebrow: "Spalanie tłuszczu", main: "HIIT Burn", sub: "25 min · max efekt" },
-    dom: { eyebrow: "Trening w domu", main: "Full Body", sub: "Bez sprzętu" },
-    kalistenika: { eyebrow: "Mistrzostwo ciała", main: "Push-Pull", sub: "Drążek i poręcze" },
-    outdoor: { eyebrow: "Na świeżym powietrzu", main: "Interwały", sub: "Bieganie 5×3 min" },
+    redukcja: { eyebrow: "Polecany trening", main: "HIIT Burn", sub: "25 min · max efekt" },
+    dom: { eyebrow: "Polecany trening", main: "Full Body", sub: "Bez sprzętu" },
+    kalistenika: { eyebrow: "Polecany trening", main: "Push-Pull", sub: "Drążek i poręcze" },
+    outdoor: { eyebrow: "Polecany trening", main: "Interwały", sub: "Bieganie 5×3 min" },
   };
   const hero = heroTitles[cat];
 
@@ -585,11 +585,7 @@ function WeekView() {
           ) : (
             <ul className="space-y-1.5">
               {selectedDayLogs.map((l) => (
-                <li key={l.id} className="flex items-center gap-2 text-xs">
-                  <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[l.kind] }} />
-                  <span className="flex-1 truncate">{l.title}</span>
-                  <span className="text-muted-foreground">{l.minutes} min · {l.kcal} kcal</span>
-                </li>
+                <LogRow key={l.id} log={l} />
               ))}
             </ul>
           )}
@@ -599,14 +595,65 @@ function WeekView() {
   );
 }
 
+function LogRow({ log }: { log: TrainingLog }) {
+  const [editing, setEditing] = useState(false);
+  const [minutes, setMinutes] = useState(log.minutes);
+  const [kcal, setKcal] = useState(log.kcal);
+  const [title, setTitle] = useState(log.title);
+  if (editing) {
+    return (
+      <li className="rounded-xl bg-white/[0.04] p-2">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded bg-white/5 px-2 py-1 text-xs outline-none" />
+        <div className="mt-1.5 grid grid-cols-2 gap-1.5 text-[11px]">
+          <label className="flex items-center gap-1 rounded bg-white/5 px-2 py-1"><span className="text-muted-foreground">min</span>
+            <input type="number" value={minutes} onChange={(e) => setMinutes(parseInt(e.target.value) || 0)} className="flex-1 w-12 bg-transparent text-right outline-none" />
+          </label>
+          <label className="flex items-center gap-1 rounded bg-white/5 px-2 py-1"><span className="text-muted-foreground">kcal</span>
+            <input type="number" value={kcal} onChange={(e) => setKcal(parseInt(e.target.value) || 0)} className="flex-1 w-12 bg-transparent text-right outline-none" />
+          </label>
+        </div>
+        <div className="mt-1.5 flex gap-1.5">
+          <button onClick={() => { updateLog(log.id, { minutes, kcal, title }); setEditing(false); toast.success("Zaktualizowano"); }} className="flex-1 rounded bg-[var(--lime)] px-2 py-1 text-[11px] font-semibold text-background">Zapisz</button>
+          <button onClick={() => setEditing(false)} className="rounded bg-white/5 px-2 py-1 text-[11px]">Anuluj</button>
+        </div>
+      </li>
+    );
+  }
+  return (
+    <li className="flex items-center gap-2 text-xs">
+      <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[log.kind] }} />
+      <span className="flex-1 truncate">{log.title}</span>
+      <span className="text-muted-foreground">{log.minutes} min · {log.kcal} kcal</span>
+      <button onClick={() => setEditing(true)} title="Edytuj" className="grid h-6 w-6 place-items-center rounded-full bg-white/5 hover:bg-white/10">
+        <Pencil className="h-3 w-3" />
+      </button>
+      <button
+        onClick={() => {
+          if (!confirm(`Usunąć "${log.title}"?`)) return;
+          removeLog(log.id);
+          toast.success("Wpis usunięty");
+        }}
+        title="Usuń"
+        className="grid h-6 w-6 place-items-center rounded-full bg-red-500/10 text-red-300 hover:bg-red-500/20"
+      >
+        <Trash2 className="h-3 w-3" />
+      </button>
+    </li>
+  );
+}
+
 function MonthView() {
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  today.setHours(0, 0, 0, 0);
+  const [offset, setOffset] = useState(0);
+  const cursor = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // Monday-first
-  const monthName = today.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
+  const monthName = cursor.toLocaleDateString("pl-PL", { month: "long", year: "numeric" });
   const [logs, setLogs] = useState<TrainingLog[]>([]);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   useEffect(() => {
     const refresh = () => setLogs(readLogs());
     refresh();
@@ -629,9 +676,20 @@ function MonthView() {
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
+  const dayLogs = selectedDay
+    ? logs.filter((l) => {
+        const d = new Date(l.ts);
+        return d.getFullYear() === year && d.getMonth() === month && d.getDate() === selectedDay;
+      })
+    : [];
+
   return (
     <div className="rounded-2xl glass p-4">
-      <p className="mb-3 text-center font-display text-sm capitalize">{monthName}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <button onClick={() => setOffset((o) => o - 1)} className="rounded-full glass px-3 py-1 text-[11px]">‹</button>
+        <p className="font-display text-sm capitalize">{monthName}</p>
+        <button onClick={() => setOffset((o) => o + 1)} className="rounded-full glass px-3 py-1 text-[11px]">›</button>
+      </div>
       <div className="mb-1.5 grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
         {["Pn","Wt","Śr","Cz","Pt","Sb","Nd"].map((d) => <span key={d}>{d}</span>)}
       </div>
@@ -639,12 +697,18 @@ function MonthView() {
         {cells.map((d, i) => {
           if (d === null) return <span key={`e${i}`} />;
           const kinds = byDay.get(d);
-          const isToday = d === today.getDate();
+          const isToday = offset === 0 && d === today.getDate();
+          const isSel = d === selectedDay;
           return (
-            <div
+            <button
               key={d}
-              className={`relative aspect-square rounded-lg flex flex-col items-center justify-center text-xs ${
-                isToday ? "ring-1 ring-[var(--magenta)] bg-[var(--magenta)]/10" : "bg-white/[0.03]"
+              onClick={() => setSelectedDay(isSel ? null : d)}
+              className={`relative aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition active:scale-[0.95] ${
+                isSel
+                  ? "ring-2 ring-[var(--lime)] bg-[var(--lime)]/15"
+                  : isToday
+                  ? "ring-1 ring-[var(--magenta)] bg-[var(--magenta)]/10"
+                  : "bg-white/[0.03] hover:bg-white/[0.07]"
               }`}
             >
               <span className={isToday ? "font-semibold" : "text-foreground/80"}>{d}</span>
@@ -655,10 +719,24 @@ function MonthView() {
                   ))}
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
+      {selectedDay && (
+        <div className="mt-3 rounded-xl bg-white/[0.03] p-3">
+          <p className="mb-2 text-[11px] uppercase tracking-widest text-muted-foreground">
+            {new Date(year, month, selectedDay).toLocaleDateString("pl-PL", { weekday: "long", day: "2-digit", month: "long" })}
+          </p>
+          {dayLogs.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Brak treningów tego dnia.</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {dayLogs.map((l) => <LogRow key={l.id} log={l} />)}
+            </ul>
+          )}
+        </div>
+      )}
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
         {(["silownia","biezia","bieg","street","mind","sen"] as const).map((k) => (
           <span key={k} className="inline-flex items-center gap-1">

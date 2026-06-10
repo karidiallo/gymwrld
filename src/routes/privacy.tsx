@@ -33,8 +33,15 @@ function PrivacyPage() {
 
         <div className="mt-12 space-y-8 text-[15px] leading-relaxed text-white/75">
           <section>
-            <h2 className="font-display text-xl text-white">1. Kim jesteśmy</h2>
-            <p className="mt-2">GymWrld („my”, „nas”) to aplikacja do śledzenia treningu, diety, biegów, cyklu menstruacyjnego i regeneracji. Niniejszy dokument opisuje, jakie dane zbieramy, w jakim celu i jak je chronimy.</p>
+            <h2 className="font-display text-xl text-white">1. Administrator danych</h2>
+            <p className="mt-2">Administratorem danych osobowych jest:</p>
+            <div className="mt-3 rounded-2xl bg-white/[0.04] p-4 text-sm">
+              <p className="font-semibold text-white">VVG Kari Diallo</p>
+              <p className="mt-1 text-white/70">ul. Lukrecjusza 4<br/>60-461 Poznań, Polska</p>
+              <p className="mt-2 text-white/70">NIP: 7812081765 · REGON: 540506780</p>
+              <p className="mt-2 text-white/70">Kontakt: <a href="mailto:info@gymwrld.com" className="text-white underline-offset-4 hover:underline">info@gymwrld.com</a></p>
+            </div>
+            <p className="mt-3">GymWrld („my”, „nas”) to aplikacja do śledzenia treningu, diety, biegów, cyklu menstruacyjnego i regeneracji. Niniejszy dokument opisuje, jakie dane zbieramy, w jakim celu i jak je chronimy.</p>
           </section>
 
           <section>
@@ -70,7 +77,7 @@ function PrivacyPage() {
 
           <section>
             <h2 className="font-display text-xl text-white">7. Kontakt</h2>
-            <p className="mt-2">Pytania dotyczące prywatności kieruj na <a className="text-white underline-offset-4 hover:underline" href="mailto:privacy@gymwrld.com">privacy@gymwrld.com</a>.</p>
+            <p className="mt-2">Pytania dotyczące prywatności kieruj na <a className="text-white underline-offset-4 hover:underline" href="mailto:info@gymwrld.com">info@gymwrld.com</a>.</p>
           </section>
         </div>
 

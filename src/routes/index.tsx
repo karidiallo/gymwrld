@@ -39,6 +39,7 @@ function Index() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [profile, setProfile] = useState<{ name?: string; lvl?: number; xp?: number; streak?: number; stats?: { sila: number; kondycja: number; dieta: number; sen: number; rozwoj: number } }>({});
+  const [body, setBody] = useState<{ weight: number; height: number }>({ weight: 0, height: 0 });
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
@@ -70,6 +71,13 @@ function Index() {
         if (raw) {
           const p = JSON.parse(raw);
           setProfile({ name: p.name, lvl: p.lvl, xp: p.xp, streak: p.streak, stats: p.stats });
+        }
+      } catch {}
+      try {
+        const rb = localStorage.getItem("gw_body");
+        if (rb) {
+          const b = JSON.parse(rb);
+          setBody({ weight: Number(b.weight) || 0, height: Number(b.height) || 0 });
         }
       } catch {}
     };
@@ -188,6 +196,7 @@ function Index() {
               <div className="mt-1.5 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]" style={{ width: `${Math.min(100, ((profile.xp ?? 0) / 2000) * 100)}%` }} />
               </div>
+              <BMIBar weight={body.weight} height={body.height} />
             </div>
             <button
               onClick={() => setViewerOpen(true)}
@@ -277,6 +286,45 @@ function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
     </span>
   );
 }
+
+function BMIBar({ weight, height }: { weight: number; height: number }) {
+  if (!weight || !height) return null;
+  const h = height / 100;
+  const bmi = weight / (h * h);
+  // Map BMI 15–35 to 0–100% on the bar
+  const pct = Math.max(0, Math.min(100, ((bmi - 15) / 20) * 100));
+  const cat =
+    bmi < 18.5 ? { label: "Niedowaga", color: "text-[var(--cyan,#60a5fa)]" } :
+    bmi < 25   ? { label: "Norma",     color: "text-[var(--lime)]" } :
+    bmi < 30   ? { label: "Nadwaga",   color: "text-[var(--orange)]" } :
+                 { label: "Otyłość",   color: "text-[var(--magenta)]" };
+  return (
+    <div className="mt-2">
+      <div className="flex items-center justify-between text-[10px]">
+        <span className="uppercase tracking-wider text-muted-foreground">BMI</span>
+        <span className="font-medium tabular-nums">
+          {bmi.toFixed(1)} <span className={`${cat.color}`}>· {cat.label}</span>
+        </span>
+      </div>
+      <div className="relative mt-1 h-1.5 w-32 overflow-hidden rounded-full bg-white/10">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-full opacity-70"
+          style={{
+            background:
+              "linear-gradient(to right, #60a5fa 0%, #60a5fa 17.5%, #bef264 17.5%, #bef264 50%, #ff8c3c 50%, #ff8c3c 75%, #e94560 75%, #e94560 100%)",
+          }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 h-3 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+          style={{ left: `calc(${pct}% - 2px)` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+
 
 function SectionTitle({ title, action, actionTo }: { title: string; action?: string; actionTo?: string }) {
   return (

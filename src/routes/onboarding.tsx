@@ -233,7 +233,7 @@ function StepConsent({
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl leading-tight">Zanim ruszymy — <span className="text-gradient">krótka formalność</span></h1>
-        <p className="mt-2 text-sm text-muted-foreground">RODO i Apple/Google wymagają, abyś świadomie zaakceptował/a poniższe.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Twoje dane są bezpieczne. Zaznacz, że się z tym zgadzasz — zajmie to chwilę.</p>
       </div>
 
       <ConsentRow
@@ -255,12 +255,12 @@ function StepConsent({
       <ConsentRow
         checked={consentMarketing}
         onChange={setConsentMarketing}
-        label={<>Chcę otrzymywać newsletter, motywacyjne pushe i promocje (możesz wycofać w dowolnej chwili).</>}
+        label={<>Chcę otrzymywać newsletter i promocje (możesz wycofać w dowolnej chwili).</>}
       />
 
       <p className="rounded-2xl bg-white/[0.03] p-3 text-[11px] leading-relaxed text-muted-foreground">
         Klikając „Dalej” potwierdzasz, że masz co najmniej 13 lat oraz że zapoznałeś/aś się z polityką prywatności.
-        Twoje dane przechowujemy zaszyfrowane w UE (Supabase). Możesz w każdej chwili pobrać kopię lub usunąć konto z poziomu ustawień.
+        Twoje dane przechowujemy zaszyfrowane w UE. Możesz w każdej chwili pobrać kopię lub usunąć konto z poziomu ustawień.
       </p>
 
       <button
@@ -276,18 +276,30 @@ function StepConsent({
 
 function ConsentRow({ checked, onChange, label, required }: { checked: boolean; onChange: (v: boolean) => void; label: React.ReactNode; required?: boolean }) {
   return (
-    <label className={`flex items-start gap-3 rounded-2xl p-3.5 transition cursor-pointer ${checked ? "bg-gradient-to-br from-[var(--lime)]/15 to-transparent ring-1 ring-[var(--lime)]/40" : "glass"}`}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--lime)]"
-      />
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`group flex w-full items-start gap-3 rounded-2xl p-4 text-left transition-all duration-200 active:scale-[0.99] ${
+        checked
+          ? "bg-gradient-to-br from-[var(--lime)]/20 via-[var(--lime)]/5 to-transparent ring-1 ring-[var(--lime)]/60 shadow-[0_0_24px_rgba(190,242,100,0.15)]"
+          : "glass hover:bg-white/[0.06]"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg transition-all duration-200 ${
+          checked
+            ? "bg-gradient-to-br from-[var(--lime)] to-[var(--orange)] text-background scale-110"
+            : "bg-white/5 ring-1 ring-white/15 text-transparent group-hover:ring-white/30"
+        }`}
+      >
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+      </span>
       <span className="text-sm leading-snug">
         {label}
         {required && <span className="ml-1 text-[var(--magenta)]">*</span>}
       </span>
-    </label>
+    </button>
   );
 }
 
