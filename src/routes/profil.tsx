@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet, ChevronRight } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
+import { enablePushNotifications, isPushEnabled } from "@/lib/push";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Profil — GymWrld" }] }),
