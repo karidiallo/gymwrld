@@ -266,6 +266,7 @@ function Dieta() {
         <ToiletCard label="Siku" emoji="💧" value={toilet.pee} onAdd={() => setToilet((t) => ({ ...t, pee: t.pee + 1 }))} onSub={() => setToilet((t) => ({ ...t, pee: Math.max(0, t.pee - 1) }))} hint="Norma 4-7/dzień" />
         <ToiletCard label="Kupa" emoji="💩" value={toilet.poop} onAdd={() => setToilet((t) => ({ ...t, poop: t.poop + 1 }))} onSub={() => setToilet((t) => ({ ...t, poop: Math.max(0, t.poop - 1) }))} hint="Norma 1-2/dzień" />
       </div>
+      <PartnerAdSlot />
       <div className="h-24" />
 
       {open && <AddMealSheet onClose={() => setOpen(false)} onAdd={addMeal} />}
