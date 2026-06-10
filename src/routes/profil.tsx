@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet } from "lucide-react";
+import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet, ChevronRight } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 
@@ -140,7 +140,18 @@ function Profil() {
         </div>
       </Link>
 
-      {gender === "k" && <CycleSection />}
+      <Link to="/fizjo" className="mt-3 block overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--orange)]/30 via-[var(--magenta)]/20 to-transparent p-[1px]">
+        <div className="flex items-center gap-3 rounded-3xl bg-card/60 p-4 backdrop-blur-xl">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--orange)]/20 text-xl">🩺</div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold leading-tight">Masz kontuzję?</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">Sprawdź listę polecanych fizjoterapeutów w Twoim mieście.</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </Link>
+
+      {(gender === "k" || gender === "nb") && <CycleSection />}
 
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">

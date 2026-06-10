@@ -35,6 +35,7 @@ function Onboarding() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
+  const [cycleTracker, setCycleTracker] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -84,6 +85,9 @@ function Onboarding() {
       if (stayLogged) localStorage.setItem("gw_session_persist", "1");
       else localStorage.removeItem("gw_session_persist");
       localStorage.setItem("gw_profile", JSON.stringify({ name, nickname, email, goals, level, freq, age, gender, city, lvl: 1, xp: 0, stats: { sila: 0, kondycja: 0, dieta: 0, sen: 0, rozwoj: 0 } }));
+      // Cycle tracker preference: women get it by default, NB only if they opted in.
+      const wantsCycle = gender === "k" ? true : gender === "nb" ? !!cycleTracker : false;
+      localStorage.setItem("gw_cycle_enabled", wantsCycle ? "1" : "0");
       localStorage.setItem("gw_avatar", JSON.stringify(avatar));
       localStorage.setItem("gw_body", JSON.stringify({ weight: Number(weight) || 0, height: Number(height) || 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0 }));
       const n = computeNutrition({ gender, age: Number(age) || undefined, weight: Number(weight) || undefined, height: Number(height) || undefined, freq, goals });
@@ -147,6 +151,7 @@ function Onboarding() {
             height={height} setHeight={setHeight}
             gender={gender} setGender={setGender}
             avatar={avatar} setAvatar={setAvatar}
+            cycleTracker={cycleTracker} setCycleTracker={setCycleTracker}
             onGenderPick={(g) => setGender(g)}
             onNext={() => { setAvatar((a) => ({ ...a, gender: gender ?? a.gender })); setStep(3); }}
           />
@@ -246,7 +251,7 @@ function StepName({
 
 
 function StepPersonal({
-  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick, avatar, setAvatar,
+  age, setAge, weight, setWeight, height, setHeight, gender, setGender, onNext, onGenderPick, avatar, setAvatar, cycleTracker, setCycleTracker,
 }: {
   age: number | ""; setAge: (v: number | "") => void;
   weight: number | ""; setWeight: (v: number | "") => void;
@@ -256,6 +261,7 @@ function StepPersonal({
   onGenderPick: (g: Gender) => void;
   avatar: AvatarConfig;
   setAvatar: (cb: (a: AvatarConfig) => AvatarConfig) => void;
+  cycleTracker: boolean | null; setCycleTracker: (v: boolean) => void;
 }) {
   const genders: { id: Gender; label: string; emoji: string }[] = [
     { id: "m", label: "Mężczyzna", emoji: "♂" },
@@ -264,7 +270,8 @@ function StepPersonal({
   ];
   const canNext = !!age && Number(age) >= 13 && Number(age) <= 99 && !!gender
     && !!weight && Number(weight) >= 30 && Number(weight) <= 250
-    && !!height && Number(height) >= 120 && Number(height) <= 230;
+    && !!height && Number(height) >= 120 && Number(height) <= 230
+    && (gender !== "nb" || cycleTracker !== null);
   const nbBase = avatar.nbBase ?? "m";
   return (
     <div className="space-y-6">
@@ -326,6 +333,23 @@ function StepPersonal({
             })}
           </div>
           <p className="mt-2 text-[10px] text-muted-foreground">Wybór jest tylko wizualny — możesz go zmienić w dowolnej chwili w profilu.</p>
+        </div>
+      )}
+
+      {gender === "nb" && (
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Tracker miesiączki</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setCycleTracker(true)}
+              className={`rounded-2xl p-3 text-sm font-medium transition ${cycleTracker === true ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}
+            >Tak, włącz</button>
+            <button
+              onClick={() => setCycleTracker(false)}
+              className={`rounded-2xl p-3 text-sm font-medium transition ${cycleTracker === false ? "bg-gradient-to-br from-[var(--magenta)]/30 to-[var(--lime)]/15 ring-1 ring-[var(--magenta)]/60" : "glass"}`}
+            >Nie, pomiń</button>
+          </div>
+          <p className="mt-2 text-[10px] text-muted-foreground">Możesz to zmienić w dowolnej chwili w ustawieniach profilu.</p>
         </div>
       )}
 

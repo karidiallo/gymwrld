@@ -17,7 +17,7 @@ import { Toaster } from "../components/ui/sonner";
 import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
-import { installLocalStateCloudSync, syncLocalState } from "../lib/cloud-state";
+import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 
 function NotFoundComponent() {
   return (
@@ -99,8 +99,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/icon-512.png" },
-      { rel: "icon", href: "/icon-512.png", type: "image/png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "apple-touch-icon", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", href: "/icon-512.png", type: "image/png", sizes: "512x512" },
+      { rel: "icon", href: "/icon-192.png", type: "image/png", sizes: "192x192" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -152,6 +154,8 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
+        clearLocalAppState();
+        if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
         router.invalidate();
         return;
