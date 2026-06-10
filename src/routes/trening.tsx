@@ -9,7 +9,7 @@ import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
-import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
+import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
 import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
@@ -585,17 +585,60 @@ function WeekView() {
           ) : (
             <ul className="space-y-1.5">
               {selectedDayLogs.map((l) => (
-                <li key={l.id} className="flex items-center gap-2 text-xs">
-                  <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[l.kind] }} />
-                  <span className="flex-1 truncate">{l.title}</span>
-                  <span className="text-muted-foreground">{l.minutes} min · {l.kcal} kcal</span>
-                </li>
+                <LogRow key={l.id} log={l} />
               ))}
             </ul>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function LogRow({ log }: { log: TrainingLog }) {
+  const [editing, setEditing] = useState(false);
+  const [minutes, setMinutes] = useState(log.minutes);
+  const [kcal, setKcal] = useState(log.kcal);
+  const [title, setTitle] = useState(log.title);
+  if (editing) {
+    return (
+      <li className="rounded-xl bg-white/[0.04] p-2">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded bg-white/5 px-2 py-1 text-xs outline-none" />
+        <div className="mt-1.5 grid grid-cols-2 gap-1.5 text-[11px]">
+          <label className="flex items-center gap-1 rounded bg-white/5 px-2 py-1"><span className="text-muted-foreground">min</span>
+            <input type="number" value={minutes} onChange={(e) => setMinutes(parseInt(e.target.value) || 0)} className="flex-1 w-12 bg-transparent text-right outline-none" />
+          </label>
+          <label className="flex items-center gap-1 rounded bg-white/5 px-2 py-1"><span className="text-muted-foreground">kcal</span>
+            <input type="number" value={kcal} onChange={(e) => setKcal(parseInt(e.target.value) || 0)} className="flex-1 w-12 bg-transparent text-right outline-none" />
+          </label>
+        </div>
+        <div className="mt-1.5 flex gap-1.5">
+          <button onClick={() => { updateLog(log.id, { minutes, kcal, title }); setEditing(false); toast.success("Zaktualizowano"); }} className="flex-1 rounded bg-[var(--lime)] px-2 py-1 text-[11px] font-semibold text-background">Zapisz</button>
+          <button onClick={() => setEditing(false)} className="rounded bg-white/5 px-2 py-1 text-[11px]">Anuluj</button>
+        </div>
+      </li>
+    );
+  }
+  return (
+    <li className="flex items-center gap-2 text-xs">
+      <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[log.kind] }} />
+      <span className="flex-1 truncate">{log.title}</span>
+      <span className="text-muted-foreground">{log.minutes} min · {log.kcal} kcal</span>
+      <button onClick={() => setEditing(true)} title="Edytuj" className="grid h-6 w-6 place-items-center rounded-full bg-white/5 hover:bg-white/10">
+        <Pencil className="h-3 w-3" />
+      </button>
+      <button
+        onClick={() => {
+          if (!confirm(`Usunąć "${log.title}"?`)) return;
+          removeLog(log.id);
+          toast.success("Wpis usunięty");
+        }}
+        title="Usuń"
+        className="grid h-6 w-6 place-items-center rounded-full bg-red-500/10 text-red-300 hover:bg-red-500/20"
+      >
+        <Trash2 className="h-3 w-3" />
+      </button>
+    </li>
   );
 }
 
