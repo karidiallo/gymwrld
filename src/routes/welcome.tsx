@@ -302,7 +302,6 @@ function WelcomePage() {
               {src: moduleRunning, t: "Biegi i Kroki"},
               {src: moduleMindHealth, t: "Mind Health"},
               {src: moduleWomen, t: "Dla Kobiet"},
-              {src: moduleRpg, t: "Gra RPG"},
             ].map((c) => (
               <div key={c.t} className="group relative aspect-[4/5] overflow-hidden rounded-3xl">
                 <img src={c.src} alt={c.t} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" width={768} height={960} loading="lazy" />
