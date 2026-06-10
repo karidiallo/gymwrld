@@ -328,6 +328,27 @@ function ToiletCard({ label, emoji, value, onAdd, onSub, hint }: { label: string
   );
 }
 
+function PartnerAdSlot() {
+  return (
+    <div className="mt-4 overflow-hidden rounded-3xl ring-1 ring-[var(--lime)]/30 bg-gradient-to-br from-[var(--lime)]/15 via-[var(--orange)]/10 to-[var(--magenta)]/10 p-[1px]">
+      <div className="flex items-center gap-3 rounded-[calc(1.5rem-1px)] bg-black/55 p-4 backdrop-blur-xl">
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[var(--lime)]/40 to-[var(--orange)]/40 text-2xl">
+          🍫
+        </div>
+        <div className="flex-1">
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[var(--lime)]">Partner GymWRLD</p>
+          <p className="mt-0.5 text-sm font-semibold leading-tight">
+            -15% na batony proteinowe <span className="text-[var(--lime)]">BrandX</span>
+          </p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">Kod: <span className="font-mono text-foreground">GYMWRLD15</span> · ważne 7 dni</p>
+        </div>
+        <button className="rounded-full bg-white text-black px-3 py-1.5 text-[11px] font-semibold">Skorzystaj</button>
+      </div>
+      <p className="px-3 pb-2 pt-1 text-[9px] uppercase tracking-widest text-muted-foreground/60">Twoja reklama tutaj · partnerships@gymwrld.com</p>
+    </div>
+  );
+}
+
 function Macro({ label, value, goal, color, unit }: { label: string; value: number; goal: number; color: string; unit: string }) {
   return (
     <div>
