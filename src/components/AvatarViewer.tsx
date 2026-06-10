@@ -2,14 +2,19 @@ import { useEffect, useState } from "react";
 import { X, Lock, Check } from "lucide-react";
 import { type AvatarConfig } from "./AvatarSvg";
 import sanctuary from "@/assets/sanctuary.jpg";
+import roomLoft from "@/assets/room-loft.jpg";
+import roomParis from "@/assets/room-paris.jpg";
+import roomMilano from "@/assets/room-milano.jpg";
+import roomBarcelona from "@/assets/room-barcelona.jpg";
+import roomVilla from "@/assets/room-villa.jpg";
 
 const ROOMS = [
   { id: "starter", name: "Apartament startowy", bgImg: sanctuary, bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", locked: false },
-  { id: "loft", name: "Loft · Berlin", bg: "linear-gradient(180deg,#0e1d2a 0%,#0a1320 70%,#000 100%)", locked: true, req: "Lvl 5" },
-  { id: "paris", name: "Atelier · Paryż", bg: "linear-gradient(180deg,#1a1428 0%,#100a18 70%,#000 100%)", locked: true, req: "Lvl 10" },
-  { id: "penthouse", name: "Penthouse · Mediolan", bg: "linear-gradient(180deg,#2a0e1d 0%,#1a0814 70%,#000 100%)", locked: true, req: "Lvl 20 · Premium" },
-  { id: "skyhouse", name: "Sky House · Barcelona", bg: "linear-gradient(180deg,#0e2a23 0%,#0a1a18 70%,#000 100%)", locked: true, req: "Lvl 30 · Premium" },
-  { id: "villa", name: "Vila · Lazurowe", bg: "linear-gradient(180deg,#2a1a0e 0%,#1a1108 70%,#000 100%)", locked: true, req: "Lvl 40 · Premium" },
+  { id: "loft", name: "Loft · Berlin", bgImg: roomLoft, bg: "linear-gradient(180deg,#0e1d2a 0%,#0a1320 70%,#000 100%)", locked: true, req: "Lvl 5" },
+  { id: "paris", name: "Atelier · Paryż", bgImg: roomParis, bg: "linear-gradient(180deg,#1a1428 0%,#100a18 70%,#000 100%)", locked: true, req: "Lvl 10" },
+  { id: "penthouse", name: "Penthouse · Mediolan", bgImg: roomMilano, bg: "linear-gradient(180deg,#2a0e1d 0%,#1a0814 70%,#000 100%)", locked: true, req: "Lvl 20 · Premium" },
+  { id: "skyhouse", name: "Sky House · Barcelona", bgImg: roomBarcelona, bg: "linear-gradient(180deg,#0e2a23 0%,#0a1a18 70%,#000 100%)", locked: true, req: "Lvl 30 · Premium" },
+  { id: "villa", name: "Vila · Lazurowe", bgImg: roomVilla, bg: "linear-gradient(180deg,#2a1a0e 0%,#1a1108 70%,#000 100%)", locked: true, req: "Lvl 40 · Premium" },
 ];
 
 const KEY = "gw_active_room";

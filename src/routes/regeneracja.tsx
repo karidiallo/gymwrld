@@ -32,7 +32,12 @@ function Regeneracja() {
     try { const raw = localStorage.getItem("gw_mind"); if (raw) setMind(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_journal"); if (raw) setJournal(JSON.parse(raw)); } catch {}
     try { const raw = localStorage.getItem("gw_recovery"); if (raw) setSleep(JSON.parse(raw)); } catch {}
+    try { const raw = localStorage.getItem("gw_moods"); if (raw) setMoods(JSON.parse(raw)); } catch {}
   }, []);
+  const persistMoods = (next: number[]) => {
+    setMoods(next);
+    if (typeof window !== "undefined") localStorage.setItem("gw_moods", JSON.stringify(next));
+  };
   const persistSleep = (next: SleepEntry[]) => {
     setSleep(next);
     if (typeof window !== "undefined") localStorage.setItem("gw_recovery", JSON.stringify(next));

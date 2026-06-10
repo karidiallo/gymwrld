@@ -9,7 +9,6 @@ import moduleNutrition from "@/assets/module-nutrition.jpg";
 import moduleStreet from "@/assets/module-street.jpg";
 import moduleRunning from "@/assets/module-running.jpg";
 import moduleMindHealth from "@/assets/module-mind-health.jpg";
-import moduleRpg from "@/assets/module-rpg.jpg";
 import moduleWomen from "@/assets/module-women.jpg";
 
 export const Route = createFileRoute("/welcome")({
@@ -32,7 +31,6 @@ const FEATURES = [
   { icon: Footprints, title: "Biegi i Kroki", desc: "Tryb maraton, dzienny licznik kroków, kalorie i historia tras. Bieg na siłowni lub w parku — kondycja rośnie adekwatnie do dystansu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
   { icon: Moon, title: "Sen i Regeneracja", desc: "Tracker snu, strefa reset, oddychanie i mind sesje. Sen wpływa na statystyki — bez regeneracji nie ma progresu.", tint: "from-[var(--violet)]/40 to-[var(--magenta)]/20" },
   { icon: Heart, title: "Mind Health", desc: "Oddech, medytacja, journal, nastrój i reset po ciężkim dniu. Regeneracja wpływa na energię, sen i Twój długofalowy progres.", tint: "from-[var(--magenta)]/40 to-[var(--violet)]/20" },
-  { icon: Sparkles, title: "Gra RPG", desc: "Twoja cyfrowa postać rośnie z każdym treningiem. Questy dają XP, odblokowujesz poziomy, pokoje sanktuarium i lokalne promocje.", tint: "from-[var(--orange)]/40 to-[var(--magenta)]/20" },
   { icon: Heart, title: "Dla Kobiet", desc: "Tryb cyklu, plany dopasowane do faz, trening i odżywianie z myślą o kobiecym ciele. Mniej PMS-u, więcej energii.", tint: "from-[var(--magenta)]/40 to-[var(--orange)]/20" },
   { icon: Activity, title: "Statystyki & Medale", desc: "Pięć atrybutów: Siła, Kondycja, Dieta, Sen, Rozwój. Odblokowuj medale za pierwsze sesje, streaki i kamienie milowe.", tint: "from-[var(--lime)]/40 to-[var(--orange)]/20" },
 ];
