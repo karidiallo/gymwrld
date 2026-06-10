@@ -86,6 +86,8 @@ function Stats() {
         <KPI label="Mind" value={String(counts.mind ?? 0)} />
       </div>
 
+      <RatingsSection logs={logs} />
+
       <h3 className="mb-3 mt-7 text-lg font-semibold">Medale & osiągnięcia</h3>
       <div className="grid grid-cols-2 gap-3">
         {MEDALS.map((m) => {
@@ -129,5 +131,48 @@ function KPI({ label, value }: { label: string; value: string }) {
       <p className="font-display text-2xl">{value}</p>
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
     </div>
+  );
+}
+
+function RatingsSection({ logs }: { logs: any[] }) {
+  const now = Date.now();
+  const rated = logs.filter((l) => typeof l.rating === "number" && l.rating > 0);
+  const last7 = rated.filter((l) => now - l.ts < 7 * 86400_000);
+  const last30 = rated.filter((l) => now - l.ts < 30 * 86400_000);
+  const avg = (xs: any[]) => xs.length ? (xs.reduce((s, l) => s + l.rating, 0) / xs.length) : 0;
+  const dist = [1, 2, 3, 4, 5].map((star) => rated.filter((l) => l.rating === star).length);
+  const max = Math.max(1, ...dist);
+  if (rated.length === 0) return (
+    <>
+      <h3 className="mb-3 mt-7 text-lg font-semibold">Twoje zadowolenie</h3>
+      <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
+        Brak ocen — oceniaj treningi w historii ★
+      </div>
+    </>
+  );
+  return (
+    <>
+      <h3 className="mb-3 mt-7 text-lg font-semibold">Twoje zadowolenie</h3>
+      <div className="rounded-2xl glass p-4">
+        <div className="grid grid-cols-2 gap-3">
+          <KPI label="Średnia 7 dni" value={`${avg(last7).toFixed(1)}★`} />
+          <KPI label="Średnia 30 dni" value={`${avg(last30).toFixed(1)}★`} />
+        </div>
+        <div className="mt-4 flex items-end justify-between gap-2">
+          {dist.map((count, i) => (
+            <div key={i} className="flex flex-1 flex-col items-center gap-1">
+              <div className="flex h-24 w-full items-end overflow-hidden rounded-md bg-white/5">
+                <div
+                  className="w-full rounded-md bg-gradient-to-t from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] transition-all"
+                  style={{ height: `${(count / max) * 100}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">{i + 1}★</p>
+              <p className="text-[10px] font-semibold tabular-nums">{count}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
