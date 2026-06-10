@@ -10,6 +10,7 @@ import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
+import { LogDetail } from "@/components/LogDetail";
 import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
