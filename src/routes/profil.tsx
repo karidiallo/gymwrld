@@ -188,6 +188,37 @@ function Profil() {
         </button>
       </section>
 
+      {/* Push notifications */}
+      <button
+        onClick={async () => {
+          if (pushEnabled) {
+            localStorage.removeItem("gw_push_enabled");
+            setPushEnabled(false);
+            toast("Powiadomienia wyłączone");
+            return;
+          }
+          try {
+            await enablePushNotifications();
+            setPushEnabled(true);
+            toast.success("Powiadomienia push włączone");
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Nie udało się włączyć");
+          }
+        }}
+        className="mt-2 flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition active:scale-[0.99]"
+      >
+        <div className={`grid h-10 w-10 place-items-center rounded-xl ${pushEnabled ? "bg-[var(--lime)]/15 text-[var(--lime)]" : "bg-[var(--magenta)]/15 text-[var(--magenta)]"}`}>
+          <Bell className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium">Powiadomienia push</p>
+          <p className="text-[11px] text-muted-foreground">{pushEnabled ? "Włączone — kliknij, aby wyłączyć" : "Treningi, woda, osiągnięcia"}</p>
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${pushEnabled ? "bg-[var(--lime)]/15 text-[var(--lime)]" : "bg-white/10 text-white"}`}>
+          {pushEnabled ? "ON" : "Włącz"}
+        </span>
+      </button>
+
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Wymiary</h3>
