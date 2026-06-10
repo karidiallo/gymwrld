@@ -170,6 +170,24 @@ export const Route = createFileRoute("/przepisy")({
 
 function Przepisy() {
   const { id } = Route.useSearch();
+  const navigate = useNavigate();
+  const [subscription, setSubscription] = useState<string>("free");
+  if (typeof window !== "undefined") {
+    // read once on render; cheap because localStorage
+  }
+  useMemo(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem("gw_profile");
+      if (raw) setSubscription(JSON.parse(raw).subscription ?? "free");
+    } catch {}
+  }, []);
+  const tierAllowed = (t?: "pro" | "premium") => {
+    if (!t) return true;
+    if (subscription === "premium") return true;
+    if (subscription === "pro" && t === "pro") return true;
+    return false;
+  };
   const [cat, setCat] = useState<RecipeCat>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | undefined>(id);
@@ -187,6 +205,14 @@ function Przepisy() {
   }, [cat, q]);
 
   const open = RECIPES.find((r) => r.id === openId);
+  const tryOpen = (r: Recipe) => {
+    if (!tierAllowed(r.tier)) {
+      toast(`Ten przepis wymaga ${r.tier === "premium" ? "Premium 👑" : "Pro ⭐"}`);
+      navigate({ to: "/premium" });
+      return;
+    }
+    setOpenId(r.id);
+  };
 
   return (
     <main className="px-5 pt-6">
@@ -261,9 +287,10 @@ function Przepisy() {
         {list.map((r) => (
           <button
             key={r.id}
-            onClick={() => setOpenId(r.id)}
+            onClick={() => tryOpen(r)}
             className="group overflow-hidden rounded-2xl glass text-left transition-transform active:scale-[0.98]"
           >
+            <div className="relative">
             {recipeImage(r) ? (
               <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
             ) : (
@@ -274,6 +301,22 @@ function Przepisy() {
                 </div>
               </div>
             )}
+            {r.tier && (
+              <span className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                r.tier === "premium"
+                  ? "bg-gradient-to-r from-[#facc15] to-[var(--orange)] text-background"
+                  : "bg-white/90 text-background"
+              }`}>
+                {r.tier === "premium" ? <Crown className="h-3 w-3" /> : <Star className="h-3 w-3" />}
+                {r.tier === "premium" ? "Premium" : "Pro"}
+              </span>
+            )}
+            {!tierAllowed(r.tier) && (
+              <div className="absolute inset-0 grid place-items-center bg-black/55 backdrop-blur-sm">
+                <Lock className="h-6 w-6 text-white/90" />
+              </div>
+            )}
+            </div>
             <div className="p-3">
               <p className="line-clamp-1 text-sm font-medium">{r.title}</p>
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
