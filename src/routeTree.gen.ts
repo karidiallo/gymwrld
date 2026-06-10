@@ -24,6 +24,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as KrokiRouteImport } from './routes/kroki'
+import { Route as HistoriaRouteImport } from './routes/historia'
 import { Route as FizjoRouteImport } from './routes/fizjo'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
@@ -106,6 +107,11 @@ const KrokiRoute = KrokiRouteImport.update({
   path: '/kroki',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoriaRoute = HistoriaRouteImport.update({
+  id: '/historia',
+  path: '/historia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FizjoRoute = FizjoRouteImport.update({
   id: '/fizjo',
   path: '/fizjo',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/historia'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/historia'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/historia'
     | '/kroki'
     | '/onboarding'
     | '/premium'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
   FizjoRoute: typeof FizjoRoute
+  HistoriaRoute: typeof HistoriaRoute
   KrokiRoute: typeof KrokiRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KrokiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/historia': {
+      id: '/historia'
+      path: '/historia'
+      fullPath: '/historia'
+      preLoaderRoute: typeof HistoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fizjo': {
       id: '/fizjo'
       path: '/fizjo'
@@ -462,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
   FizjoRoute: FizjoRoute,
+  HistoriaRoute: HistoriaRoute,
   KrokiRoute: KrokiRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,

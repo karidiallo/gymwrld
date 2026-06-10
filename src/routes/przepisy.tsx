@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import foodHero from "@/assets/food-hero.jpg";
@@ -6,7 +6,7 @@ import recipePowerBowl from "@/assets/recipe-power-bowl.jpg";
 import recipeOwsianka from "@/assets/recipe-owsianka.jpg";
 import recipeLosos from "@/assets/recipe-losos.jpg";
 import recipeOmlet from "@/assets/recipe-omlet.jpg";
-import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Pizza, Salad, Globe2, ImageIcon, Camera } from "lucide-react";
+import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Globe2, ImageIcon, Camera, Star, Crown, Lock } from "lucide-react";
 
 type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska";
 
@@ -21,6 +21,7 @@ type Recipe = {
   ingredients: string[];
   steps: string[];
   emoji: string;
+  tier?: "pro" | "premium";
 };
 
 // Tylko zweryfikowane, ręcznie dopasowane zdjęcia. Reszta przepisów ma placeholder
@@ -53,6 +54,7 @@ const RECIPES: Recipe[] = [
     ingredients: ["200g kurczaka", "100g ryżu", "150g brokułów", "Sojowa, czosnek, imbir"],
     steps: ["Marynuj kurczaka w sojowej z czosnkiem.", "Smaż na patelni 8 min.", "Ryż ugotuj.", "Brokuły na parze.", "Złóż danie."] },
   { id: "losos-batat", title: "Łosoś z batatem", kcal: 580, time: 30, cat: "obiady", tags: ["omega-3"], macro: { p: 42, c: 56, f: 18 }, emoji: "🐟",
+    tier: "pro",
     ingredients: ["180g łososia", "1 batat", "Szpinak", "Cytryna, koper"],
     steps: ["Batat piecz 25 min w 200°C.", "Łosoś smaż 4 min z każdej strony.", "Szpinak podduś.", "Podaj z cytryną."] },
   { id: "sałatka-tunczyk", title: "Sałatka z tuńczykiem", kcal: 340, time: 8, cat: "kolacje", tags: ["light", "szybkie"], macro: { p: 32, c: 18, f: 16 }, emoji: "🥗",
@@ -71,6 +73,7 @@ const RECIPES: Recipe[] = [
     ingredients: ["1 banan", "1 łyżka masła orzechowego"],
     steps: ["Pokrój banana, posmaruj masłem."] },
   { id: "tofu-curry", title: "Tofu curry z kaszą", kcal: 510, time: 25, cat: "wege", tags: ["wege", "curry"], macro: { p: 28, c: 60, f: 16 }, emoji: "🍛",
+    tier: "pro",
     ingredients: ["200g tofu", "100g kaszy jaglanej", "Mleczko kokosowe", "Pasta curry", "Warzywa"],
     steps: ["Podsmaż tofu w paście curry.", "Dodaj warzywa i mleczko.", "Duś 10 min.", "Podaj z kaszą."] },
   { id: "wege-burger", title: "Wege burger z ciecierzycą", kcal: 460, time: 30, cat: "wege", tags: ["wege"], macro: { p: 22, c: 54, f: 14 }, emoji: "🍔",
@@ -95,6 +98,7 @@ const RECIPES: Recipe[] = [
     steps: ["Podsmaż warzywa.", "Dodaj soczewicę i bulion.", "Gotuj 20 min.", "Dolej mleczko, dopraw."] },
   // —— więcej białkowych
   { id: "wolowina-ryz", title: "Wołowina po orientalnu z ryżem", kcal: 580, time: 25, cat: "bialkowe", tags: ["bialkowe", "azjatycka"], macro: { p: 48, c: 60, f: 14 }, emoji: "🥩",
+    tier: "premium",
     ingredients: ["200g wołowiny", "100g ryżu", "Brokuł", "Sos sojowy, czosnek, imbir"],
     steps: ["Marynuj wołowinę 10 min.", "Smaż 5 min na woku.", "Dodaj warzywa.", "Podaj z ryżem."] },
   { id: "indyk-quinoa", title: "Indyk z quinoa i szpinakiem", kcal: 520, time: 22, cat: "bialkowe", tags: ["bialkowe"], macro: { p: 50, c: 50, f: 10 }, emoji: "🦃",
@@ -109,13 +113,16 @@ const RECIPES: Recipe[] = [
     steps: ["Pokrój pomidory i mozzarellę.", "Ułóż naprzemiennie.", "Skrop oliwą, posyp bazylią."] },
   // —— Azjatycka
   { id: "ramen-light", title: "Ramen z kurczakiem", kcal: 540, time: 25, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 62, f: 14 }, emoji: "🍜",
+    tier: "pro",
     ingredients: ["Makaron ramen", "150g kurczaka", "Bulion miso", "Jajko, szczypiorek, nori"],
     steps: ["Zagotuj bulion.", "Dodaj makaron.", "Włóż kurczaka i jajko.", "Posyp nori i szczypiorkiem."] },
   { id: "sushi-bowl", title: "Sushi bowl z łososiem", kcal: 580, time: 20, cat: "obiady", tags: ["azjatycka"], macro: { p: 38, c: 64, f: 18 }, emoji: "🍣",
+    tier: "premium",
     ingredients: ["150g surowego łososia", "100g ryżu sushi", "Awokado, ogórek, edamame", "Sojowa, sezam"],
     steps: ["Ugotuj ryż.", "Pokrój łososia.", "Złóż bowl z warzywami i sosem."] },
   // —— Meksykańska
   { id: "burrito-bowl", title: "Burrito bowl", kcal: 640, time: 20, cat: "obiady", tags: ["meksykanska"], macro: { p: 42, c: 72, f: 18 }, emoji: "🌯",
+    tier: "pro",
     ingredients: ["150g kurczaka", "Czarna fasola", "Ryż, kukurydza, salsa, guacamole"],
     steps: ["Smaż kurczaka z przyprawami Tex-Mex.", "Złóż bowl.", "Polej salsą i guacamole."] },
   { id: "tacos-fish", title: "Tacos z rybą", kcal: 480, time: 18, cat: "kolacje", tags: ["meksykanska"], macro: { p: 32, c: 48, f: 16 }, emoji: "🌮",
@@ -163,6 +170,20 @@ export const Route = createFileRoute("/przepisy")({
 
 function Przepisy() {
   const { id } = Route.useSearch();
+  const navigate = useNavigate();
+  const [subscription] = useState<string>(() => {
+    if (typeof window === "undefined") return "free";
+    try {
+      const raw = localStorage.getItem("gw_profile");
+      return raw ? (JSON.parse(raw).subscription ?? "free") : "free";
+    } catch { return "free"; }
+  });
+  const tierAllowed = (t?: "pro" | "premium") => {
+    if (!t) return true;
+    if (subscription === "premium") return true;
+    if (subscription === "pro" && t === "pro") return true;
+    return false;
+  };
   const [cat, setCat] = useState<RecipeCat>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | undefined>(id);
@@ -180,6 +201,14 @@ function Przepisy() {
   }, [cat, q]);
 
   const open = RECIPES.find((r) => r.id === openId);
+  const tryOpen = (r: Recipe) => {
+    if (!tierAllowed(r.tier)) {
+      toast(`Ten przepis wymaga ${r.tier === "premium" ? "Premium 👑" : "Pro ⭐"}`);
+      navigate({ to: "/premium" });
+      return;
+    }
+    setOpenId(r.id);
+  };
 
   return (
     <main className="px-5 pt-6">
@@ -254,9 +283,10 @@ function Przepisy() {
         {list.map((r) => (
           <button
             key={r.id}
-            onClick={() => setOpenId(r.id)}
+            onClick={() => tryOpen(r)}
             className="group overflow-hidden rounded-2xl glass text-left transition-transform active:scale-[0.98]"
           >
+            <div className="relative">
             {recipeImage(r) ? (
               <img src={recipeImage(r)} alt={r.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
             ) : (
@@ -267,6 +297,22 @@ function Przepisy() {
                 </div>
               </div>
             )}
+            {r.tier && (
+              <span className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                r.tier === "premium"
+                  ? "bg-gradient-to-r from-[#facc15] to-[var(--orange)] text-background"
+                  : "bg-white/90 text-background"
+              }`}>
+                {r.tier === "premium" ? <Crown className="h-3 w-3" /> : <Star className="h-3 w-3" />}
+                {r.tier === "premium" ? "Premium" : "Pro"}
+              </span>
+            )}
+            {!tierAllowed(r.tier) && (
+              <div className="absolute inset-0 grid place-items-center bg-black/55 backdrop-blur-sm">
+                <Lock className="h-6 w-6 text-white/90" />
+              </div>
+            )}
+            </div>
             <div className="p-3">
               <p className="line-clamp-1 text-sm font-medium">{r.title}</p>
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">

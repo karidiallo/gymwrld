@@ -9,6 +9,7 @@ import { AvatarViewer } from "@/components/AvatarViewer";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 import { awardXp, readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
+import { BrandFooter } from "@/components/BrandLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
@@ -255,7 +256,7 @@ function Index() {
       </div>
 
       {/* Last activity */}
-      <SectionTitle title="Ostatnia aktywność" />
+      <SectionTitle title="Ostatnia aktywność" action="Historia" actionTo="/historia" />
       {recentLogs.length === 0 ? (
         <div className="rounded-2xl glass p-5 text-center text-xs text-muted-foreground">
           Brak aktywności · zaloguj pierwszy trening
@@ -285,6 +286,7 @@ function Index() {
 
       {viewerOpen && <AvatarViewer cfg={avatarCfg} onClose={() => setViewerOpen(false)} />}
       {openLog && <LogDetail log={openLog} onClose={() => setOpenLog(null)} />}
+      <BrandFooter />
     </main>
   );
 }
