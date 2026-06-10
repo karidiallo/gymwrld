@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Pencil, TrendingDown, X, Plus, Bell, Lock, Heart, Droplet, ChevronRight } from "lucide-react";
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
+import { enablePushNotifications, isPushEnabled } from "@/lib/push";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Profil — GymWrld" }] }),
@@ -17,6 +18,7 @@ function Profil() {
   const [identity, setIdentity] = useState<{ name?: string; nickname?: string }>({});
   const [gender, setGender] = useState<string | null>(null);
   const [cycleEnabled, setCycleEnabled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
   const [body, setBody] = useState({
     weight: 0, height: 0, chest: 0, waist: 0, hips: 0, biceps: 0, thigh: 0,
   });
@@ -63,6 +65,7 @@ function Profil() {
     try {
       setCycleEnabled(localStorage.getItem("gw_cycle_enabled") === "1");
     } catch {}
+    try { setPushEnabled(isPushEnabled()); } catch {}
     const onUpd = () => {
       try {
         const rp = localStorage.getItem("gw_profile");
@@ -185,6 +188,37 @@ function Profil() {
         </button>
       </section>
 
+      {/* Push notifications */}
+      <button
+        onClick={async () => {
+          if (pushEnabled) {
+            localStorage.removeItem("gw_push_enabled");
+            setPushEnabled(false);
+            toast("Powiadomienia wyłączone");
+            return;
+          }
+          try {
+            await enablePushNotifications();
+            setPushEnabled(true);
+            toast.success("Powiadomienia push włączone");
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Nie udało się włączyć");
+          }
+        }}
+        className="mt-2 flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition active:scale-[0.99]"
+      >
+        <div className={`grid h-10 w-10 place-items-center rounded-xl ${pushEnabled ? "bg-[var(--lime)]/15 text-[var(--lime)]" : "bg-[var(--magenta)]/15 text-[var(--magenta)]"}`}>
+          <Bell className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium">Powiadomienia push</p>
+          <p className="text-[11px] text-muted-foreground">{pushEnabled ? "Włączone — kliknij, aby wyłączyć" : "Treningi, woda, osiągnięcia"}</p>
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${pushEnabled ? "bg-[var(--lime)]/15 text-[var(--lime)]" : "bg-white/10 text-white"}`}>
+          {pushEnabled ? "ON" : "Włącz"}
+        </span>
+      </button>
+
       {/* Body measurements */}
       <div className="mb-3 mt-7 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Wymiary</h3>
@@ -237,6 +271,7 @@ function Profil() {
           <BodyStat label="Biceps" value={body.biceps ? `${body.biceps} cm` : "—"} />
           <BodyStat label="Udo" value={body.thigh ? `${body.thigh} cm` : "—"} />
         </div>
+        <ProfileBMI weight={body.weight} height={body.height} />
       </section>
 
       {/* Stats */}
@@ -568,6 +603,44 @@ function WeightSheet({ current, onClose, onSave }: { current: number; onClose: (
         >
           Zapisz wagę
         </button>
+      </div>
+    </div>
+  );
+}
+function ProfileBMI({ weight, height }: { weight: number; height: number }) {
+  if (!weight || !height) return null;
+  const h = height / 100;
+  const bmi = weight / (h * h);
+  const pct = Math.max(0, Math.min(100, ((bmi - 15) / 20) * 100));
+  const cat =
+    bmi < 18.5 ? { label: "Niedowaga", color: "text-[#60a5fa]" } :
+    bmi < 25   ? { label: "Norma",     color: "text-[var(--lime)]" } :
+    bmi < 30   ? { label: "Nadwaga",   color: "text-[var(--orange)]" } :
+                 { label: "Otyłość",   color: "text-[var(--magenta)]" };
+  return (
+    <div className="mt-4 rounded-2xl bg-white/[0.03] p-3">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="uppercase tracking-widest text-muted-foreground">BMI</span>
+        <span className="font-medium tabular-nums">
+          {bmi.toFixed(1)} <span className={cat.color}>· {cat.label}</span>
+        </span>
+      </div>
+      <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-full opacity-70"
+          style={{
+            background:
+              "linear-gradient(to right, #60a5fa 0%, #60a5fa 17.5%, #bef264 17.5%, #bef264 50%, #ff8c3c 50%, #ff8c3c 75%, #e94560 75%, #e94560 100%)",
+          }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 h-3.5 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+          style={{ left: `calc(${pct}% - 2px)` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between text-[9px] text-muted-foreground">
+        <span>15</span><span>18.5</span><span>25</span><span>30</span><span>35</span>
       </div>
     </div>
   );

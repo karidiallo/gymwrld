@@ -10,6 +10,7 @@ import cutHero from "@/assets/cut-hero.jpg";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
+import { LogDetail } from "@/components/LogDetail";
 import { EntryActions } from "@/components/EntryActions";
 
 export const Route = createFileRoute("/trening")({
@@ -156,7 +157,10 @@ function Trening() {
         <img src={heroes[cat]} alt="Trening" className="h-56 w-full object-cover" width={1280} height={896} loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
         <div className="absolute inset-x-5 bottom-5">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">{hero.eyebrow}</p>
+          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[var(--lime)] to-[var(--orange)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-background">
+            ★ Polecane na dziś
+          </span>
+          <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/70">{hero.eyebrow}</p>
           <h2 className="mt-1 font-display text-3xl leading-none text-white">{hero.main}<br/><span className="text-gradient">{hero.sub}</span></h2>
           <div className="mt-3 flex gap-3 text-xs text-white/80">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur"><Clock className="h-3 w-3" /> 55 min</span>
@@ -597,6 +601,7 @@ function WeekView() {
 
 function LogRow({ log }: { log: TrainingLog }) {
   const [editing, setEditing] = useState(false);
+  const [detail, setDetail] = useState(false);
   const [minutes, setMinutes] = useState(log.minutes);
   const [kcal, setKcal] = useState(log.kcal);
   const [title, setTitle] = useState(log.title);
@@ -622,7 +627,9 @@ function LogRow({ log }: { log: TrainingLog }) {
   return (
     <li className="flex items-center gap-2 text-xs">
       <span className="h-2 w-2 rounded-full" style={{ background: KIND_COLOR[log.kind] }} />
-      <span className="flex-1 truncate">{log.title}</span>
+      <button onClick={() => setDetail(true)} className="flex-1 truncate text-left hover:underline">
+        {log.title}{log.rating ? <span className="ml-1 text-[var(--orange)]">{"★".repeat(log.rating)}</span> : null}
+      </button>
       <span className="text-muted-foreground">{log.minutes} min · {log.kcal} kcal</span>
       <button onClick={() => setEditing(true)} title="Edytuj" className="grid h-6 w-6 place-items-center rounded-full bg-white/5 hover:bg-white/10">
         <Pencil className="h-3 w-3" />
@@ -638,6 +645,7 @@ function LogRow({ log }: { log: TrainingLog }) {
       >
         <Trash2 className="h-3 w-3" />
       </button>
+      {detail && <LogDetail log={log} onClose={() => setDetail(false)} />}
     </li>
   );
 }
