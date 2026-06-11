@@ -104,7 +104,7 @@ function WelcomePage() {
       <header className={`fixed inset-x-0 top-0 z-40 transition ${scrolled ? "backdrop-blur-xl bg-background/70 border-b border-white/5" : ""}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="#top" className="flex items-center gap-2">
-            <img src={logo} alt="GymWRLD" className="h-20 w-auto md:h-24" />
+            <img src={logo} alt="GymWRLD" className="h-12 w-auto md:h-14" />
           </a>
           <nav className="hidden gap-8 text-[13px] text-muted-foreground md:flex">
             <a href="#features" className="hover:text-foreground">Funkcje</a>
