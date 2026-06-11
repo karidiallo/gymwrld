@@ -10,9 +10,7 @@ export function getHostKind(): "landing" | "app" {
   return "app";
 }
 
-/** Absolute URL to the canonical app host, used for "Open app" CTAs from landing. */
+/** Keep auth/app navigation on the current host so Google OAuth and installed PWA sessions stay on one origin. */
 export function appUrl(path = "/"): string {
-  if (typeof window === "undefined") return path;
-  if (getHostKind() === "landing") return `https://app.gymwrld.com${path}`;
   return path;
 }

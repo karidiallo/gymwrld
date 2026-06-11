@@ -13,6 +13,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
     mode: search.mode === "signup" ? "signup" : undefined,
     recovery: search.recovery === "1" ? "1" : undefined,
+    oauth: search.oauth === "1" ? "1" : undefined,
   }),
   component: AuthPage,
 });
@@ -21,6 +22,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
   const initialMode = search.recovery === "1" ? "reset" : search.mode === "signup" ? "signup" : "signin";
+  const oauthReturn = search.oauth === "1";
   const [mode, setMode] = useState<"signin" | "signup" | "reset">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +35,38 @@ function AuthPage() {
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
+
+  useEffect(() => {
+    if (!oauthReturn) return;
+    let cancelled = false;
+    setBusy(true);
+
+    const finishOAuthLogin = async () => {
+      for (let attempt = 0; attempt < 10 && !cancelled; attempt += 1) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session?.user) {
+          const destination = await getPostAuthDestination(sessionData.session.user);
+          if (!cancelled) navigate({ to: destination, replace: true });
+          return;
+        }
+        const user = await getCurrentUserOrClear();
+        if (user) {
+          const destination = await getPostAuthDestination(user);
+          if (!cancelled) navigate({ to: destination, replace: true });
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+      if (!cancelled) {
+        setBusy(false);
+        toast.error("Nie udało się dokończyć logowania Google. Spróbuj ponownie.");
+        navigate({ to: "/auth", replace: true });
+      }
+    };
+
+    finishOAuthLogin();
+    return () => { cancelled = true; };
+  }, [oauthReturn, navigate]);
 
   const switchMode = (next: "signin" | "signup" | "reset") => {
     setMode(next);
@@ -47,7 +81,7 @@ function AuthPage() {
         else localStorage.removeItem("gw_session_persist");
       }
       const r = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth?oauth=1`,
         extraParams: { prompt: "select_account" },
       });
       if (r.error) {
@@ -88,7 +122,7 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/auth?oauth=1` },
         });
         if (error) throw error;
         if (data.session?.user) {
