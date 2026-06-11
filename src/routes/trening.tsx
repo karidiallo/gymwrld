@@ -1196,7 +1196,7 @@ function AddExerciseInline({ onAdd }: { onAdd: (ex: Exercise) => void }) {
       reps: 10,
       weight: 0,
       libId: lib.id,
-      restSec: recommendRest(lib),
+      restSec: lib.rest,
     });
     setOpen(false);
     setQ("");
@@ -1236,7 +1236,7 @@ function AddExerciseInline({ onAdd }: { onAdd: (ex: Exercise) => void }) {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 text-xl">{lib.emoji}</span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{lib.name}</p>
-              <p className="truncate text-[10px] text-muted-foreground">{EQUIP_LABEL[lib.equip]}</p>
+              <p className="truncate text-[10px] text-muted-foreground">{EQUIP_LABEL[lib.cat]}</p>
             </div>
             <Plus className="h-4 w-4 text-[var(--lime)]" />
           </button>
