@@ -15,10 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { CelebrationModal } from "../components/CelebrationModal";
-import { CoachFAB } from "../components/CoachFAB";
 import { supabase } from "../integrations/supabase/client";
-import { ensureCloudProfile } from "../lib/auth-flow";
-import { getCurrentUserOrClear } from "../lib/auth-session";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
@@ -163,11 +160,11 @@ function RootComponent() {
     pathname.startsWith("/auth");
 
   useEffect(() => {
-    const isLovablePreview = /lovableproject\.com|id-preview--|localhost/i.test(window.location.hostname);
-    if ("serviceWorker" in navigator && !isLovablePreview) {
-      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
-    } else if ("serviceWorker" in navigator && isLovablePreview) {
-      navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((reg) => reg.unregister())).catch(() => undefined);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations?.()
+        .then((regs) => regs.filter((reg) => reg.active?.scriptURL.includes("/sw.js")).forEach((reg) => reg.unregister()))
+        .catch(() => undefined);
     }
 
     // Capture ?ref=XXXX from landing URL — used at first profile creation.
@@ -241,12 +238,12 @@ function RootComponent() {
       }, 5 * 60_000);
     };
 
-    // If a session already exists at mount, start immediately (after refresh on an app route).
-    getCurrentUserOrClear().then((user) => {
-      if (user) startAppEffects();
-    });
+    // If a session already exists at mount, start app-only effects without blocking route rendering.
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) startAppEffects();
+    }).catch(() => undefined);
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
         clearLocalAppState();
@@ -255,9 +252,8 @@ function RootComponent() {
         router.invalidate();
         return;
       }
-      supabase.auth.getUser().then(({ data }) => {
-        if (data.user) ensureCloudProfile(data.user).then(() => syncLocalState());
-      });
+      if (!session?.user) return;
+      syncLocalState().catch(() => undefined);
       // On login: start app effects (water reminders, step tracker), mark activity.
       startAppEffects();
       pingActivity();
@@ -294,7 +290,6 @@ function RootComponent() {
         </div>
       )}
       <BottomNav />
-      <CoachFAB />
       <Toaster position="top-center" theme="dark" />
       <CelebrationModal />
     </QueryClientProvider>

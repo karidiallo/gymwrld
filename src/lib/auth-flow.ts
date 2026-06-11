@@ -23,6 +23,13 @@ function localOnboarded() {
   return typeof window !== "undefined" && localStorage.getItem("gw_onboarded") === "1";
 }
 
+function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
 export function isProfileComplete(profile?: ProfileRow | null) {
   return !!(profile?.city && profile?.gender && profile?.level && profile?.goals?.length);
 }
@@ -79,6 +86,6 @@ export async function ensureCloudProfile(user: User) {
 }
 
 export async function getPostAuthDestination(user: User) {
-  const profile = await ensureCloudProfile(user);
+  const profile = await withTimeout(ensureCloudProfile(user));
   return localOnboarded() || isProfileComplete(profile) ? "/" : "/onboarding";
 }

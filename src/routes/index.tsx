@@ -10,11 +10,18 @@ import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from
 import { awardXp, readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
 import { BrandFooter } from "@/components/BrandLoader";
-import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
 import { NotificationBell } from "@/components/NotificationBell";
+import { getCurrentUserOrClear } from "@/lib/auth-session";
+
+function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,22 +54,24 @@ function Index() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    supabase.auth.getUser().then(async ({ data }) => {
+    getCurrentUserOrClear().then(async (user) => {
       if (cancelled) return;
-      if (!data.user) {
+      if (!user) {
         // Landing page only shown in normal browser; in installed PWA go straight to auth
         const standalone = window.matchMedia?.("(display-mode: standalone)").matches || (navigator as any).standalone === true;
         navigate({ to: standalone ? "/auth" : "/welcome", replace: true });
       } else {
-        const cloudProfile = await ensureCloudProfile(data.user);
-        await syncLocalState();
+        const cloudProfile = await withTimeout(ensureCloudProfile(user).catch(() => null));
+        syncLocalState().catch(() => undefined);
         if (cancelled) return;
-        if (!isProfileComplete(cloudProfile)) {
+        if (cloudProfile && !isProfileComplete(cloudProfile)) {
           navigate({ to: "/onboarding", replace: true });
         } else {
           setAuthChecked(true);
         }
       }
+    }).catch(() => {
+      if (!cancelled) navigate({ to: "/auth", replace: true });
     });
     return () => { cancelled = true; };
   }, [navigate]);
