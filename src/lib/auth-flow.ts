@@ -60,7 +60,19 @@ export async function ensureCloudProfile(user: User) {
     syncProfileToLocal(data);
     return data as ProfileRow;
   }
-  const fallback = { id: user.id, email: user.email ?? null, name };
+  // First-time profile creation. If user landed via a referral link we stored
+  // the code in localStorage; resolve it to the referrer's user id now.
+  let referred_by: string | null = null;
+  try {
+    const ref = typeof window !== "undefined" ? localStorage.getItem("gw_ref") : null;
+    if (ref) {
+      const { data: r } = await supabase.from("profiles").select("id").eq("referral_code", ref).maybeSingle();
+      if (r?.id && r.id !== user.id) referred_by = r.id;
+      localStorage.removeItem("gw_ref");
+    }
+  } catch {}
+  const fallback: any = { id: user.id, email: user.email ?? null, name };
+  if (referred_by) fallback.referred_by = referred_by;
   await supabase.from("profiles").upsert(fallback);
   syncProfileToLocal(fallback);
   return fallback as ProfileRow;
