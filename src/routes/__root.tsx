@@ -19,6 +19,7 @@ import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
+import { hasLiveAuthSession } from "../lib/auth-session";
 
 function NotFoundComponent() {
   return (
@@ -223,7 +224,7 @@ function RootComponent() {
 
     // If a session already exists at mount, start app-only effects without blocking route rendering.
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) startAppEffects();
+      if (data.session?.user && hasLiveAuthSession()) startAppEffects();
     }).catch(() => undefined);
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {

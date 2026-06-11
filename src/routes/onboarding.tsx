@@ -7,6 +7,7 @@ import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
+import { getCurrentUserOrClear } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Witaj w GymWrld" }] }),
@@ -39,10 +40,10 @@ function Onboarding() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { navigate({ to: "/auth", search: { mode: "signup" }, replace: true }); return; }
-      setEmail((current) => current || data.user?.email || "");
-      ensureCloudProfile(data.user).then((profile) => {
+    getCurrentUserOrClear({ requireLiveSession: true }).then((user) => {
+      if (!user) { navigate({ to: "/auth", search: { mode: "signup" }, replace: true }); return; }
+      setEmail((current) => current || user.email || "");
+      ensureCloudProfile(user).then((profile) => {
         if (isProfileComplete(profile)) navigate({ to: "/", replace: true });
         else setStep((current) => Math.max(1, current));
       });
