@@ -64,7 +64,10 @@ function Index() {
         const cloudProfile = await withTimeout(ensureCloudProfile(user).catch(() => null));
         syncLocalState().catch(() => undefined);
         if (cancelled) return;
-        if (cloudProfile && !isProfileComplete(cloudProfile)) {
+        const locallyOnboarded = localStorage.getItem("gw_onboarded") === "1";
+        if (!cloudProfile && !locallyOnboarded) {
+          navigate({ to: "/onboarding", replace: true });
+        } else if (cloudProfile && !isProfileComplete(cloudProfile)) {
           navigate({ to: "/onboarding", replace: true });
         } else {
           setAuthChecked(true);
