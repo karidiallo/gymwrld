@@ -17,7 +17,6 @@ const MODULE_KEYS = [
   ["street", "gw_street"],
   ["avatar", "gw_avatar"],
   ["nutrition", "gw_nutrition"],
-  ["cycle_enabled", "gw_cycle_enabled"],
 ] as const;
 
 const USER_TAG_KEY = "gw_last_user_id";
