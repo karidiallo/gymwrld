@@ -125,12 +125,17 @@ export function installAchievementBridge() {
   if (typeof window === "undefined") return () => {};
   const handler = (e: any) => {
     const d = e.detail ?? {};
-    pushNotif({
+    // Add to feed silently (no toast) — CelebrationModal renders the big medal popup.
+    const item: Notif = {
+      id: crypto.randomUUID?.() ?? String(Math.random()).slice(2),
+      ts: Date.now(),
+      read: false,
       kind: "achievement",
       title: `Osiągnięcie: ${d.title}`,
       body: `+${d.xp} XP odblokowane`,
       emoji: "🏆",
-    });
+    };
+    writeNotifs([item, ...readNotifs()]);
   };
   window.addEventListener("gw_achievement", handler as any);
   return () => window.removeEventListener("gw_achievement", handler as any);
