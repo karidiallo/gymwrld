@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, LogOut, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
@@ -27,50 +27,16 @@ function AuthPage() {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [stayLogged, setStayLogged] = useState(true);
-  const [existing, setExisting] = useState<{ name?: string; email?: string; avatarUrl?: string } | null>(null);
+  const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
+  const cleanEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      // Explicit signup intent — always show the signup form, never the "continue as" card.
-      if (initialMode === "signup") {
-        setExisting(null);
-        return;
-      }
-      const user = await getCurrentUserOrClear();
-      if (cancelled) return;
-      const persist = typeof window !== "undefined" && localStorage.getItem("gw_session_persist") === "1";
-      if (user) {
-        if (!persist) {
-          // User opted out of "Remember me" — drop the session.
-          await clearAuthSession();
-          setExisting(null);
-        } else {
-          const meta: any = user.user_metadata ?? {};
-          setExisting({
-            name: meta.full_name ?? meta.name ?? user.email?.split("@")[0],
-            email: user.email ?? undefined,
-            avatarUrl: meta.avatar_url ?? meta.picture,
-          });
-        }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [initialMode]);
-
-  const continueAs = async () => {
-    const user = await getCurrentUserOrClear();
-    if (user) navigate({ to: await getPostAuthDestination(user) });
-    else setExisting(null);
-  };
-
-  const switchAccount = async () => {
-    await clearAuthSession();
-    setExisting(null);
+  const switchMode = (next: "signin" | "signup" | "reset") => {
+    setMode(next);
+    setSignupPendingEmail(null);
   };
 
   const signInGoogle = async () => {
@@ -80,7 +46,10 @@ function AuthPage() {
         if (stayLogged) localStorage.setItem("gw_session_persist", "1");
         else localStorage.removeItem("gw_session_persist");
       }
-      const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const r = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: { prompt: "select_account" },
+      });
       if (r.error) {
         toast.error("Google: " + r.error.message);
         return;
@@ -92,7 +61,7 @@ function AuthPage() {
   };
 
   const submit = async () => {
-    if (!email.includes("@")) return toast.error("Podaj poprawny e-mail");
+    if (!cleanEmail.includes("@")) return toast.error("Podaj poprawny e-mail");
     setBusy(true);
     try {
       if (typeof window !== "undefined") {
@@ -100,23 +69,25 @@ function AuthPage() {
         else localStorage.removeItem("gw_session_persist");
       }
       if (mode === "reset") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
           redirectTo: `${window.location.origin}/auth?recovery=1`,
         });
         if (error) throw error;
-        toast.success(`Link do resetu wysłany na ${email}`);
-        setMode("signin");
+        toast.success(`Link do resetu wysłany na ${cleanEmail}`);
+        switchMode("signin");
         return;
       }
       if (password.length < 8) return toast.error("Hasło musi mieć min. 8 znaków");
       if (mode === "signin") {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) throw error;
         toast.success("Zalogowano");
         if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
       } else {
+        await clearAuthSession();
         const { data, error } = await supabase.auth.signUp({
-          email, password,
+          email: cleanEmail,
+          password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
@@ -124,53 +95,22 @@ function AuthPage() {
           toast.success("Konto utworzone");
           navigate({ to: await getPostAuthDestination(data.session.user) });
         } else {
-          toast.success("Konto utworzone — potwierdź e-mail, potem wróć do logowania");
-          setMode("signin");
+          setSignupPendingEmail(cleanEmail);
+          toast.success("Konto utworzone — sprawdź e-mail aktywacyjny");
         }
       }
     } catch (e: any) {
-      const msg = e?.message ?? "Coś poszło nie tak";
-      toast.error(msg.includes("Email not confirmed") ? "Najpierw potwierdź e-mail z wiadomości aktywacyjnej." : msg);
+      const msg = String(e?.message ?? "Coś poszło nie tak");
+      const friendly = msg.includes("Email not confirmed")
+        ? "Najpierw potwierdź e-mail z wiadomości aktywacyjnej."
+        : msg.includes("weak") || msg.includes("pwned")
+          ? "To hasło jest zbyt słabe lub znane z wycieków — wybierz mocniejsze, unikalne hasło."
+          : msg.includes("Invalid login credentials")
+            ? "Nieprawidłowy e-mail lub hasło."
+            : msg;
+      toast.error(friendly);
     } finally { setBusy(false); }
   };
-
-  if (existing) {
-    const initials = (existing.name ?? existing.email ?? "?").slice(0, 1).toUpperCase();
-    return (
-      <main className="relative min-h-screen bg-black px-5 pt-10 pb-12 text-white">
-        <div className="mx-auto flex max-w-[420px] flex-col items-center pt-10">
-          <img src={logoAsset.url} alt="GymWrld" className="w-[40%] max-w-[180px]" />
-          <h1 className="mt-10 font-display text-2xl">Witaj z powrotem 👋</h1>
-          <p className="mt-1 text-center text-xs text-muted-foreground">Kontynuuj jako poprzednio zalogowane konto.</p>
-
-          <button
-            onClick={continueAs}
-            className="mt-8 flex w-full items-center gap-4 rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 text-left transition active:scale-[0.99]"
-          >
-            {existing.avatarUrl ? (
-              <img src={existing.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
-            ) : (
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-lg font-semibold text-black">
-                {initials}
-              </div>
-            )}
-            <div className="flex-1">
-              <p className="text-sm font-semibold">{existing.name ?? "Twoje konto"}</p>
-              <p className="text-[11px] text-muted-foreground">{existing.email}</p>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </button>
-
-          <button
-            onClick={switchAccount}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-transparent px-5 py-3 text-sm text-muted-foreground ring-1 ring-white/10 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" /> Zaloguj się jako ktoś inny
-          </button>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="relative min-h-screen bg-black px-5 pt-10 pb-12 text-white">
@@ -188,11 +128,11 @@ function AuthPage() {
         {mode !== "reset" && (
           <div className="mt-8 grid w-full grid-cols-2 rounded-2xl bg-white/5 p-1 ring-1 ring-white/10">
             <button
-              onClick={() => setMode("signin")}
+              onClick={() => switchMode("signin")}
               className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signin" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
             >Zaloguj</button>
             <button
-              onClick={() => setMode("signup")}
+              onClick={() => switchMode("signup")}
               className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signup" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
             >Utwórz konto</button>
           </div>
@@ -213,6 +153,22 @@ function AuthPage() {
           {mode !== "reset" && (
             <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
               <span className="h-px flex-1 bg-white/10" /> lub e-mail <span className="h-px flex-1 bg-white/10" />
+            </div>
+          )}
+          {signupPendingEmail && mode === "signup" && (
+            <div className="rounded-2xl border border-[var(--lime)]/30 bg-[var(--lime)]/10 p-4 text-left">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--lime)]" />
+                <div>
+                  <p className="text-sm font-semibold text-white">Konto utworzone</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Sprawdź skrzynkę {signupPendingEmail}, potwierdź e-mail i wróć tutaj do logowania.
+                  </p>
+                  <button type="button" onClick={() => switchMode("signin")} className="mt-3 text-xs font-semibold text-[var(--lime)]">
+                    Przejdź do logowania
+                  </button>
+                </div>
+              </div>
             </div>
           )}
           <div className="flex items-center gap-2 rounded-2xl bg-white/5 ring-1 ring-white/10 px-4 py-3">
@@ -247,15 +203,15 @@ function AuthPage() {
         <div className="mt-6 flex flex-col items-center gap-2 text-xs">
           {mode === "signin" && (
             <>
-              <button onClick={() => setMode("reset")} className="text-muted-foreground hover:text-white">Zapomniałem hasła</button>
-              <p className="text-muted-foreground">Nie masz konta? <button onClick={() => setMode("signup")} className="text-[var(--lime)]">Zarejestruj się</button></p>
+              <button onClick={() => switchMode("reset")} className="text-muted-foreground hover:text-white">Zapomniałem hasła</button>
+              <p className="text-muted-foreground">Nie masz konta? <button onClick={() => switchMode("signup")} className="text-[var(--lime)]">Zarejestruj się</button></p>
             </>
           )}
           {mode === "signup" && (
-            <p className="text-muted-foreground">Masz już konto? <button onClick={() => setMode("signin")} className="text-[var(--lime)]">Zaloguj się</button></p>
+            <p className="text-muted-foreground">Masz już konto? <button onClick={() => switchMode("signin")} className="text-[var(--lime)]">Zaloguj się</button></p>
           )}
           {mode === "reset" && (
-            <button onClick={() => setMode("signin")} className="text-[var(--lime)]">Wróć do logowania</button>
+            <button onClick={() => switchMode("signin")} className="text-[var(--lime)]">Wróć do logowania</button>
           )}
         </div>
       </div>
