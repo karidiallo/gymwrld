@@ -18,7 +18,7 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { CoachFAB } from "../components/CoachFAB";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
-import { clearAuthSession, getCurrentUserOrClear } from "../lib/auth-session";
+import { getCurrentUserOrClear } from "../lib/auth-session";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
