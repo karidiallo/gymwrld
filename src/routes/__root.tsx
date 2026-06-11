@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { CelebrationModal } from "../components/CelebrationModal";
+import { CoachFAB } from "../components/CoachFAB";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
@@ -289,6 +290,7 @@ function RootComponent() {
         </div>
       )}
       <BottomNav />
+      <CoachFAB />
       <Toaster position="top-center" theme="dark" />
       <CelebrationModal />
     </QueryClientProvider>

@@ -153,8 +153,8 @@ export function StreakCarousel() {
                   {c.emoji}
                 </div>
                 <div className="flex-1 text-background">
-                  <p className="font-display text-lg leading-tight drop-shadow">{c.title}</p>
-                  <p className="text-[11px] opacity-90">{c.subtitle}</p>
+                  <p className="text-base font-bold leading-tight drop-shadow normal-case">{c.title}</p>
+                  <p className="text-[11px] opacity-90 normal-case">{c.subtitle}</p>
                 </div>
                 <c.Icon className="h-5 w-5 text-background/80" />
               </div>
