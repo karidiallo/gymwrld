@@ -1,6 +1,8 @@
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+const LIVE_SESSION_KEY = "gw_live_session";
+
 function isInvalidStoredSession(error: unknown) {
   const message = error instanceof Error ? error.message : String(error ?? "");
   if (/auth session missing|session_missing|missing session|no session/i.test(message)) return false;
@@ -29,6 +31,18 @@ export async function clearAuthSession() {
     // Local storage cleanup below is the source of truth for broken/stale sessions.
   }
   clearStoredAuthSession();
+}
+
+export function markLiveAuthSession() {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(LIVE_SESSION_KEY, "1");
+  localStorage.removeItem("gw_session_persist");
+}
+
+export async function clearAuthIfNewBrowserSession() {
+  if (typeof window === "undefined") return;
+  if (sessionStorage.getItem(LIVE_SESSION_KEY) === "1") return;
+  await clearAuthSession();
 }
 
 export async function getCurrentUserOrClear(): Promise<User | null> {
