@@ -21,7 +21,6 @@ import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
 import { getHostKind } from "../lib/host";
-import { useNavigate } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -143,7 +142,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const navigate = useNavigate();
   const isStandalone =
     pathname.startsWith("/welcome") ||
     pathname.startsWith("/privacy") ||
@@ -237,7 +235,7 @@ function RootComponent() {
       window.clearInterval(idleId);
       tracker?.stop();
     };
-  }, [router, queryClient, pathname, navigate]);
+  }, [router, queryClient, pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
