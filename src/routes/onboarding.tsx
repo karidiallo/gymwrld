@@ -33,7 +33,9 @@ function Onboarding() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [level, setLevel] = useState<Level | null>(null);
   const [freq, setFreq] = useState(3);
-  const [cycleTracker, setCycleTracker] = useState<boolean | null>(null);
+  // For NB users we default to ON — opt-out instead of opt-in (previous flow lost
+  // the selection too easily and women/NB users ended up with the tracker off).
+  const [cycleTracker, setCycleTracker] = useState<boolean | null>(true);
   const [consentPrivacy, setConsentPrivacy] = useState(false);
   const [consentTerms, setConsentTerms] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
