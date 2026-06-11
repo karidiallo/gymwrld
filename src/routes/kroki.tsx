@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { ChevronLeft, Trophy, Smartphone, Gift, Play, Square, Info } from "lucide-react";
 import { Ring } from "@/components/Ring";
 import {
-  readSteps, writeSteps, startTracking, requestMotionPermission, strideMetres,
-  type StepsState, type StepTracker,
+  readSteps, writeSteps, requestMotionPermission,
+  ensureGlobalTracking, stopGlobalTracking, isGlobalTracking, getGlobalTrackerStatus,
+  type StepsState,
 } from "@/lib/steps";
 
 export const Route = createFileRoute("/kroki")({
@@ -23,10 +24,9 @@ const REWARDS = [
 
 function Steps() {
   const [state, setState] = useState<StepsState>(() => readSteps());
-  const [tracking, setTracking] = useState(false);
+  const [tracking, setTracking] = useState<boolean>(() => isGlobalTracking());
   const [accelOn, setAccelOn] = useState(false);
   const [gpsOn, setGpsOn] = useState(false);
-  const trackerRef = useRef<StepTracker | null>(null);
 
   useEffect(() => {
     const onUp = () => setState(readSteps());
@@ -34,36 +34,28 @@ function Steps() {
     return () => window.removeEventListener("gw_steps_update", onUp);
   }, []);
 
-  useEffect(() => () => { trackerRef.current?.stop(); }, []);
-
-  // Auto-start on mount if the user previously enabled the autostart preference
-  // and the browser already has motion/geolocation permission.
+  // Auto-start on mount if the user previously enabled autostart and the
+  // browser already granted motion permission (Android / desktop). On iOS the
+  // first start still needs a tap (Apple requires a user gesture).
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (isGlobalTracking()) { setTracking(true); return; }
     if (localStorage.getItem("gw_steps_autostart") !== "1") return;
-    if (trackerRef.current) return;
-    (async () => {
-      try {
-        // @ts-expect-error iOS-only API
-        const needsAsk = typeof window.DeviceMotionEvent?.requestPermission === "function";
-        if (needsAsk) return; // iOS requires a tap — don't auto-prompt
-      } catch {}
-      let stride = 0.75;
-      try {
-        const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
-        const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
-        stride = strideMetres(Number(b.height || p.height), p.gender);
-      } catch {}
-      trackerRef.current = startTracking({ strideM: stride, onUpdate: setState });
-      setTracking(true);
-    })();
+    try {
+      // @ts-expect-error iOS-only API
+      const needsAsk = typeof window.DeviceMotionEvent?.requestPermission === "function";
+      if (needsAsk) return; // iOS requires a tap — don't auto-prompt
+    } catch {}
+    ensureGlobalTracking();
+    setTracking(true);
   }, []);
 
   useEffect(() => {
     if (!tracking) return;
     const id = setInterval(() => {
-      const t = trackerRef.current;
-      if (t) { setAccelOn(t.isAccel()); setGpsOn(t.isGps()); }
+      const s = getGlobalTrackerStatus();
+      setAccelOn(s.accel); setGpsOn(s.gps);
+      setState(readSteps());
     }, 1500);
     return () => clearInterval(id);
   }, [tracking]);
@@ -75,24 +67,15 @@ function Steps() {
     } else if (perm === "unsupported") {
       toast("Brak czujnika ruchu — liczę tylko po GPS.");
     }
-    let stride = 0.75;
-    try {
-      const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
-      const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
-      stride = strideMetres(Number(b.height || p.height), p.gender);
-    } catch {}
-    trackerRef.current = startTracking({ strideM: stride, onUpdate: setState });
+    ensureGlobalTracking();
     setTracking(true);
-    localStorage.setItem("gw_steps_autostart", "1");
-    toast.success("Krokomierz włączony", { description: "Schowaj telefon do kieszeni — liczę kroki w tle." });
+    toast.success("Krokomierz włączony", { description: "Chodzi w tle — działa też po przejściu do innych zakładek aplikacji." });
   };
 
   const stop = () => {
-    trackerRef.current?.stop();
-    trackerRef.current = null;
+    stopGlobalTracking();
     setTracking(false);
     setAccelOn(false); setGpsOn(false);
-    localStorage.removeItem("gw_steps_autostart");
     toast("Krokomierz zatrzymany");
   };
 

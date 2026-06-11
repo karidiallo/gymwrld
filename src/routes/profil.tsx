@@ -65,7 +65,22 @@ function Profil() {
       if (rw) setWeightLog(JSON.parse(rw));
     } catch {}
     try {
-      setCycleEnabled(localStorage.getItem("gw_cycle_enabled") === "1");
+      // Auto-enable cycle tracker for women and non-binary users if no explicit pref.
+      // (Previously NB users had to manually flip the toggle after onboarding.)
+      const explicit = localStorage.getItem("gw_cycle_enabled");
+      if (explicit === null) {
+        const rp = localStorage.getItem("gw_profile");
+        const g = rp ? (JSON.parse(rp).gender as string | null) : null;
+        const wantsDefault = g === "k" || g === "nb";
+        if (wantsDefault) {
+          localStorage.setItem("gw_cycle_enabled", "1");
+          setCycleEnabled(true);
+        } else {
+          setCycleEnabled(false);
+        }
+      } else {
+        setCycleEnabled(explicit === "1");
+      }
     } catch {}
     try { setPushEnabled(isPushEnabled()); } catch {}
     const onUpd = () => {

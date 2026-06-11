@@ -18,7 +18,8 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
-import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
+import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking, requestMotionPermission } from "../lib/steps";
+import { toast } from "sonner";
 import { hasLiveAuthSession } from "../lib/auth-session";
 
 function NotFoundComponent() {
@@ -179,7 +180,6 @@ function RootComponent() {
     // AND we're not on a public/auth route (no notifications during signup/login).
     let offAchv: (() => void) | undefined;
     let offWater: (() => void) | undefined;
-    let tracker: StepTracker | null = null;
     let idleId: number | undefined;
     let onVis: (() => void) | undefined;
     let started = false;
@@ -194,28 +194,73 @@ function RootComponent() {
       onVis = () => { if (document.visibilityState === "visible") pingActivity(); };
       document.addEventListener("visibilitychange", onVis);
 
-      // Auto-step tracker (24h idle window). Starts only when prior permission granted.
+      // Auto-step tracker (24h idle window). Global singleton — survives route
+      // changes, so switching tabs inside the app keeps counting. On iOS, the
+      // first run still needs a tap (permission must come from user gesture);
+      // the /kroki screen shows a prompt on first visit, after that we
+      // auto-start on every login.
       (async () => {
         if (typeof window === "undefined") return;
         if (isIdleStale()) { localStorage.removeItem("gw_steps_autostart"); return; }
-        if (localStorage.getItem("gw_steps_autostart") !== "1") return;
+        const autostart = localStorage.getItem("gw_steps_autostart") === "1";
+        // Android / desktop: no permission gesture needed — start silently.
+        let needsGesture = false;
         try {
           // @ts-expect-error iOS-only
-          if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
+          needsGesture = typeof window.DeviceMotionEvent?.requestPermission === "function";
         } catch {}
-        let stride = 0.75;
-        try {
-          const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
-          const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
-          stride = strideMetres(Number(b.height || p.height), p.gender);
-        } catch {}
-        tracker = startTracking({ strideM: stride });
+        if (autostart && !needsGesture) {
+          ensureGlobalTracking();
+          return;
+        }
+        if (autostart && needsGesture) {
+          // iOS: previously enabled. Re-prompt once per session because Apple
+          // requires a user gesture to access DeviceMotion even after consent.
+          if (sessionStorage.getItem("gw_steps_prompted") === "1") return;
+          sessionStorage.setItem("gw_steps_prompted", "1");
+          toast("Włączyć krokomierz?", {
+            description: "Liczy kroki w tle, dopóki używasz aplikacji.",
+            duration: 12000,
+            action: {
+              label: "Włącz",
+              onClick: async () => {
+                const perm = await requestMotionPermission();
+                if (perm === "denied") {
+                  toast.error("Brak zgody — liczymy tylko po GPS.");
+                }
+                ensureGlobalTracking();
+              },
+            },
+          });
+          return;
+        }
+        // First-ever visit (no autostart pref). Ask once.
+        if (sessionStorage.getItem("gw_steps_prompted") === "1") return;
+        if (localStorage.getItem("gw_steps_optout") === "1") return;
+        sessionStorage.setItem("gw_steps_prompted", "1");
+        toast("Włącz krokomierz", {
+          description: "Automatycznie zlicza kroki, gdy używasz GymWrld.",
+          duration: 15000,
+          action: {
+            label: "Włącz",
+            onClick: async () => {
+              const perm = await requestMotionPermission();
+              if (perm === "denied") {
+                toast.error("Brak zgody — liczymy tylko po GPS.");
+              }
+              ensureGlobalTracking();
+            },
+          },
+          cancel: {
+            label: "Nie teraz",
+            onClick: () => { localStorage.setItem("gw_steps_optout", "1"); },
+          },
+        });
       })();
 
       idleId = window.setInterval(() => {
         if (isIdleStale()) {
-          tracker?.stop();
-          tracker = null;
+          stopGlobalTracking();
           localStorage.removeItem("gw_steps_autostart");
           pushNotif({ kind: "system", title: "Krokomierz uśpiony", body: "Nie logowałaś się 24h — wróć aby wznowić.", emoji: "😴" });
         }
@@ -230,6 +275,7 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
+        stopGlobalTracking();
         clearLocalAppState();
         if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
@@ -257,7 +303,8 @@ function RootComponent() {
       offWater?.();
       if (onVis) document.removeEventListener("visibilitychange", onVis);
       if (idleId !== undefined) window.clearInterval(idleId);
-      tracker?.stop();
+      // Intentionally NOT stopping the global tracker here — it must outlive
+      // route changes. It's torn down only on sign-out / idle.
     };
   }, [queryClient, pathname, isPublicRoute]);
 
