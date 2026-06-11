@@ -139,9 +139,21 @@ function RatingsSection({ logs }: { logs: any[] }) {
   const rated = logs.filter((l) => typeof l.rating === "number" && l.rating > 0);
   const last7 = rated.filter((l) => now - l.ts < 7 * 86400_000);
   const last30 = rated.filter((l) => now - l.ts < 30 * 86400_000);
+  const prev7 = rated.filter((l) => { const d = now - l.ts; return d >= 7 * 86400_000 && d < 14 * 86400_000; });
+  const prev30 = rated.filter((l) => { const d = now - l.ts; return d >= 30 * 86400_000 && d < 60 * 86400_000; });
   const avg = (xs: any[]) => xs.length ? (xs.reduce((s, l) => s + l.rating, 0) / xs.length) : 0;
   const dist = [1, 2, 3, 4, 5].map((star) => rated.filter((l) => l.rating === star).length);
   const max = Math.max(1, ...dist);
+  const delta7 = avg(last7) - avg(prev7);
+  const delta30 = avg(last30) - avg(prev30);
+  const fmtDelta = (d: number, prevCount: number) => {
+    if (prevCount === 0) return { txt: "—", cls: "text-muted-foreground" };
+    const arrow = d > 0.05 ? "↑" : d < -0.05 ? "↓" : "→";
+    const cls = d > 0.05 ? "text-[var(--lime)]" : d < -0.05 ? "text-[var(--magenta)]" : "text-muted-foreground";
+    return { txt: `${arrow} ${Math.abs(d).toFixed(1)}`, cls };
+  };
+  const d7 = fmtDelta(delta7, prev7.length);
+  const d30 = fmtDelta(delta30, prev30.length);
   if (rated.length === 0) return (
     <>
       <h3 className="mb-3 mt-7 text-lg font-semibold">Twoje zadowolenie</h3>
@@ -155,8 +167,16 @@ function RatingsSection({ logs }: { logs: any[] }) {
       <h3 className="mb-3 mt-7 text-lg font-semibold">Twoje zadowolenie</h3>
       <div className="rounded-2xl glass p-4">
         <div className="grid grid-cols-2 gap-3">
-          <KPI label="Średnia 7 dni" value={`${avg(last7).toFixed(1)}★`} />
-          <KPI label="Średnia 30 dni" value={`${avg(last30).toFixed(1)}★`} />
+          <div className="rounded-2xl glass p-3.5 text-center">
+            <p className="font-display text-2xl">{avg(last7).toFixed(1)}★</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Średnia 7 dni</p>
+            <p className={`mt-1 text-[10px] font-semibold ${d7.cls}`}>vs poprz. {d7.txt}</p>
+          </div>
+          <div className="rounded-2xl glass p-3.5 text-center">
+            <p className="font-display text-2xl">{avg(last30).toFixed(1)}★</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Średnia 30 dni</p>
+            <p className={`mt-1 text-[10px] font-semibold ${d30.cls}`}>vs poprz. {d30.txt}</p>
+          </div>
         </div>
         <div className="mt-4 flex items-end justify-between gap-2">
           {dist.map((count, i) => (
