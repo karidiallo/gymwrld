@@ -28,7 +28,6 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [stayLogged, setStayLogged] = useState(true);
   const [existing, setExisting] = useState<{ name?: string; email?: string; avatarUrl?: string } | null>(null);
-  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     setMode(initialMode);
@@ -54,7 +53,6 @@ function AuthPage() {
           });
         }
       }
-      setChecking(false);
     })();
     return () => { cancelled = true; };
   }, []);
