@@ -30,6 +30,7 @@ import { Route as GuruRouteImport } from './routes/guru'
 import { Route as FizjoRouteImport } from './routes/fizjo'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -141,6 +142,11 @@ const CwiczeniaRoute = CwiczeniaRouteImport.update({
   path: '/cwiczenia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BiegiRoute = BiegiRouteImport.update({
   id: '/biegi',
   path: '/biegi',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
+  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
+  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
+  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/biegi'
+    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/biegi'
+    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/biegi'
+    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -344,6 +356,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   BiegiRoute: typeof BiegiRoute
+  CoachRoute: typeof CoachRoute
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
   FizjoRoute: typeof FizjoRoute
@@ -518,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CwiczeniaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/biegi': {
       id: '/biegi'
       path: '/biegi'
@@ -560,6 +580,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   BiegiRoute: BiegiRoute,
+  CoachRoute: CoachRoute,
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
   FizjoRoute: FizjoRoute,
@@ -587,3 +608,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
