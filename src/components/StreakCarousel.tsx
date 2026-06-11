@@ -52,15 +52,25 @@ export function StreakCarousel() {
   }, []);
 
   const cards: Card[] = [
-    {
-      id: "streak",
-      emoji: "🔥",
-      title: streak > 0 ? `${streak}-dniowy streak` : "Zacznij swój streak",
-      subtitle: streak > 0 ? "Nie przerywaj passy — trenuj dziś" : "Pierwszy trening = pierwszy dzień",
-      bg: "from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]",
-      to: "/trening",
-      Icon: Flame,
-    },
+    streak > 0
+      ? {
+          id: "streak",
+          emoji: "🔥",
+          title: `${streak}-dniowy streak`,
+          subtitle: "Nie przerywaj passy — trenuj dziś",
+          bg: "from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)]",
+          to: "/trening",
+          Icon: Flame,
+        }
+      : {
+          id: "streak-start",
+          emoji: "✨",
+          title: "Witaj w GymWRLD",
+          subtitle: "Zaloguj pierwszy trening i odpal swój streak",
+          bg: "from-[var(--violet)] via-[var(--magenta)] to-[var(--orange)]",
+          to: "/trening",
+          Icon: Flame,
+        },
     {
       id: "motivation",
       emoji: "⚡",
