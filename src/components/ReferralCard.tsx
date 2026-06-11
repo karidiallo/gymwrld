@@ -30,7 +30,7 @@ export function ReferralCard() {
     } catch { toast.error("Nie udało się skopiować"); }
   };
   const share = async () => {
-    const text = `Trenuj ze mną na GymWRLD 💪 Zgarnij bonus startowy → ${link}`;
+    const text = `Trenuj ze mną na GymWRLD 💪 Zgarnij bonus startowy → ${link}\n\n#treningPL #dietaPL #siłownia #motywacja #streakchallenge`;
     try {
       if (navigator.share) await navigator.share({ title: "GymWRLD", text, url: link });
       else copy();
@@ -46,7 +46,7 @@ export function ReferralCard() {
         </div>
         <div className="flex-1">
           <p className="font-display text-lg leading-tight">Zaproś znajomych</p>
-          <p className="text-[12px] text-foreground/80">+500 XP za każdą osobę która zacznie trenować</p>
+          <p className="text-[12px] text-foreground/80">+1500 XP za każdą osobę która zacznie trenować</p>
         </div>
       </div>
       <div className="relative mt-4 flex items-center gap-2 rounded-2xl bg-black/40 px-4 py-3 ring-1 ring-white/10">
