@@ -145,7 +145,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isStandalone =
     pathname.startsWith("/welcome") ||
@@ -249,7 +248,6 @@ function RootComponent() {
         clearLocalAppState();
         if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
-        router.invalidate();
         return;
       }
       if (!session?.user) return;
@@ -267,8 +265,6 @@ function RootComponent() {
           }
         }
       }
-      router.invalidate();
-      queryClient.invalidateQueries();
     });
     return () => {
       sub.subscription.unsubscribe();
@@ -278,7 +274,7 @@ function RootComponent() {
       if (idleId !== undefined) window.clearInterval(idleId);
       tracker?.stop();
     };
-  }, [router, queryClient, pathname, isPublicRoute]);
+  }, [queryClient, pathname, isPublicRoute]);
 
   return (
     <QueryClientProvider client={queryClient}>

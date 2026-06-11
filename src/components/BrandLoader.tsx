@@ -3,12 +3,7 @@ import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 export function BrandLoader({ label = "Ładowanie…" }: { label?: string }) {
   return (
     <div className="grid place-items-center py-10">
-      <img
-        src={logoAsset.url}
-        alt="GymWRLD"
-        className="h-14 w-auto animate-pulse"
-        style={{ filter: "drop-shadow(0 0 24px rgba(255,140,60,0.45))" }}
-      />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-[var(--lime)]" aria-hidden />
       <p className="mt-3 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">{label}</p>
     </div>
   );
