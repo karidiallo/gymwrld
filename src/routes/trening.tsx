@@ -11,6 +11,7 @@ import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock,
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
+import { ROUTINES } from "@/lib/routines";
 import { LogDetail } from "@/components/LogDetail";
 import { EntryActions } from "@/components/EntryActions";
 
@@ -146,6 +147,20 @@ function Trening() {
     setSession({ title: hero.main, exercises: defaultPushDay.map((e) => ({ ...e })) });
   };
 
+  const startPlan = (planTitle: string) => {
+    const tpl = ROUTINES[planTitle];
+    if (!tpl || tpl.length === 0) {
+      // outdoor / cardio plans → use default cardio toast
+      toast("Ten plan jest cardio — zaloguj w zakładce Biegi/Outdoor.");
+      return;
+    }
+    const exs: Exercise[] = tpl.map((b, i) => {
+      const r = recommendForUser(b.weight, b.sets, b.reps, profile);
+      return { id: `e${i + 1}`, libId: b.libId, name: b.name, sets: r.sets, reps: r.reps, weight: r.weight, kind: "normal", restSec: recommendRest(b.restSec, profile.level) };
+    });
+    setSession({ title: planTitle, exercises: exs });
+  };
+
   return (
     <main className="px-5 pt-6">
       <header className="flex items-start justify-between">
@@ -233,7 +248,7 @@ function Trening() {
         {plans[cat].map((p, i) => (
           <button
             key={p.title}
-            onClick={() => setSession({ title: p.title, exercises: defaultPushDay.map((e) => ({ ...e })) })}
+            onClick={() => startPlan(p.title)}
             className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left hover:bg-white/[0.04]"
           >
             <div className={`grid h-11 w-11 place-items-center rounded-xl text-background ${["bg-[var(--magenta)]","bg-[var(--orange)]","bg-[var(--lime)]"][i % 3]}`}>
