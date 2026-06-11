@@ -5,16 +5,22 @@ import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, LogOut } from "lucide
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
+import { clearAuthSession, getCurrentUserOrClear } from "@/lib/auth-session";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Zaloguj się — GymWrld" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search.mode === "signup" ? "signup" : undefined,
+    recovery: search.recovery === "1" ? "1" : undefined,
+  }),
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
-  const initialMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "signin";
+  const search = Route.useSearch();
+  const initialMode = search.recovery === "1" ? "reset" : search.mode === "signup" ? "signup" : "signin";
   const [mode, setMode] = useState<"signin" | "signup" | "reset">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,21 +31,25 @@ function AuthPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.auth.getUser();
+      const user = await getCurrentUserOrClear();
       if (cancelled) return;
       const persist = typeof window !== "undefined" && localStorage.getItem("gw_session_persist") === "1";
-      if (data.user) {
+      if (user) {
         if (!persist) {
           // User opted out of "Remember me" — drop the session.
-          try { await supabase.auth.signOut(); } catch {}
+          await clearAuthSession();
           setExisting(null);
         } else {
-          const meta: any = data.user.user_metadata ?? {};
+          const meta: any = user.user_metadata ?? {};
           setExisting({
-            name: meta.full_name ?? meta.name ?? data.user.email?.split("@")[0],
-            email: data.user.email ?? undefined,
+            name: meta.full_name ?? meta.name ?? user.email?.split("@")[0],
+            email: user.email ?? undefined,
             avatarUrl: meta.avatar_url ?? meta.picture,
           });
         }
@@ -50,13 +60,13 @@ function AuthPage() {
   }, []);
 
   const continueAs = async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
+    const user = await getCurrentUserOrClear();
+    if (user) navigate({ to: await getPostAuthDestination(user) });
+    else setExisting(null);
   };
 
   const switchAccount = async () => {
-    try { await supabase.auth.signOut(); } catch {}
-    if (typeof window !== "undefined") localStorage.removeItem("gw_session_persist");
+    await clearAuthSession();
     setExisting(null);
   };
 
@@ -73,8 +83,8 @@ function AuthPage() {
         return;
       }
       if (r.redirected) return;
-      const { data } = await supabase.auth.getUser();
-      if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
+      const user = await getCurrentUserOrClear();
+      if (user) navigate({ to: await getPostAuthDestination(user) });
     } finally { setBusy(false); }
   };
 
