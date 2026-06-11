@@ -49,7 +49,7 @@ function Onboarding() {
         if (isProfileComplete(profile)) navigate({ to: "/", replace: true });
         else setStep((current) => current === 0 ? 1 : current);
       });
-    });
+    }).catch(() => undefined);
   }, [navigate]);
 
   const finish = async () => {
@@ -599,7 +599,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
     if (!acceptedPrivacy) { toast.error("Zaakceptuj Politykę prywatności, aby kontynuować"); return; }
     setBusy(true);
     try {
-      const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth?oauth=1` });
       if (r.error) toast.error("Google: " + r.error.message);
       else if (!r.redirected) {
         const { data } = await supabase.auth.getUser();
@@ -630,7 +630,7 @@ function StepAuth({ email, setEmail, password, setPassword, stayLogged, setStayL
       const signUp = await supabase.auth.signUp({
         email: cleanEmail,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: `${window.location.origin}/auth?oauth=1` },
       });
       if (signUp.error) throw signUp.error;
       if (signUp.data.session?.user) {
