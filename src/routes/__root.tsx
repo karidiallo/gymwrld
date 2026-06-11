@@ -18,7 +18,7 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
-import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
+import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking, requestMotionPermission } from "../lib/steps";
 import { hasLiveAuthSession } from "../lib/auth-session";
 
 function NotFoundComponent() {
