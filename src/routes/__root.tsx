@@ -14,10 +14,12 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
-import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
+import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
+import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
+import { getHostKind } from "../lib/host";
 
 function NotFoundComponent() {
   return (
@@ -150,11 +152,53 @@ function RootComponent() {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     installLocalStateCloudSync();
-    const onAchv = (e: any) => {
-      const d = e.detail ?? {};
-      toast.success(`🏆 ${d.title}`, { description: `Osiągnięcie odblokowane · +${d.xp} XP` });
-    };
-    window.addEventListener("gw_achievement", onAchv as any);
+    const offAchv = installAchievementBridge();
+    const offWater = startWaterReminders();
+    pingActivity();
+    const onVis = () => { if (document.visibilityState === "visible") pingActivity(); };
+    document.addEventListener("visibilitychange", onVis);
+
+    // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing)
+    if (typeof window !== "undefined" && getHostKind() === "landing") {
+      if (!pathname.startsWith("/welcome") && !pathname.startsWith("/privacy")) {
+        window.location.replace("/welcome");
+        return;
+      }
+    }
+
+    // Auto-step tracker (24h idle window). Starts only when prior permission granted.
+    let tracker: StepTracker | null = null;
+    (async () => {
+      if (typeof window === "undefined") return;
+      if (isIdleStale()) {
+        localStorage.removeItem("gw_steps_autostart");
+        return;
+      }
+      if (localStorage.getItem("gw_steps_autostart") !== "1") return;
+      // iOS DeviceMotion needs a tap — skip auto-prompt
+      try {
+        // @ts-expect-error iOS-only
+        if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
+      } catch {}
+      let stride = 0.75;
+      try {
+        const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
+        const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
+        stride = strideMetres(Number(b.height || p.height), p.gender);
+      } catch {}
+      tracker = startTracking({ strideM: stride });
+    })();
+
+    // 24h idle auto-stop watcher: every 5 min, if stale, stop and clear flag
+    const idleId = window.setInterval(() => {
+      if (isIdleStale()) {
+        tracker?.stop();
+        tracker = null;
+        localStorage.removeItem("gw_steps_autostart");
+        pushNotif({ kind: "system", title: "Krokomierz uśpiony", body: "Nie logowałaś się 24h — wróć aby wznowić.", emoji: "😴" });
+      }
+    }, 5 * 60_000);
+
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
@@ -167,14 +211,30 @@ function RootComponent() {
       supabase.auth.getUser().then(({ data }) => {
         if (data.user) ensureCloudProfile(data.user).then(() => syncLocalState());
       });
+      // On login: mark activity and (if permission already granted) flag auto-start
+      pingActivity();
+      if (typeof window !== "undefined" && localStorage.getItem("gw_steps_autostart") !== "1") {
+        // We don't request permission here — that happens on first manual tap in /kroki
+        // But if permission already exists on Android/desktop, flip on autostart.
+        if ("DeviceMotionEvent" in window) {
+          // @ts-expect-error iOS-only
+          if (typeof window.DeviceMotionEvent?.requestPermission !== "function") {
+            localStorage.setItem("gw_steps_autostart", "1");
+          }
+        }
+      }
       router.invalidate();
       queryClient.invalidateQueries();
     });
     return () => {
       sub.subscription.unsubscribe();
-      window.removeEventListener("gw_achievement", onAchv as any);
+      offAchv();
+      offWater();
+      document.removeEventListener("visibilitychange", onVis);
+      window.clearInterval(idleId);
+      tracker?.stop();
     };
-  }, [router, queryClient]);
+  }, [router, queryClient, pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>

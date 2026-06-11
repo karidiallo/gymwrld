@@ -15,5 +15,20 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "widgets": [
+    {
+      "name": "GymWRLD Streak",
+      "short_name": "Streak",
+      "description": "Twój streak, motywator dnia i kroki.",
+      "tag": "gymwrld-streak",
+      "ms_ac_template": "/widget-streak.json",
+      "data": "/widget-streak.json",
+      "type": "application/json",
+      "screenshots": [],
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }],
+      "auth": false,
+      "update": 900
+    }
   ]
 }

@@ -14,6 +14,22 @@
  */
 
 const STORAGE_KEY = "gw_steps_v2";
+const ACTIVITY_KEY = "gw_last_activity";
+const IDLE_MS = 24 * 60 * 60 * 1000;
+
+/** Mark that the user opened the app — extends the 24h auto-stop window. */
+export function pingActivity() {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ACTIVITY_KEY, String(Date.now()));
+}
+
+/** Has the user been away longer than 24h since last activity? */
+export function isIdleStale(): boolean {
+  if (typeof window === "undefined") return false;
+  const v = Number(localStorage.getItem(ACTIVITY_KEY) || 0);
+  if (!v) return false;
+  return Date.now() - v > IDLE_MS;
+}
 
 export type StepsState = {
   today: number;        // total steps today (max of accel + gps)
