@@ -178,6 +178,7 @@ function RatingsSection({ logs }: { logs: any[] }) {
             <p className={`mt-1 text-[10px] font-semibold ${d30.cls}`}>vs poprz. {d30.txt}</p>
           </div>
         </div>
+        <Chart14Days logs={rated} />
         <div className="mt-4 flex items-end justify-between gap-2">
           {dist.map((count, i) => (
             <div key={i} className="flex flex-1 flex-col items-center gap-1">
@@ -194,5 +195,38 @@ function RatingsSection({ logs }: { logs: any[] }) {
         </div>
       </div>
     </>
+  );
+}
+
+function Chart14Days({ logs }: { logs: any[] }) {
+  const days: { label: string; avg: number; count: number }[] = [];
+  const now = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    const end = d.getTime() + 86400_000;
+    const day = logs.filter((l) => l.ts >= d.getTime() && l.ts < end);
+    const a = day.length ? day.reduce((s, l) => s + l.rating, 0) / day.length : 0;
+    days.push({ label: ["N","P","W","Ś","C","Pt","S"][d.getDay()], avg: a, count: day.length });
+  }
+  return (
+    <div className="mt-5">
+      <p className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Ocena · ostatnie 14 dni</p>
+      <div className="flex items-end justify-between gap-1">
+        {days.map((d, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1">
+            <div className="flex h-20 w-full items-end overflow-hidden rounded-sm bg-white/5">
+              <div
+                className="w-full bg-gradient-to-t from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] transition-all"
+                style={{ height: `${(d.avg / 5) * 100}%`, opacity: d.count ? 1 : 0.15 }}
+                title={d.count ? `${d.avg.toFixed(1)}★ (${d.count})` : "brak"}
+              />
+            </div>
+            <p className="text-[9px] text-muted-foreground">{d.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -97,7 +97,7 @@ const RECIPES: Recipe[] = [
     ingredients: ["150g czerwonej soczewicy", "Marchew, cebula, czosnek", "Mleczko kokosowe", "Curry"],
     steps: ["Podsmaż warzywa.", "Dodaj soczewicę i bulion.", "Gotuj 20 min.", "Dolej mleczko, dopraw."] },
   // —— więcej białkowych
-  { id: "wolowina-ryz", title: "Wołowina po orientalnu z ryżem", kcal: 580, time: 25, cat: "bialkowe", tags: ["bialkowe", "azjatycka"], macro: { p: 48, c: 60, f: 14 }, emoji: "🥩",
+  { id: "wolowina-ryz", title: "Wołowina po orientalsku z ryżem", kcal: 580, time: 25, cat: "bialkowe", tags: ["bialkowe", "azjatycka"], macro: { p: 48, c: 60, f: 14 }, emoji: "🥩",
     tier: "premium",
     ingredients: ["200g wołowiny", "100g ryżu", "Brokuł", "Sos sojowy, czosnek, imbir"],
     steps: ["Marynuj wołowinę 10 min.", "Smaż 5 min na woku.", "Dodaj warzywa.", "Podaj z ryżem."] },

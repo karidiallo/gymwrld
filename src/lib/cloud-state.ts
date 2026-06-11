@@ -5,7 +5,7 @@ const MODULE_KEYS = [
   ["achievements", "gw_achievements"],
   ["treadmill", "gw_treadmill"],
   ["diet", "gw_diet"],
-  ["steps", "gw_steps"],
+  ["steps", "gw_steps_v2"],
   ["mind", "gw_mind"],
   ["journal", "gw_journal"],
   ["tasks", "gw_tasks"],

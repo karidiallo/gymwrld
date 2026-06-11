@@ -172,6 +172,16 @@ function AuthPage() {
       <Link to="/welcome" className="absolute left-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10">
         <ArrowLeft className="h-4 w-4" />
       </Link>
+      {busy && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <img src={logoAsset.url} alt="GymWrld" className="h-16 w-auto animate-pulse" />
+            <p className="text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
+              {mode === "signup" ? "Tworzę konto…" : mode === "reset" ? "Wysyłam link…" : "Loguję…"}
+            </p>
+          </div>
+        </div>
+      )}
       <div className="mx-auto flex max-w-[420px] flex-col items-center pt-6">
         <img src={logoAsset.url} alt="GymWrld" className="w-[40%] max-w-[180px]" />
         {mode !== "reset" && (
