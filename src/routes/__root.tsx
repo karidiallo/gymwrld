@@ -93,6 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "GymWrld — Twoja cyfrowa wersja siebie" },
       { property: "og:description", content: "Premium aplikacja lifestyle. Trenuj, jedz świadomie, rozwijaj swoją cyfrową postać." },
       { property: "og:type", content: "website" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "GymWRLD" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "theme-color", content: "#0F1115" },
+      { name: "format-detection", content: "telephone=no" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "GymWrld — Twoja cyfrowa wersja siebie" },
@@ -159,6 +165,14 @@ function RootComponent() {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     installLocalStateCloudSync();
+
+    // Capture ?ref=XXXX from landing URL — used at first profile creation.
+    try {
+      const ref = new URLSearchParams(window.location.search).get("ref");
+      if (ref && /^[A-Z0-9]{4,12}$/i.test(ref)) {
+        localStorage.setItem("gw_ref", ref.toUpperCase());
+      }
+    } catch {}
 
     // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing).
     // For /auth on apex, jump to the app subdomain so OAuth + session persistence work there.
