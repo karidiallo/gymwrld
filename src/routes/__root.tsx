@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
+import { CelebrationModal } from "../components/CelebrationModal";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
@@ -147,57 +148,84 @@ function RootComponent() {
     pathname.startsWith("/auth") ||
     pathname.startsWith("/onboarding");
 
+  // Public, pre-auth routes — NEVER run reminders / step tracking / activity here.
+  const isPublicRoute =
+    pathname.startsWith("/welcome") ||
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/auth");
+
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     installLocalStateCloudSync();
-    const offAchv = installAchievementBridge();
-    const offWater = startWaterReminders();
-    pingActivity();
-    const onVis = () => { if (document.visibilityState === "visible") pingActivity(); };
-    document.addEventListener("visibilitychange", onVis);
 
-    // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing)
+    // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing).
+    // For /auth on apex, jump to the app subdomain so OAuth + session persistence work there.
     if (typeof window !== "undefined" && getHostKind() === "landing") {
+      if (pathname.startsWith("/auth")) {
+        window.location.replace(`https://app.gymwrld.com${pathname}${window.location.search}`);
+        return;
+      }
       if (!pathname.startsWith("/welcome") && !pathname.startsWith("/privacy")) {
         window.location.replace("/welcome");
         return;
       }
+      // On apex landing we never start trackers, reminders or activity pings.
+      const { data: subL } = supabase.auth.onAuthStateChange(() => {});
+      return () => subL.subscription.unsubscribe();
     }
 
-    // Auto-step tracker (24h idle window). Starts only when prior permission granted.
+    // App-host effects: only start water/achievement/steps once we have an authenticated user
+    // AND we're not on a public/auth route (no notifications during signup/login).
+    let offAchv: (() => void) | undefined;
+    let offWater: (() => void) | undefined;
     let tracker: StepTracker | null = null;
-    (async () => {
-      if (typeof window === "undefined") return;
-      if (isIdleStale()) {
-        localStorage.removeItem("gw_steps_autostart");
-        return;
-      }
-      if (localStorage.getItem("gw_steps_autostart") !== "1") return;
-      // iOS DeviceMotion needs a tap — skip auto-prompt
-      try {
-        // @ts-expect-error iOS-only
-        if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
-      } catch {}
-      let stride = 0.75;
-      try {
-        const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
-        const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
-        stride = strideMetres(Number(b.height || p.height), p.gender);
-      } catch {}
-      tracker = startTracking({ strideM: stride });
-    })();
+    let idleId: number | undefined;
+    let onVis: (() => void) | undefined;
+    let started = false;
 
-    // 24h idle auto-stop watcher: every 5 min, if stale, stop and clear flag
-    const idleId = window.setInterval(() => {
-      if (isIdleStale()) {
-        tracker?.stop();
-        tracker = null;
-        localStorage.removeItem("gw_steps_autostart");
-        pushNotif({ kind: "system", title: "Krokomierz uśpiony", body: "Nie logowałaś się 24h — wróć aby wznowić.", emoji: "😴" });
-      }
-    }, 5 * 60_000);
+    const startAppEffects = () => {
+      if (started || isPublicRoute) return;
+      started = true;
+      offAchv = installAchievementBridge();
+      offWater = startWaterReminders();
+      pingActivity();
+      onVis = () => { if (document.visibilityState === "visible") pingActivity(); };
+      document.addEventListener("visibilitychange", onVis);
+
+      // Auto-step tracker (24h idle window). Starts only when prior permission granted.
+      (async () => {
+        if (typeof window === "undefined") return;
+        if (isIdleStale()) { localStorage.removeItem("gw_steps_autostart"); return; }
+        if (localStorage.getItem("gw_steps_autostart") !== "1") return;
+        try {
+          // @ts-expect-error iOS-only
+          if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
+        } catch {}
+        let stride = 0.75;
+        try {
+          const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
+          const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
+          stride = strideMetres(Number(b.height || p.height), p.gender);
+        } catch {}
+        tracker = startTracking({ strideM: stride });
+      })();
+
+      idleId = window.setInterval(() => {
+        if (isIdleStale()) {
+          tracker?.stop();
+          tracker = null;
+          localStorage.removeItem("gw_steps_autostart");
+          pushNotif({ kind: "system", title: "Krokomierz uśpiony", body: "Nie logowałaś się 24h — wróć aby wznowić.", emoji: "😴" });
+        }
+      }, 5 * 60_000);
+    };
+
+    // If a session already exists at mount, start immediately (after refresh on an app route).
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) startAppEffects();
+    });
 
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
@@ -211,7 +239,8 @@ function RootComponent() {
       supabase.auth.getUser().then(({ data }) => {
         if (data.user) ensureCloudProfile(data.user).then(() => syncLocalState());
       });
-      // On login: mark activity and (if permission already granted) flag auto-start
+      // On login: start app effects (water reminders, step tracker), mark activity.
+      startAppEffects();
       pingActivity();
       if (typeof window !== "undefined" && localStorage.getItem("gw_steps_autostart") !== "1") {
         // We don't request permission here — that happens on first manual tap in /kroki
@@ -228,13 +257,13 @@ function RootComponent() {
     });
     return () => {
       sub.subscription.unsubscribe();
-      offAchv();
-      offWater();
-      document.removeEventListener("visibilitychange", onVis);
-      window.clearInterval(idleId);
+      offAchv?.();
+      offWater?.();
+      if (onVis) document.removeEventListener("visibilitychange", onVis);
+      if (idleId !== undefined) window.clearInterval(idleId);
       tracker?.stop();
     };
-  }, [router, queryClient, pathname]);
+  }, [router, queryClient, pathname, isPublicRoute]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -247,6 +276,7 @@ function RootComponent() {
       )}
       <BottomNav />
       <Toaster position="top-center" theme="dark" />
+      <CelebrationModal />
     </QueryClientProvider>
   );
 }
