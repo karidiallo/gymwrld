@@ -43,6 +43,12 @@ function AuthPage() {
 
     const finishOAuthLogin = async () => {
       for (let attempt = 0; attempt < 10 && !cancelled; attempt += 1) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session?.user) {
+          const destination = await getPostAuthDestination(sessionData.session.user);
+          if (!cancelled) navigate({ to: destination, replace: true });
+          return;
+        }
         const user = await getCurrentUserOrClear();
         if (user) {
           const destination = await getPostAuthDestination(user);
