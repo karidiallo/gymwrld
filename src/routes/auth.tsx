@@ -65,23 +65,40 @@ function AuthPage() {
 
   useEffect(() => {
     const hasOAuthHash = typeof window !== "undefined" && window.location.hash.length > 1;
-    if (!oauthReturn && !hasOAuthHash) return;
+    const hasConsumedOAuthHash = typeof window !== "undefined" && window.location.href.endsWith("#");
+    if (!oauthReturn && !hasOAuthHash && !hasConsumedOAuthHash) return;
     let cancelled = false;
     setBusy(true);
 
     const finishOAuthLogin = async () => {
       const intent = readAuthIntent(mode === "signup" ? "signup" : "signin");
+      try {
+        const hashUser = await consumeAuthHashSession();
+        if (hashUser) {
+          markLiveAuthSession();
+          const destination = await routeAfterAuth(hashUser, intent);
+          if (!cancelled) navigate({ to: destination, replace: true });
+          return;
+        }
+      } catch (error: any) {
+        if (!cancelled) {
+          setBusy(false);
+          toast.error(error?.message ? `Google: ${error.message}` : "Nie udało się dokończyć logowania Google.");
+          navigate({ to: "/auth", replace: true });
+        }
+        return;
+      }
       for (let attempt = 0; attempt < 20 && !cancelled; attempt += 1) {
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {
-          markLiveSession();
+          markLiveAuthSession();
           const destination = await routeAfterAuth(sessionData.session.user, intent);
           if (!cancelled) navigate({ to: destination, replace: true });
           return;
         }
         const user = await getCurrentUserOrClear();
         if (user) {
-          markLiveSession();
+          markLiveAuthSession();
           const destination = await routeAfterAuth(user, intent);
           if (!cancelled) navigate({ to: destination, replace: true });
           return;
@@ -120,7 +137,7 @@ function AuthPage() {
       if (r.redirected) return;
       const user = await getCurrentUserOrClear();
       if (user) {
-        markLiveSession();
+        markLiveAuthSession();
         navigate({ to: await routeAfterAuth(user, intent), replace: true });
       }
     } finally { setBusy(false); }
@@ -145,7 +162,7 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Zalogowano");
         if (data.user) {
-          markLiveSession();
+          markLiveAuthSession();
           await ensureCloudProfile(data.user).catch(() => null);
           navigate({ to: "/", replace: true });
         }
@@ -158,7 +175,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session?.user) {
-          markLiveSession();
+          markLiveAuthSession();
           await ensureCloudProfile(data.session.user).catch(() => null);
           toast.success("Konto utworzone");
           navigate({ to: "/onboarding", replace: true });
