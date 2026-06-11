@@ -5,33 +5,35 @@ import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, Loader2, CheckCircle2
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { ensureCloudProfile } from "@/lib/auth-flow";
-import { clearAuthSession, getCurrentUserOrClear } from "@/lib/auth-session";
+import {
+  clearAuthIntent,
+  clearAuthSession,
+  getCurrentUserOrClear,
+  markLiveAuthSession,
+  readAuthIntent,
+  rememberAuthIntent,
+  type AuthIntent,
+} from "@/lib/auth-session";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 
-const AUTH_INTENT_KEY = "gw_auth_intent";
-const LIVE_SESSION_KEY = "gw_live_session";
-
-function rememberAuthIntent(intent: "signin" | "signup") {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(AUTH_INTENT_KEY, intent);
-}
-
-function readAuthIntent(fallback: "signin" | "signup") {
-  if (typeof window === "undefined") return fallback;
-  const stored = sessionStorage.getItem(AUTH_INTENT_KEY);
-  return stored === "signup" || stored === "signin" ? stored : fallback;
-}
-
-function markLiveSession() {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(LIVE_SESSION_KEY, "1");
-  localStorage.removeItem("gw_session_persist");
-}
-
-async function routeAfterAuth(user: NonNullable<Awaited<ReturnType<typeof getCurrentUserOrClear>>>, intent: "signin" | "signup") {
+async function routeAfterAuth(user: NonNullable<Awaited<ReturnType<typeof getCurrentUserOrClear>>>, intent: AuthIntent) {
   await ensureCloudProfile(user).catch(() => null);
-  if (typeof window !== "undefined") sessionStorage.removeItem(AUTH_INTENT_KEY);
+  clearAuthIntent();
   return intent === "signup" ? "/onboarding" : "/";
+}
+
+async function consumeAuthHashSession() {
+  if (typeof window === "undefined" || window.location.hash.length <= 1) return null;
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  const error = hash.get("error_description") || hash.get("error");
+  if (error) throw new Error(error);
+  const access_token = hash.get("access_token");
+  const refresh_token = hash.get("refresh_token");
+  if (!access_token || !refresh_token) return null;
+  const { data, error: setSessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (setSessionError) throw setSessionError;
+  window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+  return data.session?.user ?? null;
 }
 
 export const Route = createFileRoute("/auth")({
