@@ -17,6 +17,7 @@ function Ustawienia() {
   const [p, setP] = useState<Profile>({});
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig>(DEFAULT_AVATAR);
+  const [waterReminders, setWaterReminders] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,6 +29,7 @@ function Ustawienia() {
       const ra = localStorage.getItem("gw_avatar");
       if (ra) setAvatarCfg({ ...DEFAULT_AVATAR, ...JSON.parse(ra) });
     } catch {}
+    setWaterReminders(localStorage.getItem("gw_reminders_water") === "1");
   }, []);
 
   useEffect(() => {
@@ -146,7 +148,27 @@ function Ustawienia() {
         <h3 className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">Preferencje</h3>
         <div className="space-y-2">
           <Row icon={<Smartphone className="h-4 w-4" />} title="Dodaj do ekranu głównego" desc="Instaluj GymWrld jak normalną aplikację" onClick={installApp} />
-          <Row icon={<Bell className="h-4 w-4" />} title="Powiadomienia" desc="Quest, treningi, motywacja" onClick={() => toast("Wkrótce")} />
+          <button
+            onClick={async () => {
+              const next = !waterReminders;
+              if (next && typeof Notification !== "undefined" && Notification.permission === "default") {
+                try { await Notification.requestPermission(); } catch {}
+              }
+              localStorage.setItem("gw_reminders_water", next ? "1" : "0");
+              setWaterReminders(next);
+              toast.success(next ? "Przypomnienia o wodzie włączone" : "Przypomnienia o wodzie wyłączone");
+            }}
+            className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left"
+          >
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/5"><Bell className="h-4 w-4" /></div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Przypomnienia o wodzie</p>
+              <p className="text-[11px] text-muted-foreground">3× dziennie (10:00, 14:00, 18:00) — tylko po Twojej zgodzie</p>
+            </div>
+            <span className={`h-6 w-11 rounded-full p-0.5 transition ${waterReminders ? "bg-gradient-to-r from-[var(--magenta)] to-[var(--lime)]" : "bg-white/10"}`}>
+              <span className={`block h-5 w-5 rounded-full bg-white transition ${waterReminders ? "translate-x-5" : ""}`} />
+            </span>
+          </button>
           <Row icon={<Lock className="h-4 w-4" />} title="Prywatność" desc="Widoczność profilu, dane" onClick={() => toast("Wkrótce")} />
         </div>
       </section>
