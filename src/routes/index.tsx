@@ -15,6 +15,7 @@ import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
 import { NotificationBell } from "@/components/NotificationBell";
+import { getCurrentUserOrClear } from "@/lib/auth-session";
 
 function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
   return Promise.race([
@@ -54,9 +55,8 @@ function Index() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    withTimeout(supabase.auth.getSession()).then(async (result) => {
+    getCurrentUserOrClear().then(async (user) => {
       if (cancelled) return;
-      const user = result?.data.session?.user ?? null;
       if (!user) {
         // Landing page only shown in normal browser; in installed PWA go straight to auth
         const standalone = window.matchMedia?.("(display-mode: standalone)").matches || (navigator as any).standalone === true;
