@@ -168,6 +168,7 @@ function AuthPage() {
         }
       } else {
         await clearAuthSession();
+        rememberAuthIntent("signup");
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
