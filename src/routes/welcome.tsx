@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus, Minus, Check, Flame, Trophy, Smartphone, Target, Zap, Moon, Activity } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import { appUrl } from "@/lib/host";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
 import moduleStrength from "@/assets/module-strength.webp";
@@ -112,10 +113,10 @@ function WelcomePage() {
             <a href="#download" className="hover:text-foreground">Pobierz</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link to="/auth" className="hidden text-[13px] text-muted-foreground hover:text-foreground sm:inline-block">Zaloguj</Link>
-            <Link to="/auth" search={{ mode: "signup" } as any} className="rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-2 text-[13px] font-semibold text-background glow-primary">
+            <a href={appUrl("/auth")} className="hidden text-[13px] text-muted-foreground hover:text-foreground sm:inline-block">Zaloguj</a>
+            <a href={appUrl("/auth?mode=signup")} className="rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-2 text-[13px] font-semibold text-background glow-primary">
               Zacznij
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -134,13 +135,13 @@ function WelcomePage() {
               Siłownia, dieta, street workout, biegi i mind health — pięć aplikacji w jednej. Każdy trening rozwija Twojego awatara, podbija statystyki i odblokowuje questy. Bez chaosu, z planem.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Link to="/auth" search={{ mode: "signup" } as any} className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
+              <a href={appUrl("/auth?mode=signup")} className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-7 py-4 text-sm font-semibold text-background glow-primary transition active:scale-[0.98]">
                 Zacznij za darmo
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-              </Link>
-              <Link to="/auth" className="inline-flex items-center gap-2 rounded-full glass px-7 py-4 text-sm font-medium text-foreground/85 hover:text-foreground">
+              </a>
+              <a href={appUrl("/auth")} className="inline-flex items-center gap-2 rounded-full glass px-7 py-4 text-sm font-medium text-foreground/85 hover:text-foreground">
                 Mam już konto
-              </Link>
+              </a>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button onClick={installApp} disabled={installed} className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-xs font-medium text-foreground/85 hover:text-foreground disabled:opacity-50">
@@ -493,7 +494,7 @@ function WelcomePage() {
             </div>
             <nav className="flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
               <Link to="/privacy" className="hover:text-foreground">Polityka prywatności</Link>
-              <Link to="/auth" className="hover:text-foreground">Logowanie</Link>
+              <a href={appUrl("/auth")} className="hover:text-foreground">Logowanie</a>
               <a href="mailto:hi@gymwrld.com" className="hover:text-foreground">Kontakt</a>
             </nav>
           </div>
