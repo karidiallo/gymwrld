@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Apple, Dumbbell, Moon, MoreHorizontal, Tag, User, X, Sparkles } from "lucide-react";
+import { Home, Apple, Dumbbell, Moon, MoreHorizontal, Tag, User, X } from "lucide-react";
 import { useState } from "react";
 
 const primary = [
@@ -10,7 +10,6 @@ const primary = [
 ] as const;
 
 const more = [
-  { to: "/coach", label: "AI Coach", icon: Sparkles },
   { to: "/profil", label: "Profil", icon: User },
   { to: "/promo", label: "Promo", icon: Tag },
 ] as const;

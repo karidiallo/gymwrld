@@ -26,7 +26,7 @@ function localOnboarded() {
 function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
   return Promise.race([
     promise,
-    new Promise<null>((resolve) => window.setTimeout(() => resolve(null), ms)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
   ]);
 }
 
