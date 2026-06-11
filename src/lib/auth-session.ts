@@ -2,8 +2,12 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 function isInvalidStoredSession(error: unknown) {
+  if (error && typeof error === "object" && "status" in error) {
+    const status = Number((error as { status?: number }).status);
+    if (status === 401 || status === 403) return true;
+  }
   const message = error instanceof Error ? error.message : String(error ?? "");
-  return /user_not_found|jwt|token|session|invalid|expired/i.test(message);
+  return /user_not_found|user from sub claim|jwt|token|session|invalid|expired/i.test(message);
 }
 
 export function clearStoredAuthSession() {
