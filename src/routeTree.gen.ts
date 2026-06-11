@@ -33,6 +33,7 @@ import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicHooksMorningMotivationRouteImport } from './routes/api/public/hooks/morning-motivation'
 
 const ZadaniaRoute = ZadaniaRouteImport.update({
   id: '/zadania',
@@ -154,6 +155,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksMorningMotivationRoute =
+  ApiPublicHooksMorningMotivationRouteImport.update({
+    id: '/api/public/hooks/morning-motivation',
+    path: '/api/public/hooks/morning-motivation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
+  '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
+  '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -233,6 +242,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
+  '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
+    | '/api/public/hooks/morning-motivation'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
+    | '/api/public/hooks/morning-motivation'
   id:
     | '__root__'
     | '/'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
+    | '/api/public/hooks/morning-motivation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -340,6 +353,7 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   WorkoutsRoute: typeof WorkoutsRoute
   ZadaniaRoute: typeof ZadaniaRoute
+  ApiPublicHooksMorningMotivationRoute: typeof ApiPublicHooksMorningMotivationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -512,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/morning-motivation': {
+      id: '/api/public/hooks/morning-motivation'
+      path: '/api/public/hooks/morning-motivation'
+      fullPath: '/api/public/hooks/morning-motivation'
+      preLoaderRoute: typeof ApiPublicHooksMorningMotivationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -540,7 +561,18 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   WorkoutsRoute: WorkoutsRoute,
   ZadaniaRoute: ZadaniaRoute,
+  ApiPublicHooksMorningMotivationRoute: ApiPublicHooksMorningMotivationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
