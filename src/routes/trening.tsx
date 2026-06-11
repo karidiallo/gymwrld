@@ -292,6 +292,22 @@ function Trening() {
         </button>
       </div>
 
+      {/* Guru autorskie treningi banner */}
+      <Link
+        to="/guru"
+        className="mt-4 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[#3a1a5a] via-[#5a2a8a] to-[#1a0a3b] p-4 transition-transform active:scale-[0.99]"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-black/40 text-[var(--lime)]">
+          <Crown className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Autorskie · Guru</p>
+          <p className="font-display text-lg leading-tight text-white">Treningi od Coachów</p>
+          <p className="text-[11px] text-white/70">Coach Nova · Coach Hawk · Coach Lex — gotowe split-y i progresje</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-white/70" />
+      </Link>
+
       {/* Marathon / runners banner */}
       <Link
         to="/biegi"
