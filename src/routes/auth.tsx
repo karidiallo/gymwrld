@@ -36,6 +36,11 @@ function AuthPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Explicit signup intent — always show the signup form, never the "continue as" card.
+      if (initialMode === "signup") {
+        setExisting(null);
+        return;
+      }
       const user = await getCurrentUserOrClear();
       if (cancelled) return;
       const persist = typeof window !== "undefined" && localStorage.getItem("gw_session_persist") === "1";
@@ -55,7 +60,7 @@ function AuthPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [initialMode]);
 
   const continueAs = async () => {
     const user = await getCurrentUserOrClear();
