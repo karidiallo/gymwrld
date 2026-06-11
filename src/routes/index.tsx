@@ -16,6 +16,13 @@ import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
 import { NotificationBell } from "@/components/NotificationBell";
 
+function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -47,22 +54,25 @@ function Index() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    supabase.auth.getUser().then(async ({ data }) => {
+    withTimeout(supabase.auth.getSession()).then(async (result) => {
       if (cancelled) return;
-      if (!data.user) {
+      const user = result?.data.session?.user ?? null;
+      if (!user) {
         // Landing page only shown in normal browser; in installed PWA go straight to auth
         const standalone = window.matchMedia?.("(display-mode: standalone)").matches || (navigator as any).standalone === true;
         navigate({ to: standalone ? "/auth" : "/welcome", replace: true });
       } else {
-        const cloudProfile = await ensureCloudProfile(data.user);
-        await syncLocalState();
+        const cloudProfile = await withTimeout(ensureCloudProfile(user).catch(() => null));
+        syncLocalState().catch(() => undefined);
         if (cancelled) return;
-        if (!isProfileComplete(cloudProfile)) {
+        if (cloudProfile && !isProfileComplete(cloudProfile)) {
           navigate({ to: "/onboarding", replace: true });
         } else {
           setAuthChecked(true);
         }
       }
+    }).catch(() => {
+      if (!cancelled) navigate({ to: "/auth", replace: true });
     });
     return () => { cancelled = true; };
   }, [navigate]);
