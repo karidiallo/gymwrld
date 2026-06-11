@@ -7,7 +7,8 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil, RotateCcw, Gift, Crown } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil, Crown } from "lucide-react";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
@@ -152,23 +153,9 @@ function Trening() {
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Twój plan</p>
           <h1 className="mt-1 font-display text-3xl">Trening</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              if (confirm("Zresetować widok i aktywną sesję?")) {
-                setSession(null); setBuilderOpen(false); setCat("silownia"); setView("tydzien");
-                toast.success("Widok zresetowany");
-              }
-            }}
-            title="Reset"
-            className="grid h-9 w-9 place-items-center rounded-full glass text-muted-foreground hover:text-foreground"
-          ><RotateCcw className="h-4 w-4" /></button>
-          <Link
-            to="/promo"
-            title="Promocje"
-            className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-background"
-          ><Gift className="h-4 w-4" /></Link>
-        </div>
+        <Link to="/" className="shrink-0">
+          <img src={logoAsset.url} alt="GymWRLD" className="h-12 w-auto" />
+        </Link>
       </header>
 
       {/* Hero */}
@@ -292,7 +279,7 @@ function Trening() {
         </button>
       </div>
 
-      {/* Guru autorskie treningi banner */}
+      {/* Autorskie treningi banner */}
       <Link
         to="/guru"
         className="mt-4 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[#3a1a5a] via-[#5a2a8a] to-[#1a0a3b] p-4 transition-transform active:scale-[0.99]"
@@ -301,9 +288,9 @@ function Trening() {
           <Crown className="h-6 w-6" />
         </div>
         <div className="flex-1">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Autorskie · Guru</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Autorskie</p>
           <p className="font-display text-lg leading-tight text-white">Treningi od Coachów</p>
-          <p className="text-[11px] text-white/70">Coach Nova · Coach Hawk · Coach Lex — gotowe split-y i progresje</p>
+          <p className="text-[11px] text-white/70">Dedykowane plany od specjalistów — splity, siła, redukcja, mobility</p>
         </div>
         <ChevronRight className="h-5 w-5 text-white/70" />
       </Link>

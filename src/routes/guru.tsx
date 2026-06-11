@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { addLog } from "@/lib/training-log";
 
 export const Route = createFileRoute("/guru")({
-  head: () => ({ meta: [{ title: "Guru — Autorskie treningi · GymWrld" }] }),
+  head: () => ({ meta: [{ title: "Treningi od Coachów — GymWrld" }] }),
   component: Guru,
 });
 
@@ -16,11 +16,7 @@ type Plan = {
   workouts: { day: string; name: string; focus: string }[];
 };
 
-const COACHES: { id: string; name: string; bio: string; emoji: string }[] = [
-  { id: "nova",  name: "Coach Nova", bio: "PRO trener przygotowania motorycznego · 12 lat doświadczenia", emoji: "🟢" },
-  { id: "hawk",  name: "Coach Hawk", bio: "Były zawodnik powerlifting · trener siły i hipertrofii",       emoji: "🔥" },
-  { id: "lex",   name: "Coach Lex",  bio: "Mistrzyni kalisteniki · skill work i mobility",                emoji: "💎" },
-];
+// Plany ułożone przez zespół specjalistów GymWRLD — bez personalnych marek.
 
 const PLANS: Plan[] = [
   {
@@ -36,7 +32,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "hawk-531", coach: "hawk", title: "Hawk 5/3/1", tagline: "Cykl siłowy na bazie Wendlera",
+    id: "hawk-531", coach: "hawk", title: "Cykl 5/3/1 — siła", tagline: "Cykl siłowy na bazie Wendlera",
     days: 4, level: "Zaawansowany", kcal: 520, minutes: 75, tier: "pro", color: "from-[#5a0f0f] to-[#1a0202]",
     workouts: [
       { day: "Pon", name: "Bench Day", focus: "Wyciskanie 5/3/1 + akcesoria klatka" },
@@ -57,7 +53,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "lex-skill", coach: "lex", title: "Calisthenics Skill", tagline: "Muscle-up, planche, front lever",
+    id: "lex-skill", coach: "lex", title: "Calisthenics — Skill Work", tagline: "Muscle-up, planche, front lever",
     days: 4, level: "Średni", kcal: 380, minutes: 50, tier: "pro", color: "from-[#0a3b1a] to-[#0a1a14]",
     workouts: [
       { day: "Pon", name: "Pull Skill",  focus: "Muscle-up progresje" },
@@ -76,7 +72,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "lex-mobility", coach: "lex", title: "Mobility & Flow", tagline: "Codzienna mobilność i flexibility",
+    id: "lex-mobility", coach: "lex", title: "Mobility & Flow", tagline: "Codzienna mobilność i elastyczność",
     days: 7, level: "Początkujący", kcal: 180, minutes: 25, tier: "free", color: "from-[#2a1a5a] to-[#0a0a1a]",
     workouts: [
       { day: "Codziennie", name: "Mobility flow", focus: "Biodra, kręgosłup, barki" },
@@ -99,23 +95,18 @@ function Guru() {
         <Link to="/trening" className="grid h-9 w-9 place-items-center rounded-full glass"><ChevronLeft className="h-4 w-4" /></Link>
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Autorskie</p>
-          <h1 className="mt-1 font-display text-3xl">Treningi <span className="text-gradient">od Guru</span></h1>
+          <h1 className="mt-1 font-display text-3xl">Treningi <span className="text-gradient">od Coachów</span></h1>
         </div>
       </header>
 
-      <section className="mt-5 space-y-2.5">
-        {COACHES.map((c) => (
-          <div key={c.id} className="rounded-2xl glass p-4">
-            <p className="font-display text-lg">{c.emoji} {c.name}</p>
-            <p className="text-[11px] text-muted-foreground">{c.bio}</p>
-          </div>
-        ))}
+      <section className="mt-5 rounded-2xl glass p-4">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">O sekcji</p>
+        <p className="mt-1 text-sm">Dedykowane plany od zespołu specjalistów — gotowe splity, cykle siłowe, redukcja i mobility. Skopiuj plan w jeden klik i zacznij dziś.</p>
       </section>
 
-      <h3 className="mb-3 mt-7 text-lg font-semibold">Plany</h3>
+      <h3 className="mb-3 mt-7 text-lg font-semibold">Gotowe plany</h3>
       <div className="space-y-3">
         {PLANS.map((p) => {
-          const coach = COACHES.find((c) => c.id === p.coach)!;
           const locked = !canAccess(p.tier);
           return (
             <button
@@ -125,7 +116,7 @@ function Guru() {
             >
               <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/5 blur-3xl" />
               <div className="flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.2em] text-white/70">
-                <span>{coach.emoji} {coach.name}</span>
+                <span>{p.level}</span>
                 {p.tier === "pro" && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/20 px-2 py-0.5 text-[var(--lime)]"><Sparkles className="h-3 w-3" /> Pro</span>}
                 {p.tier === "premium" && <span className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/20 px-2 py-0.5 text-[var(--magenta)]"><Crown className="h-3 w-3" /> Premium</span>}
               </div>
@@ -135,7 +126,6 @@ function Guru() {
                 <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1"><Dumbbell className="h-3 w-3" /> {p.days} dni/tydz</span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1"><Clock className="h-3 w-3" /> {p.minutes} min</span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1"><Flame className="h-3 w-3" /> {p.kcal} kcal</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-1">{p.level}</span>
               </div>
               {locked && (
                 <div className="absolute inset-0 grid place-items-center bg-black/55 backdrop-blur-[3px]">

@@ -8,7 +8,7 @@ import recipeLosos from "@/assets/recipe-losos.jpg";
 import recipeOmlet from "@/assets/recipe-omlet.jpg";
 import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Globe2, ImageIcon, Camera, Star, Crown, Lock } from "lucide-react";
 
-type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska";
+type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska" | "keto" | "lowcarb" | "paleo" | "wegan" | "glutenfree" | "if";
 
 type Recipe = {
   id: string;
@@ -142,6 +142,28 @@ const RECIPES: Recipe[] = [
   { id: "rosolek", title: "Rosół z makaronem", kcal: 340, time: 60, cat: "obiady", tags: ["polska"], macro: { p: 26, c: 38, f: 8 }, emoji: "🍜",
     ingredients: ["Mięso na rosół", "Włoszczyzna", "Makaron, natka pietruszki"],
     steps: ["Gotuj wywar 50 min.", "Dodaj makaron.", "Podaj z natką."] },
+  // —— Keto / low-carb
+  { id: "keto-stek", title: "Stek z masłem ziołowym & szpinakiem", kcal: 620, time: 18, cat: "obiady", tags: ["keto", "lowcarb", "bialkowe", "glutenfree"], macro: { p: 48, c: 4, f: 46 }, emoji: "🥩",
+    ingredients: ["200g antrykotu", "Masło ziołowe", "Szpinak baby", "Czosnek, masło ghee"],
+    steps: ["Stek na rozgrzanej patelni 2 min/strona.", "Odstaw 5 min.", "Szpinak podduś z czosnkiem.", "Podaj z masłem ziołowym."] },
+  { id: "keto-jajka-awokado", title: "Jajka sadzone z awokado", kcal: 460, time: 8, cat: "sniadania", tags: ["keto", "lowcarb", "wege", "glutenfree"], macro: { p: 22, c: 8, f: 36 }, emoji: "🥑",
+    ingredients: ["3 jajka", "1 awokado", "Pomidorki", "Masło ghee, sól, pieprz"],
+    steps: ["Smaż jajka na ghee.", "Pokrój awokado.", "Złóż talerz."] },
+  // —— Paleo
+  { id: "paleo-kurczak", title: "Kurczak z warzywami z pieca", kcal: 520, time: 35, cat: "obiady", tags: ["paleo", "bialkowe", "glutenfree"], macro: { p: 46, c: 38, f: 18 }, emoji: "🍗",
+    ingredients: ["200g kurczaka", "Batat, cukinia, papryka", "Oliwa, zioła prowansalskie"],
+    steps: ["Warzywa pokrój, polej oliwą.", "Piecz 25 min w 200°C.", "Dodaj kurczaka na ostatnie 15 min."] },
+  // —— Wegan
+  { id: "wegan-tempeh", title: "Tempeh stir-fry z brokułami", kcal: 480, time: 18, cat: "wege", tags: ["wegan", "wege", "azjatycka", "bialkowe"], macro: { p: 30, c: 40, f: 18 }, emoji: "🥦",
+    ingredients: ["180g tempehu", "Brokuł, papryka", "Sojowa, imbir, sezam", "Brązowy ryż 80g"],
+    steps: ["Tempeh podsmaż na woku.", "Dodaj warzywa.", "Sos sojowy + imbir.", "Podaj z ryżem."] },
+  { id: "wegan-soczewica-curry", title: "Curry z soczewicy", kcal: 480, time: 25, cat: "wege", tags: ["wegan", "wege", "glutenfree"], macro: { p: 22, c: 60, f: 14 }, emoji: "🍛",
+    ingredients: ["150g czerwonej soczewicy", "Mleczko kokosowe", "Pomidor, cebula", "Pasta curry"],
+    steps: ["Podsmaż cebulę z pastą.", "Dodaj soczewicę i mleczko.", "Gotuj 20 min."] },
+  // —— Intermittent Fasting / break-fast
+  { id: "if-break", title: "IF Break-fast bowl", kcal: 720, time: 15, cat: "obiady", tags: ["if", "bialkowe"], macro: { p: 52, c: 64, f: 24 }, emoji: "🥗",
+    ingredients: ["200g kurczaka lub tofu", "100g ryżu", "Awokado", "Jajko, ogórek, edamame"],
+    steps: ["Pierwszy posiłek po poście — duża porcja białka i tłuszczy.", "Złóż bowl z wszystkich składników."] },
 ];
 
 const CATS: { id: RecipeCat; label: string; icon: React.ReactNode }[] = [
@@ -152,6 +174,15 @@ const CATS: { id: RecipeCat; label: string; icon: React.ReactNode }[] = [
   { id: "przekaski", label: "Przekąski", icon: <Cookie className="h-3.5 w-3.5" /> },
   { id: "wege", label: "Wege", icon: <Leaf className="h-3.5 w-3.5" /> },
   { id: "bialkowe", label: "Białkowe", icon: <Heart className="h-3.5 w-3.5" /> },
+];
+
+const DIETS: { id: Extract<RecipeCat, "keto" | "lowcarb" | "paleo" | "wegan" | "glutenfree" | "if">; label: string; emoji: string; gradient: string }[] = [
+  { id: "keto",       label: "Keto",          emoji: "🥑", gradient: "from-[#0a3b1a]/40 via-[var(--lime)]/20 to-[#1a3b2a]/40" },
+  { id: "lowcarb",    label: "Low-carb",      emoji: "🥩", gradient: "from-[#3b0a0a]/40 via-[var(--orange)]/20 to-[#1a0a0a]/40" },
+  { id: "paleo",      label: "Paleo",         emoji: "🍖", gradient: "from-[#2a1a05]/40 via-[var(--orange)]/15 to-[#3b1a0a]/40" },
+  { id: "wegan",      label: "Wegańska",      emoji: "🌱", gradient: "from-[#0a3b1a]/40 via-[var(--lime)]/30 to-[#1a3b14]/40" },
+  { id: "glutenfree", label: "Bezglutenowa",  emoji: "🌾", gradient: "from-[#1a1a05]/40 via-white/10 to-[#2a2010]/40" },
+  { id: "if",         label: "IF / Post",     emoji: "⏱️", gradient: "from-[#1a0a3b]/40 via-[var(--magenta)]/20 to-[#0a0a2a]/40" },
 ];
 
 const CUISINES: { id: Exclude<RecipeCat, "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe">; label: string; emoji: string; gradient: string }[] = [
@@ -192,6 +223,9 @@ function Przepisy() {
     return RECIPES.filter((r) => {
       if (cat === "bialkowe") return r.tags.includes("bialkowe");
       if (cat === "wloska" || cat === "azjatycka" || cat === "meksykanska" || cat === "srodziemnomorska" || cat === "polska") {
+        return r.tags.includes(cat);
+      }
+      if (cat === "keto" || cat === "lowcarb" || cat === "paleo" || cat === "wegan" || cat === "glutenfree" || cat === "if") {
         return r.tags.includes(cat);
       }
       if (cat !== "all" && r.cat !== cat) return false;
@@ -270,6 +304,34 @@ function Przepisy() {
                 <span className="text-2xl">{c.emoji}</span>
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-white/70">Kuchnia</p>
+                  <p className="font-display text-base leading-tight text-white">{c.label}</p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Diets */}
+      <div className="mt-5">
+        <p className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <Leaf className="h-3 w-3" /> Diety i style odżywiania
+        </p>
+        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+          {DIETS.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setCat(c.id)}
+              className={`relative h-24 w-40 shrink-0 overflow-hidden rounded-2xl border text-left transition ${
+                cat === c.id ? "border-[var(--lime)] ring-1 ring-[var(--lime)] glow-primary" : "border-white/10"
+              }`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient}`} />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="relative flex h-full flex-col justify-between p-3">
+                <span className="text-2xl">{c.emoji}</span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-white/70">Dieta</p>
                   <p className="font-display text-base leading-tight text-white">{c.label}</p>
                 </div>
               </div>
