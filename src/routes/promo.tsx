@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Sparkles, Lock, Tag, Copy, MapPin } from "lucide-react";
 import { PL_CITIES } from "@/routes/onboarding";
+import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/promo")({
   head: () => ({ meta: [{ title: "Promo — GymWrld" }] }),
@@ -38,9 +40,14 @@ function Promo() {
   const deals = (tab === "darmowe" ? free : premium).filter((d) => !d.city || d.city === cityId);
   return (
     <main className="px-5 pt-6">
-      <header>
-        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Oferty partnerów</p>
-        <h1 className="mt-1 font-display text-3xl">Promo</h1>
+      <header className="flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Oferty partnerów</p>
+          <h1 className="mt-1 font-display text-3xl">Promo</h1>
+        </div>
+        <Link to="/" className="shrink-0">
+          <img src={logoAsset.url} alt="GymWRLD" className="h-12 w-auto" />
+        </Link>
       </header>
 
       {/* Hero */}
