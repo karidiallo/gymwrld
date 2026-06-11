@@ -128,11 +128,11 @@ function AuthPage() {
         {mode !== "reset" && (
           <div className="mt-8 grid w-full grid-cols-2 rounded-2xl bg-white/5 p-1 ring-1 ring-white/10">
             <button
-              onClick={() => setMode("signin")}
+              onClick={() => switchMode("signin")}
               className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signin" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
             >Zaloguj</button>
             <button
-              onClick={() => setMode("signup")}
+              onClick={() => switchMode("signup")}
               className={`rounded-xl py-2.5 text-sm font-semibold transition ${mode === "signup" ? "bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] text-background" : "text-muted-foreground"}`}
             >Utwórz konto</button>
           </div>
@@ -153,6 +153,22 @@ function AuthPage() {
           {mode !== "reset" && (
             <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
               <span className="h-px flex-1 bg-white/10" /> lub e-mail <span className="h-px flex-1 bg-white/10" />
+            </div>
+          )}
+          {signupPendingEmail && mode === "signup" && (
+            <div className="rounded-2xl border border-[var(--lime)]/30 bg-[var(--lime)]/10 p-4 text-left">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--lime)]" />
+                <div>
+                  <p className="text-sm font-semibold text-white">Konto utworzone</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Sprawdź skrzynkę {signupPendingEmail}, potwierdź e-mail i wróć tutaj do logowania.
+                  </p>
+                  <button type="button" onClick={() => switchMode("signin")} className="mt-3 text-xs font-semibold text-[var(--lime)]">
+                    Przejdź do logowania
+                  </button>
+                </div>
+              </div>
             </div>
           )}
           <div className="flex items-center gap-2 rounded-2xl bg-white/5 ring-1 ring-white/10 px-4 py-3">
