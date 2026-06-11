@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
+import { supabase } from "@/integrations/supabase/client";
+import { pushNotif } from "@/lib/notifications";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCqdCOHFP6jUA9d_7sCy5-n26Muuoob1YI",
@@ -45,14 +47,21 @@ export async function enablePushNotifications(): Promise<string | null> {
   if (token) {
     localStorage.setItem("gw_push_token", token);
     localStorage.setItem("gw_push_enabled", "1");
+    // Persist token to DB so server-side cron can target the user
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        await supabase.from("push_tokens").upsert(
+          { user_id: data.user.id, token, platform: "web", updated_at: new Date().toISOString() },
+          { onConflict: "token" },
+        );
+      }
+    } catch {}
     onMessage(messaging, (payload) => {
-      // Foreground — show a toast-like in-page notification via Notification API
-      try {
-        new Notification(payload.notification?.title || "GymWrld", {
-          body: payload.notification?.body || "",
-          icon: "/icon-192.png",
-        });
-      } catch {}
+      // Foreground — also surface in the in-app notification feed
+      const t = payload.notification?.title || "GymWrld";
+      const b = payload.notification?.body || "";
+      pushNotif({ kind: "motivation", title: t, body: b, emoji: "🔔" });
     });
   }
   return token ?? null;

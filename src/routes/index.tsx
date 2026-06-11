@@ -13,6 +13,8 @@ import { BrandFooter } from "@/components/BrandLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
+import { StreakCarousel } from "@/components/StreakCarousel";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -146,8 +148,12 @@ function Index() {
         <div className="flex items-center gap-2">
           <Chip icon={<Sparkles className="h-3.5 w-3.5 text-[var(--lime)]" />} label={`Lvl ${profile.lvl ?? 1}`} />
           <Chip icon={<Flame className="h-3.5 w-3.5 text-[var(--orange)]" />} label={`${profile.streak ?? 0} dni`} />
+          <NotificationBell />
         </div>
       </header>
+
+      {/* Streak / motivator swipe widget */}
+      <StreakCarousel />
 
       {/* Sanctuary Hero */}
       <section className="relative mt-5 overflow-hidden rounded-3xl">
