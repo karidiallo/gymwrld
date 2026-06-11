@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, LogOut } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, LogOut, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { getPostAuthDestination } from "@/lib/auth-flow";
@@ -28,7 +28,6 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [stayLogged, setStayLogged] = useState(true);
   const [existing, setExisting] = useState<{ name?: string; email?: string; avatarUrl?: string } | null>(null);
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     setMode(initialMode);
@@ -54,7 +53,6 @@ function AuthPage() {
           });
         }
       }
-      setChecking(false);
     })();
     return () => { cancelled = true; };
   }, []);
@@ -131,14 +129,6 @@ function AuthPage() {
     } finally { setBusy(false); }
   };
 
-  if (checking) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-black text-white">
-        <img src={logoAsset.url} alt="GymWrld" className="w-32 animate-pulse" />
-      </main>
-    );
-  }
-
   if (existing) {
     const initials = (existing.name ?? existing.email ?? "?").slice(0, 1).toUpperCase();
     return (
@@ -183,13 +173,9 @@ function AuthPage() {
         <ArrowLeft className="h-4 w-4" />
       </Link>
       {busy && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3">
-            <img src={logoAsset.url} alt="GymWrld" className="h-16 w-auto animate-pulse" />
-            <p className="text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
-              {mode === "signup" ? "Tworzę konto…" : mode === "reset" ? "Wysyłam link…" : "Loguję…"}
-            </p>
-          </div>
+        <div className="fixed inset-x-0 top-4 z-50 mx-auto flex w-[calc(100%-2rem)] max-w-[420px] items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-xs text-white shadow-2xl ring-1 ring-white/15 backdrop-blur-xl" role="status" aria-live="polite">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {mode === "signup" ? "Tworzę konto…" : mode === "reset" ? "Wysyłam link…" : "Loguję…"}
         </div>
       )}
       <div className="mx-auto flex max-w-[420px] flex-col items-center pt-6">

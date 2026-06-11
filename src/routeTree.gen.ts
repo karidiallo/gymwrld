@@ -30,11 +30,9 @@ import { Route as GuruRouteImport } from './routes/guru'
 import { Route as FizjoRouteImport } from './routes/fizjo'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
-import { Route as CoachRouteImport } from './routes/coach'
 import { Route as BiegiRouteImport } from './routes/biegi'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiCoachRouteImport } from './routes/api/coach'
 import { Route as ApiPublicHooksMorningMotivationRouteImport } from './routes/api/public/hooks/morning-motivation'
 
 const ZadaniaRoute = ZadaniaRouteImport.update({
@@ -142,11 +140,6 @@ const CwiczeniaRoute = CwiczeniaRouteImport.update({
   path: '/cwiczenia',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoachRoute = CoachRouteImport.update({
-  id: '/coach',
-  path: '/coach',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BiegiRoute = BiegiRouteImport.update({
   id: '/biegi',
   path: '/biegi',
@@ -162,11 +155,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCoachRoute = ApiCoachRouteImport.update({
-  id: '/api/coach',
-  path: '/api/coach',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicHooksMorningMotivationRoute =
   ApiPublicHooksMorningMotivationRouteImport.update({
     id: '/api/public/hooks/morning-motivation',
@@ -178,7 +166,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
-  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -200,14 +187,12 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
-  '/api/coach': typeof ApiCoachRoute
   '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
-  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -229,7 +214,6 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
-  '/api/coach': typeof ApiCoachRoute
   '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRoutesById {
@@ -237,7 +221,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/biegi': typeof BiegiRoute
-  '/coach': typeof CoachRoute
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
@@ -259,7 +242,6 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/workouts': typeof WorkoutsRoute
   '/zadania': typeof ZadaniaRoute
-  '/api/coach': typeof ApiCoachRoute
   '/api/public/hooks/morning-motivation': typeof ApiPublicHooksMorningMotivationRoute
 }
 export interface FileRouteTypes {
@@ -268,7 +250,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/biegi'
-    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -290,14 +271,12 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
-    | '/api/coach'
     | '/api/public/hooks/morning-motivation'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/biegi'
-    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -319,14 +298,12 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
-    | '/api/coach'
     | '/api/public/hooks/morning-motivation'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/biegi'
-    | '/coach'
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
@@ -348,7 +325,6 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/workouts'
     | '/zadania'
-    | '/api/coach'
     | '/api/public/hooks/morning-motivation'
   fileRoutesById: FileRoutesById
 }
@@ -356,7 +332,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   BiegiRoute: typeof BiegiRoute
-  CoachRoute: typeof CoachRoute
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
   FizjoRoute: typeof FizjoRoute
@@ -378,7 +353,6 @@ export interface RootRouteChildren {
   WelcomeRoute: typeof WelcomeRoute
   WorkoutsRoute: typeof WorkoutsRoute
   ZadaniaRoute: typeof ZadaniaRoute
-  ApiCoachRoute: typeof ApiCoachRoute
   ApiPublicHooksMorningMotivationRoute: typeof ApiPublicHooksMorningMotivationRoute
 }
 
@@ -531,13 +505,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CwiczeniaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coach': {
-      id: '/coach'
-      path: '/coach'
-      fullPath: '/coach'
-      preLoaderRoute: typeof CoachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/biegi': {
       id: '/biegi'
       path: '/biegi'
@@ -559,13 +526,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/coach': {
-      id: '/api/coach'
-      path: '/api/coach'
-      fullPath: '/api/coach'
-      preLoaderRoute: typeof ApiCoachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/morning-motivation': {
       id: '/api/public/hooks/morning-motivation'
       path: '/api/public/hooks/morning-motivation'
@@ -580,7 +540,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   BiegiRoute: BiegiRoute,
-  CoachRoute: CoachRoute,
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
   FizjoRoute: FizjoRoute,
@@ -602,7 +561,6 @@ const rootRouteChildren: RootRouteChildren = {
   WelcomeRoute: WelcomeRoute,
   WorkoutsRoute: WorkoutsRoute,
   ZadaniaRoute: ZadaniaRoute,
-  ApiCoachRoute: ApiCoachRoute,
   ApiPublicHooksMorningMotivationRoute: ApiPublicHooksMorningMotivationRoute,
 }
 export const routeTree = rootRouteImport
