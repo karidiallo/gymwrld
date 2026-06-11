@@ -1,12 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Mail, ChevronRight, Check, Sparkles, Lock, Eye, EyeOff, Shuffle, MapPin } from "lucide-react";
+import { ChevronRight, Check, Sparkles, MapPin } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from "@/components/AvatarSvg";
 import { computeNutrition, writeNutrition } from "@/lib/nutrition";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 
 export const Route = createFileRoute("/onboarding")({
@@ -20,10 +19,8 @@ type Gender = "m" | "k" | "nb";
 
 function Onboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [stayLogged, setStayLogged] = useState(true);
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<number | "">("");
@@ -43,11 +40,11 @@ function Onboarding() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
+      if (!data.user) { navigate({ to: "/auth", search: { mode: "signup" }, replace: true }); return; }
       setEmail((current) => current || data.user?.email || "");
       ensureCloudProfile(data.user).then((profile) => {
         if (isProfileComplete(profile)) navigate({ to: "/", replace: true });
-        else setStep((current) => current === 0 ? 1 : current);
+        else setStep((current) => Math.max(1, current));
       });
     }).catch(() => undefined);
   }, [navigate]);
@@ -85,8 +82,7 @@ function Onboarding() {
 
     if (saved && typeof window !== "undefined") {
       localStorage.setItem("gw_onboarded", "1");
-      if (stayLogged) localStorage.setItem("gw_session_persist", "1");
-      else localStorage.removeItem("gw_session_persist");
+      localStorage.removeItem("gw_session_persist");
       // RODO art. 7 — wykazanie zgody (timestamp + wersja polityki).
       localStorage.setItem("gw_consent", JSON.stringify({
         privacy: consentPrivacy,
@@ -110,24 +106,6 @@ function Onboarding() {
 
   const total = 8;
   const progress = ((step + 1) / total) * 100;
-
-  // First screen: pure black, huge logo only.
-  if (step === 0) {
-    return (
-      <main className="relative flex min-h-screen flex-col items-center bg-black px-5 pt-10 pb-10 text-white">
-        <div className="flex flex-1 items-center justify-center w-full">
-          <img
-            src={logoAsset.url}
-            alt="GymWrld"
-            className="mx-auto block w-[58%] max-w-[320px] drop-shadow-[0_8px_40px_rgba(255,255,255,0.18)]"
-          />
-        </div>
-        <div className="w-full max-w-[480px]">
-          <StepAuth email={email} setEmail={setEmail} password={password} setPassword={setPassword} stayLogged={stayLogged} setStayLogged={setStayLogged} onNext={() => setStep(1)} />
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="relative min-h-screen overflow-hidden px-5 pt-10 pb-10">
