@@ -75,16 +75,37 @@ function readWater(): WaterState {
     const raw = localStorage.getItem(WATER_KEY);
     if (!raw) return { day: today(), fired: [] };
     const s = JSON.parse(raw) as WaterState;
-    if (s.day !== today()) return { day: today(), fired: [] };
+    if (s.day !== today()) {
+      // New day: mark all *past* slots as already-fired so we never replay them on first login of the day.
+      const h = new Date().getHours();
+      const pastSlots = WATER_SLOTS.filter((slot) => h > slot);
+      return { day: today(), fired: pastSlots };
+    }
     return s;
   } catch { return { day: today(), fired: [] }; }
 }
 function writeWater(s: WaterState) { localStorage.setItem(WATER_KEY, JSON.stringify(s)); }
 function today() { return new Date().toISOString().slice(0, 10); }
 
-/** Call once on app boot. Fires water reminders at 10/14/18 if missed. */
+/**
+ * Call once on app boot. Fires water reminders at 10/14/18 — only for the
+ * *current* slot window (never replays missed slots from earlier in the day),
+ * and only if the user has explicitly opted in via `gw_reminders_water === "1"`.
+ */
 export function startWaterReminders() {
   if (typeof window === "undefined") return () => {};
+  // Hard gate: require explicit user consent. Default OFF.
+  if (localStorage.getItem("gw_reminders_water") !== "1") return () => {};
+  // Seed fired-slots for any slots already in the past, so first tick of the
+  // day doesn't dump 1-3 notifications at once when the user logs in late.
+  const initial = readWater();
+  const nowH = new Date().getHours();
+  const seedFired = Array.from(new Set([
+    ...initial.fired,
+    ...WATER_SLOTS.filter((slot) => nowH > slot),
+  ]));
+  if (seedFired.length !== initial.fired.length) writeWater({ day: today(), fired: seedFired });
+
   const tick = () => {
     const now = new Date();
     const h = now.getHours();
@@ -92,7 +113,9 @@ export function startWaterReminders() {
     const s = readWater();
     for (let i = 0; i < WATER_SLOTS.length; i++) {
       const slot = WATER_SLOTS[i];
-      if (h >= slot && (h > slot || m >= 0) && !s.fired.includes(slot)) {
+      // Fire only inside the current slot hour and only within the first 10
+      // minutes — never replay slots that have already passed.
+      if (h === slot && m < 10 && !s.fired.includes(slot)) {
         const copy = WATER_COPY[i % WATER_COPY.length];
         pushNotif({ kind: "water", title: copy.title, body: copy.body, emoji: "💧" });
         s.fired.push(slot);
