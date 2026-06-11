@@ -117,6 +117,52 @@ export type StepTracker = {
   isGps: () => boolean;
 };
 
+// ---------------------------------------------------------------------------
+// Global singleton tracker — survives route changes and effect cleanups so
+// switching tabs inside the app does NOT pause the step counter. Browsers
+// still throttle background tabs (we can't beat that without native), but
+// while the app/PWA is in the foreground on ANY screen, counting continues.
+// ---------------------------------------------------------------------------
+
+let GLOBAL_TRACKER: StepTracker | null = null;
+
+function readStride(): number {
+  if (typeof window === "undefined") return 0.75;
+  try {
+    const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
+    const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
+    return strideMetres(Number(b.height || p.height), p.gender);
+  } catch {
+    return 0.75;
+  }
+}
+
+/** Start the global tracker if not already running. Idempotent. */
+export function ensureGlobalTracking() {
+  if (typeof window === "undefined") return null;
+  if (GLOBAL_TRACKER) return GLOBAL_TRACKER;
+  GLOBAL_TRACKER = startTracking({ strideM: readStride() });
+  localStorage.setItem("gw_steps_autostart", "1");
+  return GLOBAL_TRACKER;
+}
+
+export function stopGlobalTracking() {
+  GLOBAL_TRACKER?.stop();
+  GLOBAL_TRACKER = null;
+  if (typeof window !== "undefined") localStorage.removeItem("gw_steps_autostart");
+}
+
+export function isGlobalTracking(): boolean {
+  return GLOBAL_TRACKER !== null;
+}
+
+export function getGlobalTrackerStatus(): { accel: boolean; gps: boolean } {
+  return {
+    accel: GLOBAL_TRACKER?.isAccel() ?? false,
+    gps: GLOBAL_TRACKER?.isGps() ?? false,
+  };
+}
+
 /**
  * Start tracking. Calls onStep(stepDelta, source) whenever new steps are detected.
  * Persists to localStorage automatically.
