@@ -57,6 +57,7 @@ export function syncProfileToLocal(profile: ProfileRow) {
   };
   localStorage.setItem("gw_profile", JSON.stringify(next));
   if (isProfileComplete(profile)) localStorage.setItem("gw_onboarded", "1");
+  else localStorage.removeItem("gw_onboarded");
   window.dispatchEvent(new Event("gw_profile_update"));
 }
 
@@ -87,5 +88,6 @@ export async function ensureCloudProfile(user: User) {
 
 export async function getPostAuthDestination(user: User) {
   const profile = await withTimeout(ensureCloudProfile(user));
-  return localOnboarded() || isProfileComplete(profile) ? "/" : "/onboarding";
+  if (profile) return isProfileComplete(profile) ? "/" : "/onboarding";
+  return localOnboarded() ? "/" : "/onboarding";
 }
