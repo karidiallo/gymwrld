@@ -4,12 +4,12 @@ import { ArrowRight, Dumbbell, Apple, MapPin, Footprints, Heart, Sparkles, Plus,
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import avatarMale from "@/assets/avatar-male-athletic-crop.png";
 import avatarFemale from "@/assets/avatar-female-athletic-crop.png";
-import moduleStrength from "@/assets/module-strength.jpg";
-import moduleNutrition from "@/assets/module-nutrition.jpg";
-import moduleStreet from "@/assets/module-street.jpg";
-import moduleRunning from "@/assets/module-running.jpg";
-import moduleMindHealth from "@/assets/module-mind-health.jpg";
-import moduleWomen from "@/assets/module-women.jpg";
+import moduleStrength from "@/assets/module-strength.webp";
+import moduleNutrition from "@/assets/module-nutrition.webp";
+import moduleStreet from "@/assets/module-street.webp";
+import moduleRunning from "@/assets/module-running.webp";
+import moduleMindHealth from "@/assets/module-mind-health.webp";
+import moduleWomen from "@/assets/module-women.webp";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({

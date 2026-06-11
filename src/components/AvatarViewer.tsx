@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { X, Lock, Check } from "lucide-react";
 import { type AvatarConfig } from "./AvatarSvg";
-import sanctuary from "@/assets/sanctuary.jpg";
-import roomLoft from "@/assets/room-loft.jpg";
-import roomParis from "@/assets/room-paris.jpg";
-import roomMilano from "@/assets/room-milano.jpg";
-import roomBarcelona from "@/assets/room-barcelona.jpg";
-import roomVilla from "@/assets/room-villa.jpg";
+import sanctuary from "@/assets/sanctuary.webp";
+import roomLoft from "@/assets/room-loft.webp";
+import roomParis from "@/assets/room-paris.webp";
+import roomMilano from "@/assets/room-milano.webp";
+import roomBarcelona from "@/assets/room-barcelona.webp";
+import roomVilla from "@/assets/room-villa.webp";
 
 const ROOMS = [
   { id: "starter", name: "Apartament startowy", bgImg: sanctuary, bg: "linear-gradient(180deg,#1a1428 0%,#0f0a1a 70%,#000 100%)", locked: false },

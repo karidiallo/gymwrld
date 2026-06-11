@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import gymHero from "@/assets/gym-hero.jpg";
+import gymHero from "@/assets/gym-hero.webp";
 import { ArrowLeft, Search, Dumbbell, Target, AlertCircle, ChevronRight, Activity } from "lucide-react";
 
 type EquipCat = "all" | "maszyny" | "hantle" | "kettle" | "sztanga" | "bodyweight" | "guma";

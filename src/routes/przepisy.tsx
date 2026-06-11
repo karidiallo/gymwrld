@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import foodHero from "@/assets/food-hero.jpg";
-import recipePowerBowl from "@/assets/recipe-power-bowl.jpg";
-import recipeOwsianka from "@/assets/recipe-owsianka.jpg";
-import recipeLosos from "@/assets/recipe-losos.jpg";
-import recipeOmlet from "@/assets/recipe-omlet.jpg";
+import foodHero from "@/assets/food-hero.webp";
+import recipePowerBowl from "@/assets/recipe-power-bowl.webp";
+import recipeOwsianka from "@/assets/recipe-owsianka.webp";
+import recipeLosos from "@/assets/recipe-losos.webp";
+import recipeOmlet from "@/assets/recipe-omlet.webp";
 import { ArrowLeft, Clock, Flame, Search, ChevronRight, Heart, Leaf, Beef, Sandwich, Soup, Cookie, Sparkles, Globe2, ImageIcon, Camera, Star, Crown, Lock } from "lucide-react";
 
 type RecipeCat = "all" | "sniadania" | "obiady" | "kolacje" | "przekaski" | "wege" | "bialkowe" | "wloska" | "azjatycka" | "meksykanska" | "srodziemnomorska" | "polska" | "keto" | "lowcarb" | "paleo" | "wegan" | "glutenfree" | "if";

@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import gymHero from "@/assets/gym-hero.jpg";
-import homeHero from "@/assets/home-hero.jpg";
-import outdoorHero from "@/assets/outdoor-hero.jpg";
-import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
-import womenHero from "@/assets/women-hero.jpg";
-import cutHero from "@/assets/cut-hero.jpg";
+import gymHero from "@/assets/gym-hero.webp";
+import homeHero from "@/assets/home-hero.webp";
+import outdoorHero from "@/assets/outdoor-hero.webp";
+import calisthenicsHero from "@/assets/calisthenics-hero.webp";
+import womenHero from "@/assets/women-hero.webp";
+import cutHero from "@/assets/cut-hero.webp";
 import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil, Crown } from "lucide-react";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";

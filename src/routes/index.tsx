@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import sanctuary from "@/assets/sanctuary.jpg";
+import sanctuary from "@/assets/sanctuary.webp";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
 import { Flame, Footprints, Sparkles, ChevronRight, Moon, Dumbbell, Apple, Check } from "lucide-react";
 import { AvatarViewer } from "@/components/AvatarViewer";

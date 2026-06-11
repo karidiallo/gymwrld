@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
-import foodHero from "@/assets/food-hero.jpg";
+import foodHero from "@/assets/food-hero.webp";
 import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight, Sparkles, Settings2 } from "lucide-react";
 import { readLogs } from "@/lib/training-log";
 import { readNutrition, writeNutrition, computeNutrition, type NutritionTarget } from "@/lib/nutrition";
