@@ -423,6 +423,67 @@ function WelcomePage() {
         </div>
       </section>
 
+      {/* how to install */}
+      <section id="howto" className="border-t border-white/5">
+        <div className="mx-auto max-w-6xl px-6 py-24">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">— Jak zainstalować</p>
+          <h2 className="mt-3 font-display text-3xl tracking-tight md:text-5xl">15 sekund i masz <span className="text-gradient">apkę na ekranie</span>.</h2>
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground">PWA — nic nie pobierasz ze sklepu. Działa offline, ma swoją ikonę, pełny ekran. Pokazujemy krok po kroku.</p>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {/* iOS */}
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[var(--violet)]/15 via-[var(--magenta)]/10 to-transparent p-6">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-black/40 text-lg"></div>
+                <p className="font-display text-xl">iPhone · iOS</p>
+                <span className="ml-auto text-[10px] uppercase tracking-widest text-muted-foreground">Safari</span>
+              </div>
+              <ol className="mt-5 space-y-3 text-sm">
+                {[
+                  ["1", "Otwórz gymwrld.com w Safari (nie Chrome)"],
+                  ["2", "Stuknij ikonę Udostępnij (kwadrat ze strzałką w górę)"],
+                  ["3", "Przewiń i wybierz „Do ekranu początkowego”"],
+                  ["4", "Stuknij „Dodaj” → ikona pojawi się na ekranie"],
+                ].map(([n, t]) => (
+                  <li key={n} className="flex gap-3">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-[11px] font-bold text-background">{n}</span>
+                    <span className="text-foreground/90">{t}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-5 text-[11px] text-muted-foreground">💡 Po dodaniu otwieraj zawsze z ikony — działa jak natywna apka, bez paska URL.</p>
+            </div>
+
+            {/* Android */}
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[var(--lime)]/15 via-[var(--orange)]/10 to-transparent p-6">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-black/40 text-lg">🤖</div>
+                <p className="font-display text-xl">Android</p>
+                <span className="ml-auto text-[10px] uppercase tracking-widest text-muted-foreground">Chrome</span>
+              </div>
+              <ol className="mt-5 space-y-3 text-sm">
+                {[
+                  ["1", "Otwórz gymwrld.com w Chrome"],
+                  ["2", "Stuknij menu (trzy kropki w prawym górnym rogu)"],
+                  ["3", "Wybierz „Zainstaluj aplikację” lub „Dodaj do ekranu głównego”"],
+                  ["4", "Potwierdź → GymWRLD pojawi się jak natywna apka"],
+                ].map(([n, t]) => (
+                  <li key={n} className="flex gap-3">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[var(--lime)] to-[var(--orange)] text-[11px] font-bold text-background">{n}</span>
+                    <span className="text-foreground/90">{t}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-5 text-[11px] text-muted-foreground">💡 Czasem Chrome sam wyświetli baner „Zainstaluj GymWRLD” — kliknij i gotowe.</p>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-white/10 bg-black/30 p-5 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">Problemy?</span> Upewnij się, że jesteś na <code>gymwrld.com</code> (nie na podglądzie). Po instalacji otwórz apkę z ekranu — zaloguj się raz, dalej już pamięta sesję.
+          </div>
+        </div>
+      </section>
+
       {/* footer */}
       <footer className="border-t border-white/5">
         <div className="mx-auto max-w-6xl px-6 py-14">
