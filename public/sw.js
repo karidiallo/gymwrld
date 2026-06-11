@@ -1,21 +1,21 @@
-const CACHE_NAME = "gymwrld-shell-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest"];
+function isGymWrldAppCache(name) {
+  return name === "gymwrld-shell-v1" || /^gymwrld-shell-/.test(name) || /(^|-)precache-v\d+-|(^|-)runtime-/.test(name);
+}
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))),
+    (async () => {
+      try {
+        const names = await caches.keys();
+        await Promise.allSettled(names.filter(isGymWrldAppCache).map((name) => caches.delete(name)));
+        await self.clients.claim();
+        const clients = await self.clients.matchAll({ type: "window" });
+        await Promise.allSettled(clients.map((client) => client.navigate(client.url)));
+      } finally {
+        await self.registration.unregister();
+      }
+    })(),
   );
-  self.clients.claim();
-});
-
-self.addEventListener("fetch", (event) => {
-  const request = event.request;
-  const url = new URL(request.url);
-  if (url.pathname.startsWith("/~oauth") || url.pathname.startsWith("/api/") || request.method !== "GET") return;
-  event.respondWith(fetch(request).catch(() => caches.match(request).then((cached) => cached || caches.match("/"))));
 });
