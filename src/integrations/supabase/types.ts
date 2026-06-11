@@ -30,6 +30,8 @@ export type Database = {
           lvl: number | null
           name: string | null
           nickname: string | null
+          referral_code: string | null
+          referred_by: string | null
           subscription: string | null
           updated_at: string
           weight: number | null
@@ -50,6 +52,8 @@ export type Database = {
           lvl?: number | null
           name?: string | null
           nickname?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription?: string | null
           updated_at?: string
           weight?: number | null
@@ -70,12 +74,22 @@ export type Database = {
           lvl?: number | null
           name?: string | null
           nickname?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           subscription?: string | null
           updated_at?: string
           weight?: number | null
           xp?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_tokens: {
         Row: {
@@ -190,7 +204,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gen_referral_code: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
