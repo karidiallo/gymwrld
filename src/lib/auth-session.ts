@@ -31,7 +31,12 @@ export async function clearAuthSession() {
 }
 
 export async function getCurrentUserOrClear(): Promise<User | null> {
-  const { data, error } = await supabase.auth.getUser();
+  const result = await Promise.race([
+    supabase.auth.getUser(),
+    new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 2500)),
+  ]);
+  if (!result) return null;
+  const { data, error } = result;
   if (error) {
     if (isInvalidStoredSession(error)) await clearAuthSession();
     return null;
