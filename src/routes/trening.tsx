@@ -1118,6 +1118,16 @@ function WorkoutSession({
               <button onClick={() => startRest(ex)} className="rounded-full bg-[var(--orange)]/15 px-3 py-1 font-medium text-[var(--orange)] hover:bg-[var(--orange)]/25">
                 <Timer className="mr-1 inline h-2.5 w-2.5" /> Przerwa {ex.restSec ?? 90}s
               </button>
+              <button
+                onClick={() => {
+                  if (!confirm(`Usunąć "${ex.name}" z treningu?`)) return;
+                  setItems((arr) => arr.filter((e) => e.id !== ex.id));
+                  toast("Ćwiczenie usunięte");
+                }}
+                className="rounded-full bg-[var(--magenta)]/15 px-3 py-1 font-medium text-[var(--magenta)] hover:bg-[var(--magenta)]/25"
+              >
+                <Trash2 className="mr-1 inline h-2.5 w-2.5" /> Usuń
+              </button>
             </div>
             <div className="mt-3 flex gap-1.5">
               {Array.from({ length: ex.sets }).map((_, i) => (
@@ -1126,6 +1136,8 @@ function WorkoutSession({
             </div>
           </div>
         ))}
+        {/* Add custom exercise */}
+        <AddExerciseInline onAdd={(ex) => setItems((arr) => [...arr, ex])} />
       </div>
 
       {/* Floating AI rest timer */}
@@ -1165,6 +1177,74 @@ function SetStat({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="rounded-xl bg-white/[0.04] p-2">
       <p className="font-display text-base leading-none">{value}</p>
       <p className="mt-1 text-[10px] text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function AddExerciseInline({ onAdd }: { onAdd: (ex: Exercise) => void }) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const matches = q.trim().length === 0
+    ? EXERCISES.slice(0, 8)
+    : EXERCISES.filter((e) => e.name.toLowerCase().includes(q.toLowerCase())).slice(0, 12);
+
+  const addFromLib = (lib: ExerciseInfo) => {
+    onAdd({
+      id: `ex_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      name: lib.name,
+      sets: 3,
+      reps: 10,
+      weight: 0,
+      libId: lib.id,
+      restSec: recommendRest(lib),
+    });
+    setOpen(false);
+    setQ("");
+    toast.success(`Dodano: ${lib.name}`);
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center justify-center gap-2 rounded-3xl border border-dashed border-white/20 bg-white/[0.02] px-4 py-4 text-sm font-medium text-muted-foreground hover:border-[var(--lime)]/60 hover:text-[var(--lime)]"
+      >
+        <Plus className="h-4 w-4" /> Dodaj ćwiczenie
+      </button>
+    );
+  }
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input
+          autoFocus
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Szukaj ćwiczeń…"
+          className="flex-1 bg-transparent text-sm outline-none"
+        />
+        <button onClick={() => { setOpen(false); setQ(""); }} className="text-xs text-muted-foreground">Anuluj</button>
+      </div>
+      <div className="mt-2 max-h-64 space-y-1 overflow-y-auto">
+        {matches.map((lib) => (
+          <button
+            key={lib.id}
+            onClick={() => addFromLib(lib)}
+            className="flex w-full items-center gap-3 rounded-xl bg-white/5 p-2 text-left hover:bg-white/10"
+          >
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/5 text-xl">{lib.emoji}</span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{lib.name}</p>
+              <p className="truncate text-[10px] text-muted-foreground">{EQUIP_LABEL[lib.equip]}</p>
+            </div>
+            <Plus className="h-4 w-4 text-[var(--lime)]" />
+          </button>
+        ))}
+        {matches.length === 0 && (
+          <p className="px-2 py-3 text-center text-xs text-muted-foreground">Brak wyników</p>
+        )}
+      </div>
     </div>
   );
 }
