@@ -32,7 +32,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "hawk-531", coach: "hawk", title: "Hawk 5/3/1", tagline: "Cykl siłowy na bazie Wendlera",
+    id: "hawk-531", coach: "hawk", title: "Cykl 5/3/1 — siła", tagline: "Cykl siłowy na bazie Wendlera",
     days: 4, level: "Zaawansowany", kcal: 520, minutes: 75, tier: "pro", color: "from-[#5a0f0f] to-[#1a0202]",
     workouts: [
       { day: "Pon", name: "Bench Day", focus: "Wyciskanie 5/3/1 + akcesoria klatka" },
@@ -53,7 +53,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "lex-skill", coach: "lex", title: "Calisthenics Skill", tagline: "Muscle-up, planche, front lever",
+    id: "lex-skill", coach: "lex", title: "Calisthenics — Skill Work", tagline: "Muscle-up, planche, front lever",
     days: 4, level: "Średni", kcal: 380, minutes: 50, tier: "pro", color: "from-[#0a3b1a] to-[#0a1a14]",
     workouts: [
       { day: "Pon", name: "Pull Skill",  focus: "Muscle-up progresje" },
@@ -72,7 +72,7 @@ const PLANS: Plan[] = [
     ],
   },
   {
-    id: "lex-mobility", coach: "lex", title: "Mobility & Flow", tagline: "Codzienna mobilność i flexibility",
+    id: "lex-mobility", coach: "lex", title: "Mobility & Flow", tagline: "Codzienna mobilność i elastyczność",
     days: 7, level: "Początkujący", kcal: 180, minutes: 25, tier: "free", color: "from-[#2a1a5a] to-[#0a0a1a]",
     workouts: [
       { day: "Codziennie", name: "Mobility flow", focus: "Biodra, kręgosłup, barki" },
