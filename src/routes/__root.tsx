@@ -179,7 +179,6 @@ function RootComponent() {
     // AND we're not on a public/auth route (no notifications during signup/login).
     let offAchv: (() => void) | undefined;
     let offWater: (() => void) | undefined;
-    let tracker: StepTracker | null = null;
     let idleId: number | undefined;
     let onVis: (() => void) | undefined;
     let started = false;
@@ -194,7 +193,11 @@ function RootComponent() {
       onVis = () => { if (document.visibilityState === "visible") pingActivity(); };
       document.addEventListener("visibilitychange", onVis);
 
-      // Auto-step tracker (24h idle window). Starts only when prior permission granted.
+      // Auto-step tracker (24h idle window). Global singleton — survives route
+      // changes, so switching tabs inside the app keeps counting. On iOS, the
+      // first run still needs a tap (permission must come from user gesture);
+      // the /kroki screen shows a prompt on first visit, after that we
+      // auto-start on every login.
       (async () => {
         if (typeof window === "undefined") return;
         if (isIdleStale()) { localStorage.removeItem("gw_steps_autostart"); return; }
@@ -203,19 +206,12 @@ function RootComponent() {
           // @ts-expect-error iOS-only
           if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
         } catch {}
-        let stride = 0.75;
-        try {
-          const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
-          const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
-          stride = strideMetres(Number(b.height || p.height), p.gender);
-        } catch {}
-        tracker = startTracking({ strideM: stride });
+        ensureGlobalTracking();
       })();
 
       idleId = window.setInterval(() => {
         if (isIdleStale()) {
-          tracker?.stop();
-          tracker = null;
+          stopGlobalTracking();
           localStorage.removeItem("gw_steps_autostart");
           pushNotif({ kind: "system", title: "Krokomierz uśpiony", body: "Nie logowałaś się 24h — wróć aby wznowić.", emoji: "😴" });
         }
@@ -257,7 +253,8 @@ function RootComponent() {
       offWater?.();
       if (onVis) document.removeEventListener("visibilitychange", onVis);
       if (idleId !== undefined) window.clearInterval(idleId);
-      tracker?.stop();
+      // Intentionally NOT stopping the global tracker here — it must outlive
+      // route changes. It's torn down only on sign-out / idle.
     };
   }, [queryClient, pathname, isPublicRoute]);
 
