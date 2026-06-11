@@ -95,7 +95,7 @@ export const Route = createFileRoute("/api/coach")({
         });
 
         return result.toUIMessageStreamResponse({
-          headers: { "x-thread-id": threadId },
+          headers: { "x-thread-id": threadId ?? "" },
         });
       },
     },
