@@ -312,6 +312,34 @@ function Przepisy() {
         </div>
       </div>
 
+      {/* Diets */}
+      <div className="mt-5">
+        <p className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <Leaf className="h-3 w-3" /> Diety i style odżywiania
+        </p>
+        <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
+          {DIETS.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setCat(c.id)}
+              className={`relative h-24 w-40 shrink-0 overflow-hidden rounded-2xl border text-left transition ${
+                cat === c.id ? "border-[var(--lime)] ring-1 ring-[var(--lime)] glow-primary" : "border-white/10"
+              }`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${c.gradient}`} />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="relative flex h-full flex-col justify-between p-3">
+                <span className="text-2xl">{c.emoji}</span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-white/70">Dieta</p>
+                  <p className="font-display text-base leading-tight text-white">{c.label}</p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Recipe grid */}
       <div className="mt-5 grid grid-cols-2 gap-3">
         {list.map((r) => (
