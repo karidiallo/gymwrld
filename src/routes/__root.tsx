@@ -18,7 +18,7 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
-import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking, requestMotionPermission } from "../lib/steps";
+import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking } from "../lib/steps";
 import { hasLiveAuthSession } from "../lib/auth-session";
 
 function NotFoundComponent() {
@@ -226,6 +226,7 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
+        stopGlobalTracking();
         clearLocalAppState();
         if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
