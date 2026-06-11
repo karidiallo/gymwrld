@@ -4,9 +4,35 @@ import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { getPostAuthDestination } from "@/lib/auth-flow";
+import { ensureCloudProfile } from "@/lib/auth-flow";
 import { clearAuthSession, getCurrentUserOrClear } from "@/lib/auth-session";
 import logoAsset from "@/assets/gymwrld-logo.png.asset.json";
+
+const AUTH_INTENT_KEY = "gw_auth_intent";
+const LIVE_SESSION_KEY = "gw_live_session";
+
+function rememberAuthIntent(intent: "signin" | "signup") {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(AUTH_INTENT_KEY, intent);
+}
+
+function readAuthIntent(fallback: "signin" | "signup") {
+  if (typeof window === "undefined") return fallback;
+  const stored = sessionStorage.getItem(AUTH_INTENT_KEY);
+  return stored === "signup" || stored === "signin" ? stored : fallback;
+}
+
+function markLiveSession() {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(LIVE_SESSION_KEY, "1");
+  localStorage.removeItem("gw_session_persist");
+}
+
+async function routeAfterAuth(user: NonNullable<Awaited<ReturnType<typeof getCurrentUserOrClear>>>, intent: "signin" | "signup") {
+  await ensureCloudProfile(user).catch(() => null);
+  if (typeof window !== "undefined") sessionStorage.removeItem(AUTH_INTENT_KEY);
+  return intent === "signup" ? "/onboarding" : "/";
+}
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Zaloguj się — GymWrld" }] }),
@@ -28,7 +54,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [stayLogged, setStayLogged] = useState(true);
   const [signupPendingEmail, setSignupPendingEmail] = useState<string | null>(null);
   const cleanEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
@@ -37,25 +62,29 @@ function AuthPage() {
   }, [initialMode]);
 
   useEffect(() => {
-    if (!oauthReturn) return;
+    const hasOAuthHash = typeof window !== "undefined" && window.location.hash.length > 1;
+    if (!oauthReturn && !hasOAuthHash) return;
     let cancelled = false;
     setBusy(true);
 
     const finishOAuthLogin = async () => {
-      for (let attempt = 0; attempt < 10 && !cancelled; attempt += 1) {
+      const intent = readAuthIntent(mode === "signup" ? "signup" : "signin");
+      for (let attempt = 0; attempt < 20 && !cancelled; attempt += 1) {
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {
-          const destination = await getPostAuthDestination(sessionData.session.user);
+          markLiveSession();
+          const destination = await routeAfterAuth(sessionData.session.user, intent);
           if (!cancelled) navigate({ to: destination, replace: true });
           return;
         }
         const user = await getCurrentUserOrClear();
         if (user) {
-          const destination = await getPostAuthDestination(user);
+          markLiveSession();
+          const destination = await routeAfterAuth(user, intent);
           if (!cancelled) navigate({ to: destination, replace: true });
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, 350));
+        await new Promise((resolve) => setTimeout(resolve, 250));
       }
       if (!cancelled) {
         setBusy(false);
@@ -66,7 +95,7 @@ function AuthPage() {
 
     finishOAuthLogin();
     return () => { cancelled = true; };
-  }, [oauthReturn, navigate]);
+  }, [oauthReturn, navigate, mode]);
 
   const switchMode = (next: "signin" | "signup" | "reset") => {
     setMode(next);
@@ -76,10 +105,8 @@ function AuthPage() {
   const signInGoogle = async () => {
     setBusy(true);
     try {
-      if (typeof window !== "undefined") {
-        if (stayLogged) localStorage.setItem("gw_session_persist", "1");
-        else localStorage.removeItem("gw_session_persist");
-      }
+      const intent = mode === "signup" ? "signup" : "signin";
+      rememberAuthIntent(intent);
       const r = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}/auth?oauth=1`,
         extraParams: { prompt: "select_account" },
@@ -90,7 +117,10 @@ function AuthPage() {
       }
       if (r.redirected) return;
       const user = await getCurrentUserOrClear();
-      if (user) navigate({ to: await getPostAuthDestination(user) });
+      if (user) {
+        markLiveSession();
+        navigate({ to: await routeAfterAuth(user, intent), replace: true });
+      }
     } finally { setBusy(false); }
   };
 
@@ -98,10 +128,6 @@ function AuthPage() {
     if (!cleanEmail.includes("@")) return toast.error("Podaj poprawny e-mail");
     setBusy(true);
     try {
-      if (typeof window !== "undefined") {
-        if (stayLogged) localStorage.setItem("gw_session_persist", "1");
-        else localStorage.removeItem("gw_session_persist");
-      }
       if (mode === "reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
           redirectTo: `${window.location.origin}/auth?recovery=1`,
@@ -116,7 +142,11 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) throw error;
         toast.success("Zalogowano");
-        if (data.user) navigate({ to: await getPostAuthDestination(data.user) });
+        if (data.user) {
+          markLiveSession();
+          await ensureCloudProfile(data.user).catch(() => null);
+          navigate({ to: "/", replace: true });
+        }
       } else {
         await clearAuthSession();
         const { data, error } = await supabase.auth.signUp({
@@ -126,8 +156,10 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session?.user) {
+          markLiveSession();
+          await ensureCloudProfile(data.session.user).catch(() => null);
           toast.success("Konto utworzone");
-          navigate({ to: await getPostAuthDestination(data.session.user) });
+          navigate({ to: "/onboarding", replace: true });
         } else {
           setSignupPendingEmail(cleanEmail);
           toast.success("Konto utworzone — sprawdź e-mail aktywacyjny");
@@ -221,17 +253,6 @@ function AuthPage() {
           <button onClick={submit} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[var(--magenta)] via-[var(--orange)] to-[var(--lime)] px-5 py-3.5 text-sm font-semibold text-background disabled:opacity-50">
             {mode === "signin" ? "Zaloguj" : mode === "signup" ? "Utwórz konto" : "Wyślij link"} <ChevronRight className="h-4 w-4" />
           </button>
-          {mode !== "reset" && (
-            <label className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={stayLogged}
-                onChange={(e) => setStayLogged(e.target.checked)}
-                className="h-4 w-4 accent-[var(--lime)]"
-              />
-              Zapamiętaj mnie na tym urządzeniu
-            </label>
-          )}
         </div>
 
         <div className="mt-6 flex flex-col items-center gap-2 text-xs">
