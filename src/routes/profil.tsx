@@ -5,6 +5,7 @@ import { Settings, Shirt, Sofa, Trophy, BadgeCheck, Sparkles, Scale, Ruler, Penc
 import { AvatarCustomizer } from "@/components/AvatarCustomizer";
 import { DEFAULT_AVATAR, getAvatarImage, type AvatarConfig } from "@/components/AvatarSvg";
 import { enablePushNotifications, isPushEnabled } from "@/lib/push";
+import { BrandFooter } from "@/components/BrandLoader";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({ meta: [{ title: "Profil — GymWrld" }] }),
@@ -320,6 +321,7 @@ function Profil() {
           }}
         />
       )}
+      <BrandFooter />
     </main>
   );
 }

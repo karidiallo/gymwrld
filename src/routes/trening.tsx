@@ -7,7 +7,7 @@ import outdoorHero from "@/assets/outdoor-hero.jpg";
 import calisthenicsHero from "@/assets/calisthenics-hero.jpg";
 import womenHero from "@/assets/women-hero.jpg";
 import cutHero from "@/assets/cut-hero.jpg";
-import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil } from "lucide-react";
+import { Dumbbell, Home, Mountain, Trophy, Calendar, ChevronRight, Flame, Clock, Heart, Activity, Plus, X, Play, Pause, Check, Trash2, Sparkles, Minus, Library, Layers, ArrowDown, Search, Timer, Pencil, RotateCcw, Gift, Crown } from "lucide-react";
 import { EXERCISES, EQUIP_LABEL, recommendRest, type ExerciseInfo, type EquipCat } from "@/lib/exercises-data";
 import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type TrainingLog } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
@@ -147,9 +147,28 @@ function Trening() {
 
   return (
     <main className="px-5 pt-6">
-      <header>
-        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Twój plan</p>
-        <h1 className="mt-1 font-display text-3xl">Trening</h1>
+      <header className="flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Twój plan</p>
+          <h1 className="mt-1 font-display text-3xl">Trening</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (confirm("Zresetować widok i aktywną sesję?")) {
+                setSession(null); setBuilderOpen(false); setCat("silownia"); setView("tydzien");
+                toast.success("Widok zresetowany");
+              }
+            }}
+            title="Reset"
+            className="grid h-9 w-9 place-items-center rounded-full glass text-muted-foreground hover:text-foreground"
+          ><RotateCcw className="h-4 w-4" /></button>
+          <Link
+            to="/promo"
+            title="Promocje"
+            className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[var(--magenta)] to-[var(--orange)] text-background"
+          ><Gift className="h-4 w-4" /></Link>
+        </div>
       </header>
 
       {/* Hero */}
@@ -272,6 +291,22 @@ function Trening() {
           </div>
         </button>
       </div>
+
+      {/* Guru autorskie treningi banner */}
+      <Link
+        to="/guru"
+        className="mt-4 flex items-center gap-3 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-[#3a1a5a] via-[#5a2a8a] to-[#1a0a3b] p-4 transition-transform active:scale-[0.99]"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-black/40 text-[var(--lime)]">
+          <Crown className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Autorskie · Guru</p>
+          <p className="font-display text-lg leading-tight text-white">Treningi od Coachów</p>
+          <p className="text-[11px] text-white/70">Coach Nova · Coach Hawk · Coach Lex — gotowe split-y i progresje</p>
+        </div>
+        <ChevronRight className="h-5 w-5 text-white/70" />
+      </Link>
 
       {/* Marathon / runners banner */}
       <Link

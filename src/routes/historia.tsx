@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, NotebookPen } from "lucide-react";
-import { readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
+import { readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog, type TrainingKind } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
 import { BrandFooter } from "@/components/BrandLoader";
 
@@ -13,6 +13,8 @@ export const Route = createFileRoute("/historia")({
 function Historia() {
   const [logs, setLogs] = useState<TrainingLog[]>([]);
   const [open, setOpen] = useState<TrainingLog | null>(null);
+  const [filter, setFilter] = useState<"all" | TrainingKind>("all");
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     const load = () => setLogs(readLogs());
@@ -21,16 +23,23 @@ function Historia() {
     return () => window.removeEventListener("gw_training_log_update", load);
   }, []);
 
+  const filtered = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    return logs.filter((l) => (filter === "all" || l.kind === filter) && (ql === "" || l.title.toLowerCase().includes(ql) || (l.notes ?? "").toLowerCase().includes(ql)));
+  }, [logs, filter, q]);
+
   const groups = useMemo(() => {
     const g = new Map<string, TrainingLog[]>();
-    for (const l of logs) {
+    for (const l of filtered) {
       const d = new Date(l.ts);
       const key = d.toLocaleDateString("pl-PL", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
       if (!g.has(key)) g.set(key, []);
       g.get(key)!.push(l);
     }
     return [...g.entries()];
-  }, [logs]);
+  }, [filtered]);
+
+  const KINDS: (TrainingKind | "all")[] = ["all", "silownia", "biezia", "bieg", "street", "mind", "sen"];
 
   return (
     <main className="px-5 pt-6">
@@ -43,8 +52,26 @@ function Historia() {
       </header>
 
       <div className="mt-5 rounded-2xl glass p-4 text-xs text-muted-foreground">
-        <NotebookPen className="mr-1 inline h-3.5 w-3.5" /> {logs.length} sesji · {logs.reduce((s,l)=>s+(l.minutes||0),0)} min · {logs.reduce((s,l)=>s+(l.kcal||0),0)} kcal
+        <NotebookPen className="mr-1 inline h-3.5 w-3.5" /> {filtered.length}/{logs.length} sesji · {filtered.reduce((s,l)=>s+(l.minutes||0),0)} min · {filtered.reduce((s,l)=>s+(l.kcal||0),0)} kcal
       </div>
+
+      <div className="mt-3 -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+        {KINDS.map((k) => (
+          <button
+            key={k}
+            onClick={() => setFilter(k)}
+            className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-medium transition ${filter === k ? "bg-foreground text-background" : "bg-white/5 text-muted-foreground hover:bg-white/10"}`}
+          >
+            {k === "all" ? "Wszystkie" : KIND_LABEL[k]}
+          </button>
+        ))}
+      </div>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Szukaj w tytule lub notatce…"
+        className="mt-2 w-full rounded-2xl bg-white/[0.04] px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/50"
+      />
 
       {groups.length === 0 ? (
         <p className="mt-8 text-center text-sm text-muted-foreground">Brak wpisów. Zacznij od pierwszego treningu.</p>

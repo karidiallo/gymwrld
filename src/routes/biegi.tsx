@@ -53,14 +53,20 @@ function Biegi() {
   }, [watchId, tickId]);
 
   const startTracking = () => {
-    if (!navigator.geolocation) { toast.error("Brak GPS"); return; }
-    setTrackKm(0); setTrackSec(0); setTrackPath([]);
-    setTracking(true);
-    const t0 = Date.now();
-    const ti = setInterval(() => setTrackSec(Math.floor((Date.now() - t0) / 1000)), 1000);
-    setTickId(ti);
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
+    if (!navigator.geolocation) { toast.error("Brak GPS w tym urządzeniu"); return; }
+    // First, explicitly request permission so the toast reflects user's choice
+    toast.loading("Czekam na zgodę GPS…", { id: "gps-perm" });
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        toast.dismiss("gps-perm");
+        // permission granted — start the actual watcher
+        setTrackKm(0); setTrackSec(0); setTrackPath([]);
+        setTracking(true);
+        const t0 = Date.now();
+        const ti = setInterval(() => setTrackSec(Math.floor((Date.now() - t0) / 1000)), 1000);
+        setTickId(ti);
+        const id = navigator.geolocation.watchPosition(
+          (pos) => {
         const p = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         setTrackPath((prev) => {
           const next = [...prev, p];
@@ -70,14 +76,22 @@ function Biegi() {
           }
           return next;
         });
+          },
+          (err) => toast.error("GPS: " + err.message),
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+        );
+        setWatchId(id);
+        localStorage.setItem("gw_health_connected", "1");
+        setHealthConnected(true);
+        toast.success("Nagrywanie biegu rozpoczęte");
       },
-      (err) => toast.error("GPS: " + err.message),
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+      (err) => {
+        toast.dismiss("gps-perm");
+        if (err.code === err.PERMISSION_DENIED) toast.error("Brak zgody na GPS — włącz lokalizację w przeglądarce");
+        else toast.error("GPS: " + err.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
-    setWatchId(id);
-    localStorage.setItem("gw_health_connected", "1");
-    setHealthConnected(true);
-    toast.success("Nagrywanie biegu rozpoczęte");
   };
 
   const stopTracking = () => {
@@ -104,7 +118,15 @@ function Biegi() {
     try {
       const rp = localStorage.getItem("gw_profile");
       if (rp) { const p = JSON.parse(rp); if (p.city) setCityId(p.city); }
-      setHealthConnected(localStorage.getItem("gw_health_connected") === "1");
+      const wasConnected = localStorage.getItem("gw_health_connected") === "1";
+      if (wasConnected && typeof navigator !== "undefined" && (navigator as any).permissions?.query) {
+        (navigator as any).permissions.query({ name: "geolocation" }).then((res: any) => {
+          if (res.state === "granted") setHealthConnected(true);
+          else { localStorage.removeItem("gw_health_connected"); setHealthConnected(false); }
+        }).catch(() => setHealthConnected(wasConnected));
+      } else {
+        setHealthConnected(wasConnected);
+      }
     } catch {}
   }, []);
 
@@ -114,18 +136,26 @@ function Biegi() {
   const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${city.lat},${city.lon}`;
 
   const connectHealth = () => {
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          localStorage.setItem("gw_health_connected", "1");
-          setHealthConnected(true);
-          toast.success("GPS / Health połączone — możesz nagrywać biegi");
-        },
-        () => toast.error("Brak dostępu do lokalizacji — włącz GPS w przeglądarce"),
-      );
-    } else {
-      toast.error("Twoje urządzenie nie wspiera GPS");
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error("Twoje urządzenie nie wspiera GPS"); return;
     }
+    toast.loading("Czekam na zgodę GPS…", { id: "gps-perm" });
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        toast.dismiss("gps-perm");
+        localStorage.setItem("gw_health_connected", "1");
+        setHealthConnected(true);
+        toast.success("GPS połączony — możesz nagrywać biegi");
+      },
+      (err) => {
+        toast.dismiss("gps-perm");
+        localStorage.removeItem("gw_health_connected");
+        setHealthConnected(false);
+        if (err.code === err.PERMISSION_DENIED) toast.error("Odmówiono dostępu do lokalizacji");
+        else toast.error("Brak GPS: " + err.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
   };
   const persist = (next: Run[]) => {
     setRuns(next);

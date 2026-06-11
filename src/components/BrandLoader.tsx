@@ -16,11 +16,9 @@ export function BrandLoader({ label = "Ładowanie…" }: { label?: string }) {
 
 export function BrandFooter() {
   return (
-    <footer className="mt-10 mb-24 flex flex-col items-center gap-1 opacity-70">
-      <img src={logoAsset.url} alt="GymWRLD" className="h-6 w-auto" />
-      <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-        GymWRLD · v1.0 · made with ♥ in Poznań
-      </p>
+    <footer className="mt-12 mb-24 flex flex-col items-center gap-2 opacity-80">
+      <img src={logoAsset.url} alt="GymWRLD" className="h-20 w-auto" />
+      <p className="text-[10px] uppercase tracking-[0.32em] text-muted-foreground">v1.0</p>
     </footer>
   );
 }

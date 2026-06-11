@@ -25,6 +25,7 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as KrokiRouteImport } from './routes/kroki'
 import { Route as HistoriaRouteImport } from './routes/historia'
+import { Route as GuruRouteImport } from './routes/guru'
 import { Route as FizjoRouteImport } from './routes/fizjo'
 import { Route as DietaRouteImport } from './routes/dieta'
 import { Route as CwiczeniaRouteImport } from './routes/cwiczenia'
@@ -112,6 +113,11 @@ const HistoriaRoute = HistoriaRouteImport.update({
   path: '/historia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuruRoute = GuruRouteImport.update({
+  id: '/guru',
+  path: '/guru',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FizjoRoute = FizjoRouteImport.update({
   id: '/fizjo',
   path: '/fizjo',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/cwiczenia': typeof CwiczeniaRoute
   '/dieta': typeof DietaRoute
   '/fizjo': typeof FizjoRoute
+  '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
   '/onboarding': typeof OnboardingRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/guru'
     | '/historia'
     | '/kroki'
     | '/onboarding'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/guru'
     | '/historia'
     | '/kroki'
     | '/onboarding'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/cwiczenia'
     | '/dieta'
     | '/fizjo'
+    | '/guru'
     | '/historia'
     | '/kroki'
     | '/onboarding'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   CwiczeniaRoute: typeof CwiczeniaRoute
   DietaRoute: typeof DietaRoute
   FizjoRoute: typeof FizjoRoute
+  GuruRoute: typeof GuruRoute
   HistoriaRoute: typeof HistoriaRoute
   KrokiRoute: typeof KrokiRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -430,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guru': {
+      id: '/guru'
+      path: '/guru'
+      fullPath: '/guru'
+      preLoaderRoute: typeof GuruRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fizjo': {
       id: '/fizjo'
       path: '/fizjo'
@@ -482,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   CwiczeniaRoute: CwiczeniaRoute,
   DietaRoute: DietaRoute,
   FizjoRoute: FizjoRoute,
+  GuruRoute: GuruRoute,
   HistoriaRoute: HistoriaRoute,
   KrokiRoute: KrokiRoute,
   OnboardingRoute: OnboardingRoute,

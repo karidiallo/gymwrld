@@ -6,6 +6,7 @@ import foodHero from "@/assets/food-hero.jpg";
 import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight, Sparkles, Settings2 } from "lucide-react";
 import { readLogs } from "@/lib/training-log";
 import { readNutrition, writeNutrition, computeNutrition, type NutritionTarget } from "@/lib/nutrition";
+import { BrandFooter } from "@/components/BrandLoader";
 
 export const Route = createFileRoute("/dieta")({
   head: () => ({ meta: [{ title: "Dieta — GymWrld" }, { name: "description", content: "Twój dzienny plan żywieniowy." }] }),
@@ -294,6 +295,7 @@ function Dieta() {
           }}
         />
       )}
+      <BrandFooter />
     </main>
   );
 }
