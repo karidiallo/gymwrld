@@ -18,7 +18,8 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
-import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking } from "../lib/steps";
+import { pingActivity, isIdleStale, ensureGlobalTracking, stopGlobalTracking, requestMotionPermission } from "../lib/steps";
+import { toast } from "sonner";
 import { hasLiveAuthSession } from "../lib/auth-session";
 
 function NotFoundComponent() {
@@ -201,12 +202,60 @@ function RootComponent() {
       (async () => {
         if (typeof window === "undefined") return;
         if (isIdleStale()) { localStorage.removeItem("gw_steps_autostart"); return; }
-        if (localStorage.getItem("gw_steps_autostart") !== "1") return;
+        const autostart = localStorage.getItem("gw_steps_autostart") === "1";
+        // Android / desktop: no permission gesture needed — start silently.
+        let needsGesture = false;
         try {
           // @ts-expect-error iOS-only
-          if (typeof window.DeviceMotionEvent?.requestPermission === "function") return;
+          needsGesture = typeof window.DeviceMotionEvent?.requestPermission === "function";
         } catch {}
-        ensureGlobalTracking();
+        if (autostart && !needsGesture) {
+          ensureGlobalTracking();
+          return;
+        }
+        if (autostart && needsGesture) {
+          // iOS: previously enabled. Re-prompt once per session because Apple
+          // requires a user gesture to access DeviceMotion even after consent.
+          if (sessionStorage.getItem("gw_steps_prompted") === "1") return;
+          sessionStorage.setItem("gw_steps_prompted", "1");
+          toast("Włączyć krokomierz?", {
+            description: "Liczy kroki w tle, dopóki używasz aplikacji.",
+            duration: 12000,
+            action: {
+              label: "Włącz",
+              onClick: async () => {
+                const perm = await requestMotionPermission();
+                if (perm === "denied") {
+                  toast.error("Brak zgody — liczymy tylko po GPS.");
+                }
+                ensureGlobalTracking();
+              },
+            },
+          });
+          return;
+        }
+        // First-ever visit (no autostart pref). Ask once.
+        if (sessionStorage.getItem("gw_steps_prompted") === "1") return;
+        if (localStorage.getItem("gw_steps_optout") === "1") return;
+        sessionStorage.setItem("gw_steps_prompted", "1");
+        toast("Włącz krokomierz", {
+          description: "Automatycznie zlicza kroki, gdy używasz GymWrld.",
+          duration: 15000,
+          action: {
+            label: "Włącz",
+            onClick: async () => {
+              const perm = await requestMotionPermission();
+              if (perm === "denied") {
+                toast.error("Brak zgody — liczymy tylko po GPS.");
+              }
+              ensureGlobalTracking();
+            },
+          },
+          cancel: {
+            label: "Nie teraz",
+            onClick: () => { localStorage.setItem("gw_steps_optout", "1"); },
+          },
+        });
       })();
 
       idleId = window.setInterval(() => {
