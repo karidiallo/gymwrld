@@ -36,6 +36,29 @@ function Steps() {
 
   useEffect(() => () => { trackerRef.current?.stop(); }, []);
 
+  // Auto-start on mount if the user previously enabled the autostart preference
+  // and the browser already has motion/geolocation permission.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem("gw_steps_autostart") !== "1") return;
+    if (trackerRef.current) return;
+    (async () => {
+      try {
+        // @ts-expect-error iOS-only API
+        const needsAsk = typeof window.DeviceMotionEvent?.requestPermission === "function";
+        if (needsAsk) return; // iOS requires a tap — don't auto-prompt
+      } catch {}
+      let stride = 0.75;
+      try {
+        const p = JSON.parse(localStorage.getItem("gw_profile") || "{}");
+        const b = JSON.parse(localStorage.getItem("gw_body") || "{}");
+        stride = strideMetres(Number(b.height || p.height), p.gender);
+      } catch {}
+      trackerRef.current = startTracking({ strideM: stride, onUpdate: setState });
+      setTracking(true);
+    })();
+  }, []);
+
   useEffect(() => {
     if (!tracking) return;
     const id = setInterval(() => {
@@ -60,6 +83,7 @@ function Steps() {
     } catch {}
     trackerRef.current = startTracking({ strideM: stride, onUpdate: setState });
     setTracking(true);
+    localStorage.setItem("gw_steps_autostart", "1");
     toast.success("Krokomierz włączony", { description: "Schowaj telefon do kieszeni — liczę kroki w tle." });
   };
 
@@ -68,6 +92,7 @@ function Steps() {
     trackerRef.current = null;
     setTracking(false);
     setAccelOn(false); setGpsOn(false);
+    localStorage.removeItem("gw_steps_autostart");
     toast("Krokomierz zatrzymany");
   };
 
