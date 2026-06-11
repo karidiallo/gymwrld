@@ -203,15 +203,15 @@ function AuthPage() {
         <div className="mt-6 flex flex-col items-center gap-2 text-xs">
           {mode === "signin" && (
             <>
-              <button onClick={() => setMode("reset")} className="text-muted-foreground hover:text-white">Zapomniałem hasła</button>
-              <p className="text-muted-foreground">Nie masz konta? <button onClick={() => setMode("signup")} className="text-[var(--lime)]">Zarejestruj się</button></p>
+              <button onClick={() => switchMode("reset")} className="text-muted-foreground hover:text-white">Zapomniałem hasła</button>
+              <p className="text-muted-foreground">Nie masz konta? <button onClick={() => switchMode("signup")} className="text-[var(--lime)]">Zarejestruj się</button></p>
             </>
           )}
           {mode === "signup" && (
-            <p className="text-muted-foreground">Masz już konto? <button onClick={() => setMode("signin")} className="text-[var(--lime)]">Zaloguj się</button></p>
+            <p className="text-muted-foreground">Masz już konto? <button onClick={() => switchMode("signin")} className="text-[var(--lime)]">Zaloguj się</button></p>
           )}
           {mode === "reset" && (
-            <button onClick={() => setMode("signin")} className="text-[var(--lime)]">Wróć do logowania</button>
+            <button onClick={() => switchMode("signin")} className="text-[var(--lime)]">Wróć do logowania</button>
           )}
         </div>
       </div>
