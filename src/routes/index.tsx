@@ -10,7 +10,6 @@ import { DEFAULT_AVATAR, getAvatarImageFor, skinFilter, type AvatarConfig } from
 import { awardXp, readLogs, KIND_LABEL, KIND_COLOR, type TrainingLog } from "@/lib/training-log";
 import { LogDetail } from "@/components/LogDetail";
 import { BrandFooter } from "@/components/BrandLoader";
-import { supabase } from "@/integrations/supabase/client";
 import { ensureCloudProfile, isProfileComplete } from "@/lib/auth-flow";
 import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
