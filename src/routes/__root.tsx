@@ -19,7 +19,6 @@ import { supabase } from "../integrations/supabase/client";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
-import { getHostKind } from "../lib/host";
 
 function NotFoundComponent() {
   return (
@@ -156,7 +155,8 @@ function RootComponent() {
   const isPublicRoute =
     pathname.startsWith("/welcome") ||
     pathname.startsWith("/privacy") ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/onboarding");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -173,22 +173,6 @@ function RootComponent() {
         localStorage.setItem("gw_ref", ref.toUpperCase());
       }
     } catch {}
-
-    // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing).
-    // For /auth on apex, jump to the app subdomain so OAuth + session persistence work there.
-    if (typeof window !== "undefined" && getHostKind() === "landing") {
-      if (pathname.startsWith("/auth")) {
-        window.location.replace(`https://app.gymwrld.com${pathname}${window.location.search}`);
-        return;
-      }
-      if (!pathname.startsWith("/welcome") && !pathname.startsWith("/privacy")) {
-        window.location.replace("/welcome");
-        return;
-      }
-      // On apex landing we never start trackers, reminders or activity pings.
-      const { data: subL } = supabase.auth.onAuthStateChange(() => {});
-      return () => subL.subscription.unsubscribe();
-    }
 
     // App-host effects: only start water/achievement/steps once we have an authenticated user
     // AND we're not on a public/auth route (no notifications during signup/login).
