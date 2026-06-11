@@ -166,6 +166,14 @@ function RootComponent() {
     }
     installLocalStateCloudSync();
 
+    // Capture ?ref=XXXX from landing URL — used at first profile creation.
+    try {
+      const ref = new URLSearchParams(window.location.search).get("ref");
+      if (ref && /^[A-Z0-9]{4,12}$/i.test(ref)) {
+        localStorage.setItem("gw_ref", ref.toUpperCase());
+      }
+    } catch {}
+
     // Host-based split: apex (gymwrld.com / www.gymwrld.com) only ever shows /welcome (landing).
     // For /auth on apex, jump to the app subdomain so OAuth + session persistence work there.
     if (typeof window !== "undefined" && getHostKind() === "landing") {
