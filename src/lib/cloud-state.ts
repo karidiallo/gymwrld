@@ -98,4 +98,32 @@ export function installLocalStateCloudSync() {
       migrateLocalStateToCloud().catch(() => undefined);
     }, 500);
   };
+
+  // Auto cloud-sync every 60s while tab is visible + on visibilitychange (going
+  // background flushes, foregrounding pulls latest cloud state).
+  let intervalId: ReturnType<typeof setInterval> | undefined;
+  const startInterval = () => {
+    if (intervalId) return;
+    intervalId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        migrateLocalStateToCloud().catch(() => undefined);
+      }
+    }, 60_000);
+  };
+  const stopInterval = () => {
+    if (intervalId) { clearInterval(intervalId); intervalId = undefined; }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      restoreCloudStateToLocal().catch(() => undefined);
+      startInterval();
+    } else {
+      migrateLocalStateToCloud().catch(() => undefined);
+      stopInterval();
+    }
+  });
+  window.addEventListener("beforeunload", () => {
+    migrateLocalStateToCloud().catch(() => undefined);
+  });
+  startInterval();
 }
