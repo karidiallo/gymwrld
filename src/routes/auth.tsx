@@ -87,6 +87,7 @@ function AuthPage() {
         await clearAuthSession();
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
+          password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
