@@ -54,7 +54,7 @@ function Index() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    getCurrentUserOrClear().then(async (user) => {
+    getCurrentUserOrClear({ requireLiveSession: true }).then(async (user) => {
       if (cancelled) return;
       if (!user) {
         // Landing page only shown in normal browser; in installed PWA go straight to auth
