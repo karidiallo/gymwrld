@@ -118,7 +118,15 @@ function Biegi() {
     try {
       const rp = localStorage.getItem("gw_profile");
       if (rp) { const p = JSON.parse(rp); if (p.city) setCityId(p.city); }
-      setHealthConnected(localStorage.getItem("gw_health_connected") === "1");
+      const wasConnected = localStorage.getItem("gw_health_connected") === "1";
+      if (wasConnected && typeof navigator !== "undefined" && (navigator as any).permissions?.query) {
+        (navigator as any).permissions.query({ name: "geolocation" }).then((res: any) => {
+          if (res.state === "granted") setHealthConnected(true);
+          else { localStorage.removeItem("gw_health_connected"); setHealthConnected(false); }
+        }).catch(() => setHealthConnected(wasConnected));
+      } else {
+        setHealthConnected(wasConnected);
+      }
     } catch {}
   }, []);
 
