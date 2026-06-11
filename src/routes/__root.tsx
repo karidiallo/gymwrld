@@ -87,11 +87,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "GymWrld — Twoja cyfrowa wersja siebie" },
       { name: "description", content: "Premium aplikacja lifestyle. Trenuj, jedz świadomie, rozwijaj swoją cyfrową postać." },
       { name: "author", content: "GymWrld" },
-      { property: "og:title", content: "GymWrld" },
-      { property: "og:description", content: "Premium aplikacja lifestyle łącząca fitness, dietę i rozwój." },
+      { property: "og:title", content: "GymWrld — Twoja cyfrowa wersja siebie" },
+      { property: "og:description", content: "Premium aplikacja lifestyle. Trenuj, jedz świadomie, rozwijaj swoją cyfrową postać." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "GymWrld — Twoja cyfrowa wersja siebie" },
+      { name: "twitter:description", content: "Premium aplikacja lifestyle. Trenuj, jedz świadomie, rozwijaj swoją cyfrową postać." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7694c393-0f3c-4d84-945b-3002d28039a1/id-preview-eb01f286--cd18d754-d457-4a4f-9ceb-37ed08ebe404.lovable.app-1781139578906.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7694c393-0f3c-4d84-945b-3002d28039a1/id-preview-eb01f286--cd18d754-d457-4a4f-9ceb-37ed08ebe404.lovable.app-1781139578906.png" },
     ],
     links: [
       {
