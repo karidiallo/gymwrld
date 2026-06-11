@@ -23,6 +23,7 @@ import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as KrokiRouteImport } from './routes/kroki'
 import { Route as HistoriaRouteImport } from './routes/historia'
 import { Route as GuruRouteImport } from './routes/guru'
@@ -103,6 +104,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KrokiRoute = KrokiRouteImport.update({
   id: '/kroki',
   path: '/kroki',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/guru': typeof GuruRoute
   '/historia': typeof HistoriaRoute
   '/kroki': typeof KrokiRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/premium': typeof PremiumRoute
   '/privacy': typeof PrivacyRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/guru'
     | '/historia'
     | '/kroki'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/guru'
     | '/historia'
     | '/kroki'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/guru'
     | '/historia'
     | '/kroki'
+    | '/notifications'
     | '/onboarding'
     | '/premium'
     | '/privacy'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   GuruRoute: typeof GuruRoute
   HistoriaRoute: typeof HistoriaRoute
   KrokiRoute: typeof KrokiRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PremiumRoute: typeof PremiumRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -429,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kroki': {
       id: '/kroki'
       path: '/kroki'
@@ -505,6 +525,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuruRoute: GuruRoute,
   HistoriaRoute: HistoriaRoute,
   KrokiRoute: KrokiRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PremiumRoute: PremiumRoute,
   PrivacyRoute: PrivacyRoute,
@@ -523,3 +544,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
