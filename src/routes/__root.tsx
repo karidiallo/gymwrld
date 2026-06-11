@@ -18,6 +18,7 @@ import { CelebrationModal } from "../components/CelebrationModal";
 import { CoachFAB } from "../components/CoachFAB";
 import { supabase } from "../integrations/supabase/client";
 import { ensureCloudProfile } from "../lib/auth-flow";
+import { clearAuthSession, getCurrentUserOrClear } from "../lib/auth-session";
 import { installLocalStateCloudSync, syncLocalState, clearLocalAppState } from "../lib/cloud-state";
 import { startWaterReminders, installAchievementBridge, pushNotif } from "../lib/notifications";
 import { pingActivity, isIdleStale, startTracking, requestMotionPermission, strideMetres, type StepTracker } from "../lib/steps";
@@ -162,10 +163,12 @@ function RootComponent() {
     pathname.startsWith("/auth");
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    const isLovablePreview = /lovableproject\.com|id-preview--|localhost/i.test(window.location.hostname);
+    if ("serviceWorker" in navigator && !isLovablePreview) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    } else if ("serviceWorker" in navigator && isLovablePreview) {
+      navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((reg) => reg.unregister())).catch(() => undefined);
     }
-    installLocalStateCloudSync();
 
     // Capture ?ref=XXXX from landing URL — used at first profile creation.
     try {
@@ -203,6 +206,7 @@ function RootComponent() {
     const startAppEffects = () => {
       if (started || isPublicRoute) return;
       started = true;
+      installLocalStateCloudSync();
       offAchv = installAchievementBridge();
       offWater = startWaterReminders();
       pingActivity();
@@ -238,14 +242,15 @@ function RootComponent() {
     };
 
     // If a session already exists at mount, start immediately (after refresh on an app route).
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) startAppEffects();
+    getCurrentUserOrClear().then((user) => {
+      if (user) startAppEffects();
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_OUT") {
         clearLocalAppState();
+        clearAuthSession();
         if (typeof window !== "undefined") localStorage.removeItem("gw_last_user_id");
         queryClient.clear();
         router.invalidate();
