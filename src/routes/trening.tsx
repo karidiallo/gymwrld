@@ -14,6 +14,7 @@ import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type Tr
 import { ROUTINES } from "@/lib/routines";
 import { LogDetail } from "@/components/LogDetail";
 import { EntryActions } from "@/components/EntryActions";
+import { MuscleMap, MuscleIntensityList } from "@/components/MuscleMap";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
