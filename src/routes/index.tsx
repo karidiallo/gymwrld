@@ -381,8 +381,6 @@ function StatCard({ icon, title, value, to }: { icon: React.ReactNode; title: st
   );
 }
 
-function Quest({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
-
 function StepsCard({ steps }: { steps: StepsState | null }) {
   const today = steps?.today ?? 0;
   const goal = steps?.goal ?? 10000;
