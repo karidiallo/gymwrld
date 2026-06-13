@@ -382,6 +382,47 @@ function StatCard({ icon, title, value, to }: { icon: React.ReactNode; title: st
 }
 
 function Quest({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
+
+function StepsCard({ steps }: { steps: StepsState | null }) {
+  const today = steps?.today ?? 0;
+  const goal = steps?.goal ?? 10000;
+  const pct = Math.min(100, Math.round((today / goal) * 100));
+  const week = steps?.week ?? [];
+  const dist = ((steps?.distanceM ?? 0) / 1000).toFixed(1);
+  return (
+    <Link to="/kroki" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel {goal.toLocaleString("pl-PL")}</p>
+          <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums">{today.toLocaleString("pl-PL")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {today === 0 ? "Otwórz Kroki, by włączyć krokomierz" : `${pct}% celu · ${dist} km dziś`}
+          </p>
+        </div>
+        <Ring value={today} max={goal} size={92} stroke={8} color="var(--lime)">
+          <Footprints className="h-5 w-5 text-[var(--lime)]" />
+          <span className="mt-1 text-xs font-medium">{pct}%</span>
+        </Ring>
+      </div>
+      <div className="mt-4 flex items-end gap-1.5">
+        {(week.length === 7 ? week : Array.from({ length: 7 }, (_, i) => ({ d: ["Pn","Wt","Śr","Cz","Pt","Sb","Nd"][i], steps: 0 }))).map((day, i) => {
+          const p = Math.min(100, (day.steps / goal) * 100);
+          return (
+            <div key={i} className="flex-1">
+              <div
+                className={`rounded-full ${day.steps ? "bg-gradient-to-t from-[var(--lime)] to-[var(--violet)]" : "bg-white/5"}`}
+                style={{ height: `${Math.max(4, p * 0.5)}px` }}
+              />
+              <p className="mt-1 text-center text-[10px] text-muted-foreground">{day.d}</p>
+            </div>
+          );
+        })}
+      </div>
+    </Link>
+  );
+}
+
+function QuestOriginal({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
   return (
     <button onClick={onToggle} className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition-transform active:scale-[0.99]">
       <div className={`grid h-10 w-10 place-items-center rounded-xl transition-colors ${done ? "bg-[var(--lime)] text-background" : "bg-primary/10 text-primary"}`}>
