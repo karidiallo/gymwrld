@@ -17,6 +17,35 @@ const STORAGE_KEY = "gw_steps_v2";
 const ACTIVITY_KEY = "gw_last_activity";
 const IDLE_MS = 24 * 60 * 60 * 1000;
 
+/** Step milestones celebrated through in-app notifications. */
+const MILESTONES = [1000, 2500, 5000, 7500, 10000, 12500, 15000, 20000, 25000, 30000];
+
+const MILESTONE_COPY: Record<number, { title: string; body: string; emoji: string }> = {
+  1000:  { title: "1 000 kroków!", body: "Pierwszy tysiąc dziś. Tak się buduje rytm 🔥", emoji: "🚶" },
+  2500:  { title: "2 500 kroków", body: "Jedna czwarta celu. Tempo masz idealne.", emoji: "🥾" },
+  5000:  { title: "Półmetek · 5 000", body: "Połowa dziennego celu zaliczona. Idź po więcej.", emoji: "🏃" },
+  7500:  { title: "7 500 — trzy czwarte", body: "Jeszcze 2 500 i bijesz dzienny cel.", emoji: "💪" },
+  10000: { title: "Cel dnia: 10 000 ✅", body: "Dzienne 10k zaliczone — zdrowotny minimum bity!", emoji: "🏆" },
+  12500: { title: "12 500 kroków", body: "Powyżej celu. Twoje serce Ci dziękuje.", emoji: "⚡" },
+  15000: { title: "15 000 — Wojownik", body: "Tylko 12% ludzi schodzi tyle dziennie. Brawo.", emoji: "🔥" },
+  20000: { title: "20 000 — Maraton dnia", body: "To poziom elitarny. Pamiętaj o regeneracji.", emoji: "🚀" },
+  25000: { title: "25 000 kroków", body: "Pół maratonu w nogach. Legenda.", emoji: "🏔️" },
+  30000: { title: "30 000 — kosmos", body: "Maraton pieszo zaliczony. Szacun.", emoji: "🌌" },
+};
+
+function emitMilestone(m: number, goal: number) {
+  if (typeof window === "undefined") return;
+  const copy = MILESTONE_COPY[m] ?? {
+    title: `${m.toLocaleString()} kroków`,
+    body: `Świetnie! Cel ${goal.toLocaleString()} bliżej.`,
+    emoji: "🎉",
+  };
+  // Lazy import to avoid circular dep at module init.
+  import("./notifications").then(({ pushNotif }) => {
+    pushNotif({ kind: "achievement", title: copy.title, body: copy.body, emoji: copy.emoji });
+  }).catch(() => undefined);
+}
+
 /** Mark that the user opened the app — extends the 24h auto-stop window. */
 export function pingActivity() {
   if (typeof window === "undefined") return;
