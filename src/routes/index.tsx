@@ -422,7 +422,7 @@ function StepsCard({ steps }: { steps: StepsState | null }) {
   );
 }
 
-function QuestOriginal({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
+function Quest({ title, reward, progress, done, onToggle }: { title: string; reward: string; progress: number; done: boolean; onToggle: () => void }) {
   return (
     <button onClick={onToggle} className="flex w-full items-center gap-3 rounded-2xl glass p-3.5 text-left transition-transform active:scale-[0.99]">
       <div className={`grid h-10 w-10 place-items-center rounded-xl transition-colors ${done ? "bg-[var(--lime)] text-background" : "bg-primary/10 text-primary"}`}>
