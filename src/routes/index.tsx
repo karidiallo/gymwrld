@@ -15,6 +15,7 @@ import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
 import { NotificationBell } from "@/components/NotificationBell";
 import { getCurrentUserOrClear } from "@/lib/auth-session";
+import { readSteps, type StepsState } from "@/lib/steps";
 
 function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
   return Promise.race([
@@ -120,6 +121,18 @@ function Index() {
   ]);
   const [recentLogs, setRecentLogs] = useState<TrainingLog[]>([]);
   const [openLog, setOpenLog] = useState<TrainingLog | null>(null);
+  const [steps, setSteps] = useState<StepsState | null>(() => (typeof window !== "undefined" ? readSteps() : null));
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => setSteps(readSteps());
+    sync();
+    window.addEventListener("gw_steps_update", sync);
+    const id = window.setInterval(sync, 5000); // catch updates while singleton runs in another route
+    return () => {
+      window.removeEventListener("gw_steps_update", sync);
+      window.clearInterval(id);
+    };
+  }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const load = () => setRecentLogs(readLogs().slice(0, 3));
@@ -243,27 +256,7 @@ function Index() {
 
       {/* Steps card */}
       <SectionTitle title="Dzisiejsze kroki" actionTo="/kroki" action="Historia" />
-      <Link to="/kroki" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel 10 000</p>
-            <p className="mt-1 text-4xl font-semibold tracking-tight">0</p>
-            <p className="mt-1 text-xs text-muted-foreground">0% celu · zacznij dziś</p>
-          </div>
-          <Ring value={0} size={92} stroke={8}>
-            <Footprints className="h-5 w-5 text-primary" />
-            <span className="mt-1 text-xs font-medium">0%</span>
-          </Ring>
-        </div>
-        <div className="mt-4 flex items-end gap-1.5">
-          {[0, 0, 0, 0, 0, 0, 0].map((v, i) => (
-            <div key={i} className="flex-1">
-              <div className="rounded-full bg-white/5" style={{ height: `4px` }} />
-              <p className="mt-1 text-center text-[10px] text-muted-foreground">{["P","W","Ś","C","P","S","N"][i]}</p>
-            </div>
-          ))}
-        </div>
-      </Link>
+      <StepsCard steps={steps} />
 
       {/* Quests */}
       <SectionTitle title="Dzisiejsze zadania" actionTo="/zadania" action="Wszystkie" />
@@ -383,6 +376,45 @@ function StatCard({ icon, title, value, to }: { icon: React.ReactNode; title: st
       </div>
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
         <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${value}%` }} />
+      </div>
+    </Link>
+  );
+}
+
+function StepsCard({ steps }: { steps: StepsState | null }) {
+  const today = steps?.today ?? 0;
+  const goal = steps?.goal ?? 10000;
+  const pct = Math.min(100, Math.round((today / goal) * 100));
+  const week = steps?.week ?? [];
+  const dist = ((steps?.distanceM ?? 0) / 1000).toFixed(1);
+  return (
+    <Link to="/kroki" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel {goal.toLocaleString("pl-PL")}</p>
+          <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums">{today.toLocaleString("pl-PL")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {today === 0 ? "Otwórz Kroki, by włączyć krokomierz" : `${pct}% celu · ${dist} km dziś`}
+          </p>
+        </div>
+        <Ring value={today} max={goal} size={92} stroke={8} color="var(--lime)">
+          <Footprints className="h-5 w-5 text-[var(--lime)]" />
+          <span className="mt-1 text-xs font-medium">{pct}%</span>
+        </Ring>
+      </div>
+      <div className="mt-4 flex items-end gap-1.5">
+        {(week.length === 7 ? week : Array.from({ length: 7 }, (_, i) => ({ d: ["Pn","Wt","Śr","Cz","Pt","Sb","Nd"][i], steps: 0 }))).map((day, i) => {
+          const p = Math.min(100, (day.steps / goal) * 100);
+          return (
+            <div key={i} className="flex-1">
+              <div
+                className={`rounded-full ${day.steps ? "bg-gradient-to-t from-[var(--lime)] to-[var(--violet)]" : "bg-white/5"}`}
+                style={{ height: `${Math.max(4, p * 0.5)}px` }}
+              />
+              <p className="mt-1 text-center text-[10px] text-muted-foreground">{day.d}</p>
+            </div>
+          );
+        })}
       </div>
     </Link>
   );

@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Ring } from "@/components/Ring";
 import foodHero from "@/assets/food-hero.webp";
-import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight, Sparkles, Settings2 } from "lucide-react";
+import { Plus, Coffee, UtensilsCrossed, Soup, Cookie, Droplet, X, Search, Trash2, Pencil, Minus, BookOpen, ChevronRight, Sparkles, Settings2, Bell, Clock } from "lucide-react";
 import { readLogs } from "@/lib/training-log";
 import { readNutrition, writeNutrition, computeNutrition, type NutritionTarget } from "@/lib/nutrition";
+import { readWaterSlots, writeWaterSlots } from "@/lib/notifications";
 import { BrandFooter } from "@/components/BrandLoader";
 
 export const Route = createFileRoute("/dieta")({
@@ -261,6 +262,9 @@ function Dieta() {
         </div>
       </div>
 
+      {/* Water reminders settings */}
+      <WaterRemindersCard />
+
       {/* Toilet log */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Dziennik łazienki</h3>
       <div className="grid grid-cols-2 gap-3">
@@ -412,6 +416,108 @@ function MealRow({
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
+    </div>
+  );
+}
+
+function WaterRemindersCard() {
+  const [enabled, setEnabled] = useState<boolean>(() =>
+    typeof window !== "undefined" && localStorage.getItem("gw_reminders_water") === "1",
+  );
+  const [slots, setSlots] = useState<number[]>(() => readWaterSlots());
+
+  const persistSlots = (next: number[]) => {
+    setSlots(next);
+    writeWaterSlots(next);
+  };
+  const toggle = () => {
+    const next = !enabled;
+    setEnabled(next);
+    if (typeof window !== "undefined") {
+      if (next) localStorage.setItem("gw_reminders_water", "1");
+      else localStorage.removeItem("gw_reminders_water");
+    }
+    if (next) toast.success("Powiadomienia o wodzie włączone");
+    else toast("Powiadomienia o wodzie wyłączone");
+  };
+  const updateSlot = (idx: number, hour: number) => {
+    const next = [...slots];
+    next[idx] = Math.max(0, Math.min(23, hour));
+    persistSlots(next);
+  };
+  const addSlot = () => {
+    if (slots.length >= 6) return;
+    const last = slots[slots.length - 1] ?? 9;
+    persistSlots([...slots, Math.min(23, last + 2)]);
+  };
+  const removeSlot = (idx: number) => {
+    if (slots.length <= 1) return;
+    persistSlots(slots.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div className="mt-4 rounded-2xl glass p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--violet)]/15 text-[var(--violet)]">
+            <Bell className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Przypomnienia o piciu wody</p>
+            <p className="text-[11px] text-muted-foreground">
+              {enabled ? `Aktywne · ${slots.length} powiadomień / dzień` : "Wyłączone — włącz, by otrzymywać delikatne ponaglenia"}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={toggle}
+          aria-pressed={enabled}
+          className={`relative h-6 w-11 shrink-0 rounded-full transition ${enabled ? "bg-gradient-to-r from-[var(--violet)] to-[var(--magenta)]" : "bg-white/10"}`}
+        >
+          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${enabled ? "left-[1.375rem]" : "left-0.5"}`} />
+        </button>
+      </div>
+
+      {enabled && (
+        <div className="mt-4 space-y-2">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Godziny przypomnień</p>
+          {slots.map((h, idx) => (
+            <div key={idx} className="flex items-center gap-2 rounded-xl bg-white/[0.04] p-2 pl-3">
+              <Clock className="h-3.5 w-3.5 text-[var(--violet)]" />
+              <input
+                type="time"
+                value={`${String(h).padStart(2, "0")}:00`}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  const hour = parseInt(v.split(":")[0] || "0", 10);
+                  if (!Number.isNaN(hour)) updateSlot(idx, hour);
+                }}
+                className="flex-1 bg-transparent text-sm tabular-nums outline-none [color-scheme:dark]"
+              />
+              {slots.length > 1 && (
+                <button
+                  onClick={() => removeSlot(idx)}
+                  className="grid h-7 w-7 place-items-center rounded-full bg-white/5 text-muted-foreground hover:bg-white/10"
+                  aria-label="Usuń"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          ))}
+          {slots.length < 6 && (
+            <button
+              onClick={addSlot}
+              className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 p-2 text-xs text-muted-foreground hover:bg-white/[0.03]"
+            >
+              <Plus className="h-3.5 w-3.5" /> Dodaj godzinę
+            </button>
+          )}
+          <p className="text-[10px] text-muted-foreground/80">
+            Powiadomienie pojawia się w wybranej godzinie (±10 min) — tylko gdy aplikacja jest otwarta.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

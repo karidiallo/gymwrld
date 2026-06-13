@@ -14,6 +14,7 @@ import { addLog, removeLog, updateLog, readLogs, KIND_COLOR, KIND_LABEL, type Tr
 import { ROUTINES } from "@/lib/routines";
 import { LogDetail } from "@/components/LogDetail";
 import { EntryActions } from "@/components/EntryActions";
+import { MuscleMap, MuscleIntensityList } from "@/components/MuscleMap";
 
 export const Route = createFileRoute("/trening")({
   head: () => ({ meta: [{ title: "Trening — GymWrld" }] }),
@@ -1052,12 +1053,15 @@ function WorkoutSession({
 
       {/* Exercises */}
       <div className="space-y-3 px-5 py-5">
-        {items.map((ex, idx) => (
+        {items.map((ex, idx) => {
+          const lib = EXERCISES.find((e) => e.id === ex.libId);
+          const muscles = lib?.muscles ?? [];
+          return (
           <div key={ex.id} className={`rounded-3xl glass p-4 ${ex.done ? "opacity-60" : ""} ${ex.kind === "superset" ? "ring-1 ring-[var(--magenta)]/50" : ex.kind === "dropset" ? "ring-1 ring-[var(--orange)]/50" : ""}`}>
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/5 text-3xl animate-pulse-glow">
-                  {EXERCISES.find((e) => e.id === ex.libId)?.emoji ?? "💪"}
+                  {lib?.emoji ?? "💪"}
                 </span>
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Ćwiczenie {idx + 1}</p>
@@ -1066,6 +1070,11 @@ function WorkoutSession({
                     <span className="inline-flex items-center gap-1 rounded-full bg-[var(--lime)]/15 px-2 py-0.5 text-[10px] text-[var(--lime)]">
                       <Sparkles className="h-3 w-3" /> AI dla Ciebie
                     </span>
+                    {lib?.difficulty && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-muted-foreground">
+                        {lib.difficulty}
+                      </span>
+                    )}
                     {ex.kind === "superset" && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[var(--magenta)]/20 px-2 py-0.5 text-[10px] text-[var(--magenta)]">
                         <Layers className="h-3 w-3" /> Superseria
@@ -1088,6 +1097,22 @@ function WorkoutSession({
                 <Check className="h-4 w-4" />
               </button>
             </div>
+
+            {/* Anatomical muscle map — shows targeted muscles with intensity */}
+            {muscles.length > 0 && (
+              <div className="mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--magenta)]/8 via-transparent to-[var(--orange)]/8 p-3 ring-1 ring-white/5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Pracujące mięśnie</p>
+                  <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--magenta)]" /> Główne</span>
+                    <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[var(--orange)]" /> Wspomagające</span>
+                  </div>
+                </div>
+                <MuscleMap muscles={muscles} className="mt-1" />
+                <MuscleIntensityList muscles={muscles} />
+              </div>
+            )}
+
             {editingId === ex.id ? (
               <div className="mt-3 grid grid-cols-3 gap-2">
                 <NumField label="Serie" value={ex.sets} onChange={(v) => setItems((arr) => arr.map((e) => e.id === ex.id ? { ...e, sets: v } : e))} step={1} min={1} />
@@ -1135,7 +1160,8 @@ function WorkoutSession({
               ))}
             </div>
           </div>
-        ))}
+        );
+        })}
         {/* Add custom exercise */}
         <AddExerciseInline onAdd={(ex) => setItems((arr) => [...arr, ex])} />
       </div>

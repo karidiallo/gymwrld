@@ -17,6 +17,35 @@ const STORAGE_KEY = "gw_steps_v2";
 const ACTIVITY_KEY = "gw_last_activity";
 const IDLE_MS = 24 * 60 * 60 * 1000;
 
+/** Step milestones celebrated through in-app notifications. */
+const MILESTONES = [1000, 2500, 5000, 7500, 10000, 12500, 15000, 20000, 25000, 30000];
+
+const MILESTONE_COPY: Record<number, { title: string; body: string; emoji: string }> = {
+  1000:  { title: "1 000 kroków!", body: "Pierwszy tysiąc dziś. Tak się buduje rytm 🔥", emoji: "🚶" },
+  2500:  { title: "2 500 kroków", body: "Jedna czwarta celu. Tempo masz idealne.", emoji: "🥾" },
+  5000:  { title: "Półmetek · 5 000", body: "Połowa dziennego celu zaliczona. Idź po więcej.", emoji: "🏃" },
+  7500:  { title: "7 500 — trzy czwarte", body: "Jeszcze 2 500 i bijesz dzienny cel.", emoji: "💪" },
+  10000: { title: "Cel dnia: 10 000 ✅", body: "Dzienne 10k zaliczone — zdrowotny minimum bity!", emoji: "🏆" },
+  12500: { title: "12 500 kroków", body: "Powyżej celu. Twoje serce Ci dziękuje.", emoji: "⚡" },
+  15000: { title: "15 000 — Wojownik", body: "Tylko 12% ludzi schodzi tyle dziennie. Brawo.", emoji: "🔥" },
+  20000: { title: "20 000 — Maraton dnia", body: "To poziom elitarny. Pamiętaj o regeneracji.", emoji: "🚀" },
+  25000: { title: "25 000 kroków", body: "Pół maratonu w nogach. Legenda.", emoji: "🏔️" },
+  30000: { title: "30 000 — kosmos", body: "Maraton pieszo zaliczony. Szacun.", emoji: "🌌" },
+};
+
+function emitMilestone(m: number, goal: number) {
+  if (typeof window === "undefined") return;
+  const copy = MILESTONE_COPY[m] ?? {
+    title: `${m.toLocaleString()} kroków`,
+    body: `Świetnie! Cel ${goal.toLocaleString()} bliżej.`,
+    emoji: "🎉",
+  };
+  // Lazy import to avoid circular dep at module init.
+  import("./notifications").then(({ pushNotif }) => {
+    pushNotif({ kind: "achievement", title: copy.title, body: copy.body, emoji: copy.emoji });
+  }).catch(() => undefined);
+}
+
 /** Mark that the user opened the app — extends the 24h auto-stop window. */
 export function pingActivity() {
   if (typeof window === "undefined") return;
@@ -40,6 +69,8 @@ export type StepsState = {
   week: { d: string; steps: number }[];
   goal: number;
   claimed: Record<number, boolean>;
+  /** Step milestones already celebrated today (e.g. [1000, 2500]). */
+  milestones?: number[];
 };
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
@@ -83,6 +114,7 @@ function defaultState(): StepsState {
   return {
     today: 0, todayAccel: 0, todayGps: 0, distanceM: 0,
     date: todayKey(), week: defaultWeek(), goal: 10000, claimed: {},
+    milestones: [],
   };
 }
 
@@ -180,11 +212,21 @@ export function startTracking(opts: {
 
   const persistDelta = () => {
     const s = readSteps();
-    // today = max(accel, gps) anti-double-count
-    s.today = Math.max(s.todayAccel, s.todayGps);
+    // today = max(accel, gps), anti-double-count + monotonic (never regress mid-day)
+    const computed = Math.max(s.todayAccel, s.todayGps);
+    s.today = Math.max(s.today || 0, computed);
     const idx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
     if (!s.week[idx]) s.week = defaultWeek();
     s.week[idx].steps = Math.max(s.week[idx].steps, s.today);
+    // Milestone check — emit a celebratory notification once per threshold per day.
+    const fired = new Set(s.milestones ?? []);
+    for (const m of MILESTONES) {
+      if (s.today >= m && !fired.has(m)) {
+        fired.add(m);
+        emitMilestone(m, s.goal);
+      }
+    }
+    s.milestones = Array.from(fired);
     writeSteps(s);
     opts.onUpdate?.(s);
   };
