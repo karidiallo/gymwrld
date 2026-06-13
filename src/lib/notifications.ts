@@ -107,7 +107,7 @@ function readWater(): WaterState {
     if (s.day !== today()) {
       // New day: mark all *past* slots as already-fired so we never replay them on first login of the day.
       const h = new Date().getHours();
-      const pastSlots = WATER_SLOTS.filter((slot) => h > slot);
+      const pastSlots = readWaterSlots().filter((slot) => h > slot);
       return { day: today(), fired: pastSlots };
     }
     return s;
