@@ -256,27 +256,7 @@ function Index() {
 
       {/* Steps card */}
       <SectionTitle title="Dzisiejsze kroki" actionTo="/kroki" action="Historia" />
-      <Link to="/kroki" className="group block w-full overflow-hidden rounded-3xl glass p-5 text-left transition-transform active:scale-[0.99]">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Cel 10 000</p>
-            <p className="mt-1 text-4xl font-semibold tracking-tight">0</p>
-            <p className="mt-1 text-xs text-muted-foreground">0% celu · zacznij dziś</p>
-          </div>
-          <Ring value={0} size={92} stroke={8}>
-            <Footprints className="h-5 w-5 text-primary" />
-            <span className="mt-1 text-xs font-medium">0%</span>
-          </Ring>
-        </div>
-        <div className="mt-4 flex items-end gap-1.5">
-          {[0, 0, 0, 0, 0, 0, 0].map((v, i) => (
-            <div key={i} className="flex-1">
-              <div className="rounded-full bg-white/5" style={{ height: `4px` }} />
-              <p className="mt-1 text-center text-[10px] text-muted-foreground">{["P","W","Ś","C","P","S","N"][i]}</p>
-            </div>
-          ))}
-        </div>
-      </Link>
+      <StepsCard steps={steps} />
 
       {/* Quests */}
       <SectionTitle title="Dzisiejsze zadania" actionTo="/zadania" action="Wszystkie" />
