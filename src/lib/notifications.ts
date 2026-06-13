@@ -62,7 +62,36 @@ export function pushNotif(n: Omit<Notif, "id" | "ts" | "read"> & { ts?: number }
 
 /* ---------- Water reminders (3x/day local) ---------- */
 
-const WATER_SLOTS = [10, 14, 18]; // hours
+const WATER_SLOTS_DEFAULT = [10, 14, 18]; // hours
+const WATER_SLOTS_KEY = "gw_water_slots";
+
+/** Read user-configured water reminder hours (0–23). Falls back to defaults. */
+export function readWaterSlots(): number[] {
+  if (typeof window === "undefined") return WATER_SLOTS_DEFAULT;
+  try {
+    const raw = localStorage.getItem(WATER_SLOTS_KEY);
+    if (!raw) return WATER_SLOTS_DEFAULT;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return WATER_SLOTS_DEFAULT;
+    const cleaned = arr
+      .map((h) => Number(h))
+      .filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
+    return cleaned.length ? Array.from(new Set(cleaned)).sort((a, b) => a - b) : WATER_SLOTS_DEFAULT;
+  } catch {
+    return WATER_SLOTS_DEFAULT;
+  }
+}
+
+export function writeWaterSlots(hours: number[]) {
+  if (typeof window === "undefined") return;
+  const cleaned = Array.from(new Set(
+    hours.filter((h) => Number.isInteger(h) && h >= 0 && h <= 23),
+  )).sort((a, b) => a - b);
+  localStorage.setItem(WATER_SLOTS_KEY, JSON.stringify(cleaned));
+  // Re-seed today so newly-passed slots don't replay.
+  localStorage.removeItem(WATER_KEY);
+}
+
 const WATER_COPY = [
   { title: "Czas na wodę 💧", body: "Szklanka teraz = lepsza koncentracja za godzinę." },
   { title: "Hydratacja break 💧", body: "Wypij 250 ml. Twoje mięśnie Ci podziękują." },
@@ -96,13 +125,14 @@ export function startWaterReminders() {
   if (typeof window === "undefined") return () => {};
   // Hard gate: require explicit user consent. Default OFF.
   if (localStorage.getItem("gw_reminders_water") !== "1") return () => {};
+  const SLOTS = readWaterSlots();
   // Seed fired-slots for any slots already in the past, so first tick of the
   // day doesn't dump 1-3 notifications at once when the user logs in late.
   const initial = readWater();
   const nowH = new Date().getHours();
   const seedFired = Array.from(new Set([
     ...initial.fired,
-    ...WATER_SLOTS.filter((slot) => nowH > slot),
+    ...SLOTS.filter((slot) => nowH > slot),
   ]));
   if (seedFired.length !== initial.fired.length) writeWater({ day: today(), fired: seedFired });
 
@@ -111,8 +141,8 @@ export function startWaterReminders() {
     const h = now.getHours();
     const m = now.getMinutes();
     const s = readWater();
-    for (let i = 0; i < WATER_SLOTS.length; i++) {
-      const slot = WATER_SLOTS[i];
+    for (let i = 0; i < SLOTS.length; i++) {
+      const slot = SLOTS[i];
       // Fire only inside the current slot hour and only within the first 10
       // minutes — never replay slots that have already passed.
       if (h === slot && m < 10 && !s.fired.includes(slot)) {
