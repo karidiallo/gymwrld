@@ -262,6 +262,9 @@ function Dieta() {
         </div>
       </div>
 
+      {/* Water reminders settings */}
+      <WaterRemindersCard />
+
       {/* Toilet log */}
       <h3 className="mb-3 mt-7 text-lg font-semibold">Dziennik łazienki</h3>
       <div className="grid grid-cols-2 gap-3">
