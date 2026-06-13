@@ -40,6 +40,8 @@ export type StepsState = {
   week: { d: string; steps: number }[];
   goal: number;
   claimed: Record<number, boolean>;
+  /** Step milestones already celebrated today (e.g. [1000, 2500]). */
+  milestones?: number[];
 };
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
@@ -83,6 +85,7 @@ function defaultState(): StepsState {
   return {
     today: 0, todayAccel: 0, todayGps: 0, distanceM: 0,
     date: todayKey(), week: defaultWeek(), goal: 10000, claimed: {},
+    milestones: [],
   };
 }
 
@@ -180,11 +183,21 @@ export function startTracking(opts: {
 
   const persistDelta = () => {
     const s = readSteps();
-    // today = max(accel, gps) anti-double-count
-    s.today = Math.max(s.todayAccel, s.todayGps);
+    // today = max(accel, gps), anti-double-count + monotonic (never regress mid-day)
+    const computed = Math.max(s.todayAccel, s.todayGps);
+    s.today = Math.max(s.today || 0, computed);
     const idx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
     if (!s.week[idx]) s.week = defaultWeek();
     s.week[idx].steps = Math.max(s.week[idx].steps, s.today);
+    // Milestone check — emit a celebratory notification once per threshold per day.
+    const fired = new Set(s.milestones ?? []);
+    for (const m of MILESTONES) {
+      if (s.today >= m && !fired.has(m)) {
+        fired.add(m);
+        emitMilestone(m, s.goal);
+      }
+    }
+    s.milestones = Array.from(fired);
     writeSteps(s);
     opts.onUpdate?.(s);
   };
