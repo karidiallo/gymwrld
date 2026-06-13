@@ -15,6 +15,7 @@ import { syncLocalState } from "@/lib/cloud-state";
 import { StreakCarousel } from "@/components/StreakCarousel";
 import { NotificationBell } from "@/components/NotificationBell";
 import { getCurrentUserOrClear } from "@/lib/auth-session";
+import { readSteps, type StepsState } from "@/lib/steps";
 
 function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T | null> {
   return Promise.race([
@@ -120,6 +121,18 @@ function Index() {
   ]);
   const [recentLogs, setRecentLogs] = useState<TrainingLog[]>([]);
   const [openLog, setOpenLog] = useState<TrainingLog | null>(null);
+  const [steps, setSteps] = useState<StepsState | null>(() => (typeof window !== "undefined" ? readSteps() : null));
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sync = () => setSteps(readSteps());
+    sync();
+    window.addEventListener("gw_steps_update", sync);
+    const id = window.setInterval(sync, 5000); // catch updates while singleton runs in another route
+    return () => {
+      window.removeEventListener("gw_steps_update", sync);
+      window.clearInterval(id);
+    };
+  }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const load = () => setRecentLogs(readLogs().slice(0, 3));
